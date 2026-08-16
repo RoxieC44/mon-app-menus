@@ -5,7 +5,6 @@ const App = () => {
   const [activeTab, setActiveTab] = useState('Menus');
   const [currentWeek, setCurrentWeek] = useState('Semaine du 17 au 23 août 2026');
 
-  // État des menus de la semaine
   const [menus, setMenus] = useState({
     Lundi: { midi: 'Salade composée', soir: 'Quiche lorraine' },
     Mardi: { midi: 'Restes', soir: 'Poulet rôti et légumes' },
@@ -16,7 +15,6 @@ const App = () => {
     Dimanche: { midi: 'Rôti de bœuf', soir: 'Velouté et tartines' },
   });
 
-  // Catalogue de recettes
   const [catalog, setCatalog] = useState([
     { id: 1, title: 'Quiche lorraine', category: 'Plat', time: '45 min' },
     { id: 2, title: 'Poulet rôti et légumes', category: 'Plat', time: '1h15' },
@@ -25,26 +23,19 @@ const App = () => {
     { id: 5, title: 'Salade composée', category: 'Entrée', time: '15 min' },
   ]);
 
-  // Liste de courses
-  const [shoppingList, setShoppingList] = [
-    useState([
-      { id: 1, name: 'Lait', category: 'Produits frais', checked: false },
-      { id: 2, name: 'Œufs', category: 'Produits frais', checked: false },
-      { id: 3, name: 'Pâtes', category: 'Épicerie', checked: true },
-      { id: 4, name: 'Tomates concassées', category: 'Épicerie', checked: false },
-    ]),
-  ];
+  const [shoppingList, setShoppingList] = useState([
+    { id: 1, name: 'Lait', category: 'Produits frais', checked: false },
+    { id: 2, name: 'Œufs', category: 'Produits frais', checked: false },
+    { id: 3, name: 'Pâtes', category: 'Épicerie', checked: true },
+    { id: 4, name: 'Tomates concassées', category: 'Épicerie', checked: false },
+  ]);
 
-  // Placard
   const [pantry, setPantry] = useState([
     { id: 1, name: 'Riz basmati', quantity: '2 paquets' },
     { id: 2, name: 'Huile d’olive', quantity: '1 bouteille' },
     { id: 3, name: 'Farine', quantity: '1 kg' },
   ]);
 
-  const [newItem, setNewItem] = useState('');
-
-  // Fonction pour modifier un repas dans le menu
   const handleMenuChange = (day, mealType, value) => {
     setMenus(prev => ({
       ...prev,
@@ -54,7 +45,6 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6 max-w-5xl mx-auto pb-16">
-      {/* Header */}
       <header className="mb-6 flex flex-col md:flex-row justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
         <h1 className="text-2xl font-bold text-gray-800 mb-2 md:mb-0">Mon Menu Organisé</h1>
         {activeTab === 'Menus' && (
@@ -66,7 +56,6 @@ const App = () => {
         )}
       </header>
 
-      {/* Navigation */}
       <nav className="flex space-x-2 mb-6 overflow-x-auto pb-2">
         {[
           { id: 'Menus', label: 'Menus', icon: Calendar },
@@ -92,9 +81,7 @@ const App = () => {
         })}
       </nav>
 
-      {/* Main Content */}
       <main>
-        {/* ONGLET MENUS */}
         {activeTab === 'Menus' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Object.entries(menus).map(([day, meals]) => (
@@ -125,7 +112,6 @@ const App = () => {
           </div>
         )}
 
-        {/* ONGLET CATALOGUE */}
         {activeTab === 'Catalogue' && (
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <h2 className="text-xl font-semibold mb-4 text-gray-800">Catalogue de Recettes</h2>
@@ -143,12 +129,11 @@ const App = () => {
           </div>
         )}
 
-        {/* ONGLET COURSES */}
         {activeTab === 'Courses' && (
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <h2 className="text-xl font-semibold mb-4 text-gray-800">Liste de Courses</h2>
             <div className="space-y-2">
-              {shoppingList[0].map((item) => (
+              {shoppingList.map((item) => (
                 <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center space-x-3">
                     <input type="checkbox" defaultChecked={item.checked} className="w-4 h-4 text-blue-600 rounded" />
@@ -161,7 +146,6 @@ const App = () => {
           </div>
         )}
 
-        {/* ONGLET PLACARD */}
         {activeTab === 'Placard' && (
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <h2 className="text-xl font-semibold mb-4 text-gray-800">Gestion du Placard</h2>
