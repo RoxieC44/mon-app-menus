@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Cake, Plus, Archive, ShoppingBag, X, Trash2, Sparkles, ExternalLink, Camera, Check, Utensils, Menu } from 'lucide-react';
+import { Calendar, Cake, Plus, Archive, ShoppingBag, X, Trash2, Sparkles, ExternalLink, Camera, Check, Utensils, Menu, GripVertical } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('menus');
@@ -10,7 +10,7 @@ export default function App() {
   const [gateauSubTab, setGateauSubTab] = useState('semaine'); // 'semaine' | 'catalogue'
   const [addType, setAddType] = useState('plat'); // 'plat' | 'gateau'
 
-  // Saison automatique selon le mois actuel
+  // Saison actuelle : Été (avec 'Saison actuelle : ' devant)
   const [currentSeason, setCurrentSeason] = useState('Été');
   useEffect(() => {
     const month = new Date().getMonth() + 1;
@@ -22,7 +22,7 @@ export default function App() {
 
   // Planning de la semaine (Midi et Soir modifiables / avec listes déroulantes)
   const [weeklyMenu, setWeeklyMenu] = useState({
-    Lundi: { midi: 'Restes de la veille', soir: 'Blé' },
+    Lundi: { midi: 'Restes de la veille', soir: 'Bléotto aux courgettes' },
     Mardi: { midi: 'Restes de la veille', soir: 'Poulet coco et semoule' },
     Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et patate sautée' }, // Fixé et inchangé
     Jeudi: { midi: 'Restes de la veille', soir: 'Poulet coco et riz' },
@@ -108,16 +108,6 @@ export default function App() {
       link: '',
       ingredients: ['Pâtes', 'Jambon', 'Béchamel', 'Fromage râpé'],
       instructions: '1. Cuire les pâtes.\n2. Mélanger avec la béchamel et le jambon.\n3. Gratiner au four.'
-    },
-    {
-      id: 8,
-      title: 'Blé',
-      category: 'Blé',
-      appliance: 'Casserole',
-      season: 'Toutes',
-      link: '',
-      ingredients: ['Blé'],
-      instructions: '1. Cuire le blé dans de l\'eau bouillante salée.'
     }
   ]);
 
@@ -170,12 +160,12 @@ export default function App() {
   const [formIngredients, setFormIngredients] = useState('');
   const [formInstructions, setFormInstructions] = useState('');
 
-  // Fonction de filtrage intelligent pour les menus (Saison actuelle ou 'Toutes')
+  // Fonction de filtrage intelligent pour les menus
   const getAvailableRecipes = () => {
     return dishes.filter(d => d.season === currentSeason || d.season === 'Toutes');
   };
 
-  // Fonction de génération automatique de menus respectant les contraintes par jour
+  // Fonction de génération automatique de menus
   const handleGenerateBalancedMenu = () => {
     const seasonalDishes = getAvailableRecipes();
     if (seasonalDishes.length === 0) {
@@ -192,17 +182,17 @@ export default function App() {
     };
 
     setWeeklyMenu({
-      Lundi: { midi: 'Restes de la veille', soir: 'Blé' },
+      Lundi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Blé') },
       Mardi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Semoule') },
-      Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et patate sautée' }, // Fixé (ne bouge pas)
+      Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et patate sautée' },
       Jeudi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Riz') },
       Vendredi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Pommes de terre') },
-      Samedi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Plaisir') }, // Repas plaisir
+      Samedi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Plaisir') },
       Dimanche: { midi: 'Restes de la veille', soir: getRandomDishByCat('Pâtes') },
     });
   };
 
-  // Fonction de génération automatique des goûters de la semaine basée sur la saison (sans alerte pop-up)
+  // Génération automatique des goûters
   const handleGenerateBalancedCakes = () => {
     const seasonalCakes = cakes.filter(c => c.season === currentSeason || c.season === 'Toutes');
     const pool = seasonalCakes.length > 0 ? seasonalCakes : cakes;
@@ -300,7 +290,7 @@ export default function App() {
         {/* ================= ONGLET MENUS ================= */}
         {activeTab === 'menus' && (
           <div className="space-y-6">
-            <div className="flex bg-slate-200/70 p-1 rounded-2xl max-w-md mx-auto items-center">
+            <div className="flex bg-slate-200/70 p-1 rounded-2xl max-w-md mx-auto">
               <button
                 onClick={() => setMenuSubTab('semaine')}
                 className={`flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
@@ -315,10 +305,9 @@ export default function App() {
                   menuSubTab === 'catalogue' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <div className="flex flex-col justify-center gap-[3px] w-4 h-4 items-center mr-0.5">
-                  <span className="w-1 h-1 bg-current rounded-full"></span>
-                  <span className="w-1 h-1 bg-current rounded-full"></span>
-                  <span className="w-1 h-1 bg-current rounded-full"></span>
+                <div className="flex items-center gap-1">
+                  <GripVertical size={16} className="text-slate-400" />
+                  <Menu size={18} />
                 </div>
                 Catalogue Repas ({dishes.length})
               </button>
@@ -345,12 +334,17 @@ export default function App() {
 
                 {/* Liste des jours avec menus déroulants partout */}
                 {Object.entries(weeklyMenu).map(([day, meals]) => (
-                  <div key={day} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                  <div key={day} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3 relative">
                     <div className="flex justify-between items-center border-b border-slate-100 pb-2">
                       <h3 className="font-bold text-slate-800 flex items-center gap-2">
                         <Calendar size={18} className="text-indigo-600" /> {day}
                         {day === 'Samedi' && <span className="text-[10px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-semibold">🎉 Plaisir</span>}
                       </h3>
+                      {day === 'Lundi' && (
+                        <span className="bg-blue-500 text-white text-[11px] font-bold px-3 py-0.5 rounded-full shadow-sm">
+                          blé
+                        </span>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
