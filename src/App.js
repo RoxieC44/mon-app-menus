@@ -160,6 +160,43 @@ export default function App() {
   const [formIngredients, setFormIngredients] = useState('');
   const [formInstructions, setFormInstructions] = useState('');
 
+  // Fonction de génération automatique de menus basée sur la saison
+  const handleGenerateBalancedMenu = () => {
+    const seasonalDishes = dishes.filter(d => d.season === currentSeason || d.season === 'Toutes');
+    if (seasonalDishes.length === 0) {
+      alert(`Aucune recette spécifique trouvée pour la saison ${currentSeason}.`);
+      return;
+    }
+    // Sélection aléatoire ou cyclique pour remplir les soirs de la semaine
+    const getRandomDish = (cat) => {
+      const match = seasonalDishes.filter(d => d.category === cat);
+      if (match.length > 0) return match[Math.floor(Math.random() * match.length)].title;
+      return seasonalDishes[Math.floor(Math.random() * seasonalDishes.length)].title;
+    };
+
+    setWeeklyMenu({
+      Lundi: { midi: 'Restes de la veille', soir: getRandomDish('Blé') },
+      Mardi: { midi: 'Restes de la veille', soir: getRandomDish('Semoule') },
+      Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et patate sautée' },
+      Jeudi: { midi: 'Restes de la veille', soir: getRandomDish('Riz') },
+      Vendredi: { midi: 'Restes de la veille', soir: getRandomDish('Pommes de terre') },
+      Samedi: { midi: 'Restes de la veille', soir: getRandomDish('Plaisir') },
+      Dimanche: { midi: 'Restes de la veille', soir: getRandomDish('Pâtes') },
+    });
+    alert(`Menus équilibrés générés avec succès pour la saison : ${currentSeason} !`);
+  };
+
+  // Fonction de génération automatique des goûters de la semaine basée sur la saison
+  const handleGenerateBalancedCakes = () => {
+    const seasonalCakes = cakes.filter(c => c.season === currentSeason || c.season === 'Toutes');
+    if (seasonalCakes.length > 0) {
+      const c1 = seasonalCakes[Math.floor(Math.random() * seasonalCakes.length)].title;
+      const c2 = seasonalCakes[Math.floor(Math.random() * seasonalCakes.length)].title;
+      setWeeklyCakes({ choix1: c1, choix2: c2 });
+    }
+    alert(`Goûters de la semaine générés automatiquement selon la saison (${currentSeason}) !`);
+  };
+
   // Gestion stock placard
   const handleAddPantryItem = (e) => {
     e.preventDefault();
@@ -231,8 +268,7 @@ export default function App() {
         <div className="flex items-center gap-3">
           <div className="bg-white/20 p-2 rounded-xl text-xl">🍲</div>
           <div>
-            <h1 className="text-lg font-bold">Mon app menus</h1>
-            <p className="text-xs text-indigo-200">Foyer 2 adultes + Diane | De saison & anti-gaspillage</p>
+            <h1 className="text-lg font-bold">Mon App Menus</h1>
           </div>
         </div>
         <div className="bg-amber-300 text-slate-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1.5">
@@ -277,10 +313,10 @@ export default function App() {
                     </p>
                   </div>
                   <button 
-                    onClick={() => alert(`Menus de la semaine générés automatiquement selon la saison (${currentSeason}) et l'équilibre des appareils !`)}
+                    onClick={handleGenerateBalancedMenu}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-xl text-sm transition-colors shadow-sm flex items-center gap-2 whitespace-nowrap"
                   >
-                    Générer selon la saison ({currentSeason})
+                    Générer un menu équilibré
                   </button>
                 </div>
 
@@ -291,11 +327,6 @@ export default function App() {
                       <h3 className="font-bold text-slate-800 flex items-center gap-2">
                         <Calendar size={18} className="text-indigo-600" /> {day}
                       </h3>
-                      {day !== 'Mercredi' && (
-                        <span className="text-xs font-semibold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full">
-                          {day === 'Lundi' ? 'Blé' : day === 'Mardi' ? 'Semoule' : day === 'Jeudi' ? 'Riz' : day === 'Vendredi' ? 'Pommes de terre' : day === 'Samedi' ? 'Repas plaisir' : 'Pâtes'}
-                        </span>
-                      )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -442,10 +473,10 @@ export default function App() {
                     <p className="text-xs text-slate-500">Planifiez vos choix de goûters de la semaine.</p>
                   </div>
                   <button 
-                    onClick={() => alert(`Goûters de la semaine générés automatiquement selon la saison (${currentSeason}) !`)}
+                    onClick={handleGenerateBalancedCakes}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-xl text-sm transition-colors shadow-sm flex items-center gap-2 whitespace-nowrap"
                   >
-                    Générer selon la saison ({currentSeason})
+                    Générer un menu équilibré
                   </button>
                 </div>
 
