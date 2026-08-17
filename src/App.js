@@ -24,10 +24,10 @@ export default function App() {
   const [weeklyMenu, setWeeklyMenu] = useState({
     Lundi: { midi: 'Restes de la veille', soir: 'Bléotto aux courgettes' },
     Mardi: { midi: 'Restes de la veille', soir: 'Poulet coco et semoule' },
-    Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et patate sautée' },
+    Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et patate sautée' }, // Fixé et inchangé
     Jeudi: { midi: 'Restes de la veille', soir: 'Poulet coco et riz' },
     Vendredi: { midi: 'Restes de la veille', soir: 'Poêlée de pommes de terre et lardons' },
-    Samedi: { midi: 'Restes de la veille', soir: 'Pizza maison rapide' },
+    Samedi: { midi: 'Restes de la veille', soir: 'Pizza maison rapide' }, // Repas plaisir
     Dimanche: { midi: 'Restes de la veille', soir: 'Gratin de pâtes' },
   });
 
@@ -165,40 +165,42 @@ export default function App() {
     return dishes.filter(d => d.season === currentSeason || d.season === 'Toutes');
   };
 
-  // Fonction de génération automatique de menus basée sur la saison
+  // Fonction de génération automatique de menus respectant les contraintes par jour
   const handleGenerateBalancedMenu = () => {
     const seasonalDishes = getAvailableRecipes();
     if (seasonalDishes.length === 0) {
       alert(`Aucune recette spécifique trouvée pour la saison ${currentSeason}.`);
       return;
     }
-    const getRandomDish = (cat) => {
+
+    const getRandomDishByCat = (cat) => {
       const match = seasonalDishes.filter(d => d.category === cat);
       if (match.length > 0) return match[Math.floor(Math.random() * match.length)].title;
+      const fallback = dishes.filter(d => d.category === cat);
+      if (fallback.length > 0) return fallback[Math.floor(Math.random() * fallback.length)].title;
       return seasonalDishes[Math.floor(Math.random() * seasonalDishes.length)].title;
     };
 
     setWeeklyMenu({
-      Lundi: { midi: 'Restes de la veille', soir: getRandomDish('Blé') },
-      Mardi: { midi: 'Restes de la veille', soir: getRandomDish('Semoule') },
-      Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et patate sautée' },
-      Jeudi: { midi: 'Restes de la veille', soir: getRandomDish('Riz') },
-      Vendredi: { midi: 'Restes de la veille', soir: getRandomDish('Pommes de terre') },
-      Samedi: { midi: 'Restes de la veille', soir: getRandomDish('Plaisir') },
-      Dimanche: { midi: 'Restes de la veille', soir: getRandomDish('Pâtes') },
+      Lundi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Blé') },
+      Mardi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Semoule') },
+      Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et patate sautée' }, // Fixé (ne bouge pas)
+      Jeudi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Riz') },
+      Vendredi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Pommes de terre') },
+      Samedi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Plaisir') }, // Repas plaisir
+      Dimanche: { midi: 'Restes de la veille', soir: getRandomDishByCat('Pâtes') },
     });
-    alert(`Menus équilibrés générés avec succès pour la saison : ${currentSeason} !`);
   };
 
-  // Fonction de génération automatique des goûters de la semaine basée sur la saison
+  // Fonction de génération automatique des goûters de la semaine basée sur la saison (sans alerte pop-up)
   const handleGenerateBalancedCakes = () => {
     const seasonalCakes = cakes.filter(c => c.season === currentSeason || c.season === 'Toutes');
-    if (seasonalCakes.length > 0) {
-      const c1 = seasonalCakes[Math.floor(Math.random() * seasonalCakes.length)].title;
-      const c2 = seasonalCakes[Math.floor(Math.random() * seasonalCakes.length)].title;
+    const pool = seasonalCakes.length > 0 ? seasonalCakes : cakes;
+    if (pool.length > 0) {
+      const c1 = pool[Math.floor(Math.random() * pool.length)].title;
+      const c2 = pool[Math.floor(Math.random() * pool.length)].title;
       setWeeklyCakes({ choix1: c1, choix2: c2 });
     }
-    alert(`Goûters de la semaine générés automatiquement selon la saison (${currentSeason}) !`);
   };
 
   // Gestion stock placard
@@ -330,6 +332,7 @@ export default function App() {
                     <div className="flex justify-between items-center border-b border-slate-100 pb-2">
                       <h3 className="font-bold text-slate-800 flex items-center gap-2">
                         <Calendar size={18} className="text-indigo-600" /> {day}
+                        {day === 'Samedi' && <span className="text-[10px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-semibold">🎉 Plaisir</span>}
                       </h3>
                     </div>
 
@@ -563,7 +566,7 @@ export default function App() {
               <div className="flex gap-2 w-full md:w-auto">
                 <label className="flex-1 md:flex-initial bg-white hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-semibold px-4 py-2.5 rounded-xl text-xs cursor-pointer flex items-center justify-center gap-2 transition-colors">
                   <Camera size={16} /> Photo (Livre)
-                  <input type="file" accept="image/*" className="hidden" onChange={() => alert("Simulation : Photo importée et analysée !")} />
+                  <input type="file" accept="image/*" className="hidden" onChange={() => {}} />
                 </label>
               </div>
             </div>
@@ -785,7 +788,7 @@ export default function App() {
             </div>
 
             <button
-              onClick={() => alert("Liste de courses exportée / copiée avec succès !")}
+              onClick={() => {}}
               className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl transition-colors shadow-sm text-sm flex items-center justify-center gap-2"
             >
               <Check size={18} /> Exporter / Copier la liste de courses
