@@ -20,21 +20,21 @@ export default function App() {
     else setCurrentSeason('Hiver');
   }, []);
 
-  // Planning de la semaine (Midi et Soir modifiables / avec listes déroulantes)
+  // Planning de la semaine initialement vide
   const [weeklyMenu, setWeeklyMenu] = useState({
-    Lundi: { midi: 'Restes de la veille', soir: 'Bléotto aux courgettes' },
-    Mardi: { midi: 'Restes de la veille', soir: 'Poulet coco et semoule' },
-    Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et Pomme de terre' }, // Fixé et inchangé
-    Jeudi: { midi: 'Restes de la veille', soir: 'Poulet coco et riz' },
-    Vendredi: { midi: 'Restes de la veille', soir: 'Poêlée de pommes de terre et lardons' },
-    Samedi: { midi: 'Restes de la veille', soir: 'Pizza maison rapide' }, // Repas plaisir
-    Dimanche: { midi: 'Restes de la veille', soir: 'Gratin de pâtes' },
+    Lundi: { midi: '', soir: '' },
+    Mardi: { midi: '', soir: '' },
+    Mercredi: { midi: '', soir: 'Cordon bleu et Pomme de terre' }, // Fixé et inchangé
+    Jeudi: { midi: '', soir: '' },
+    Vendredi: { midi: '', soir: '' },
+    Samedi: { midi: '', soir: '' },
+    Dimanche: { midi: '', soir: '' },
   });
 
-  // Goûters de la semaine (Choix n°1 et Choix n°2)
+  // Goûters de la semaine initialement vides
   const [weeklyCakes, setWeeklyCakes] = useState({
-    choix1: 'Gâteau au yaourt moelleux',
-    choix2: 'Cookies aux pépites de chocolat'
+    choix1: '',
+    choix2: ''
   });
 
   // Catalogue des Plats & Repas
@@ -187,12 +187,12 @@ export default function App() {
       Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et Pomme de terre' }, // Fixé (ne bouge pas)
       Jeudi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Riz') },
       Vendredi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Pommes de terre') },
-      Samedi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Plaisir') }, // Repas plaisir
+      Samedi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Plaisir') },
       Dimanche: { midi: 'Restes de la veille', soir: getRandomDishByCat('Pâtes') },
     });
   };
 
-  // Fonction de génération automatique des goûters de la semaine basée sur la saison (sans alerte pop-up)
+  // Fonction de génération automatique des goûters de la semaine basée sur la saison
   const handleGenerateBalancedCakes = () => {
     const seasonalCakes = cakes.filter(c => c.season === currentSeason || c.season === 'Toutes');
     const pool = seasonalCakes.length > 0 ? seasonalCakes : cakes;
@@ -266,11 +266,11 @@ export default function App() {
     });
   };
 
-  // Étiquette affichée en haut à droite pour chaque jour
+  // Correspondance des badges par jour (Mercredi n'a plus de badge affiché)
   const dayBadges = {
     Lundi: 'Blé',
     Mardi: 'Semoule',
-    Mercredi: 'Pommes de terre',
+    Mercredi: null,
     Jeudi: 'Riz',
     Vendredi: 'Pomme de terre',
     Samedi: 'Plaisir',
@@ -345,17 +345,17 @@ export default function App() {
                 {/* Liste des jours avec badge et menus déroulants */}
                 {Object.entries(weeklyMenu).map(([day, meals]) => {
                   const isWednesday = day === 'Mercredi';
+                  const badgeText = dayBadges[day];
 
                   return (
                     <div key={day} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3 relative">
                       <div className="flex justify-between items-center border-b border-slate-100 pb-2">
                         <h3 className="font-bold text-slate-800 flex items-center gap-2">
                           <Calendar size={18} className="text-indigo-600" /> {day}
-                          {day === 'Samedi' && <span className="text-[10px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-semibold">🎉 Plaisir</span>}
                         </h3>
-                        {dayBadges[day] && (
+                        {badgeText && (
                           <span className="bg-slate-100 text-slate-600 text-xs font-semibold px-2.5 py-1 rounded-md">
-                            {dayBadges[day]}
+                            {badgeText}
                           </span>
                         )}
                       </div>
@@ -367,8 +367,9 @@ export default function App() {
                           <select 
                             value={meals.midi}
                             onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, midi: e.target.value }})}
-                            className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                            className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                           >
+                            <option value="">-- Choisir ou laisser vide --</option>
                             <option value="Restes de la veille">Restes de la veille</option>
                             {getAvailableRecipes().map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
                           </select>
@@ -388,9 +389,9 @@ export default function App() {
                             <select 
                               value={meals.soir}
                               onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, soir: e.target.value }})}
-                              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             >
-                              <option value={meals.soir}>{meals.soir}</option>
+                              <option value="">-- Choisir ou laisser vide --</option>
                               {getAvailableRecipes().map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
                             </select>
                           )}
@@ -534,7 +535,7 @@ export default function App() {
                       onChange={(e) => setWeeklyCakes({...weeklyCakes, choix1: e.target.value})}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
                     >
-                      <option>{weeklyCakes.choix1}</option>
+                      <option value="">-- Choisir ou laisser vide --</option>
                       {cakes.map(c => <option key={c.id} value={c.title}>{c.title}</option>)}
                     </select>
                   </div>
@@ -546,7 +547,7 @@ export default function App() {
                       onChange={(e) => setWeeklyCakes({...weeklyCakes, choix2: e.target.value})}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
                     >
-                      <option>{weeklyCakes.choix2}</option>
+                      <option value="">-- Choisir ou laisser vide --</option>
                       {cakes.map(c => <option key={c.id} value={c.title}>{c.title}</option>)}
                     </select>
                   </div>
