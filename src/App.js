@@ -13,25 +13,31 @@ export default function App() {
   // Saison automatique selon le mois actuel
   const [currentSeason, setCurrentSeason] = useState('Été');
   useEffect(() => {
-    const month = new Date().getMonth() + 1; // 1 à 12
+    const month = new Date().getMonth() + 1;
     if (month >= 3 && month <= 5) setCurrentSeason('Printemps');
     else if (month >= 6 && month <= 8) setCurrentSeason('Été');
     else if (month >= 9 && month <= 11) setCurrentSeason('Automne');
     else setCurrentSeason('Hiver');
   }, []);
 
-  // Planning fixe de la semaine avec les contraintes imposées
+  // Planning de la semaine (Midi et Soir modifiables / avec listes déroulantes)
   const [weeklyMenu, setWeeklyMenu] = useState({
-    Lundi: { midi: 'Restes de la veille', soir: 'Blé' },
-    Mardi: { midi: 'Restes de la veille', soir: 'Semoule' },
-    Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et patate' },
-    Jeudi: { midi: 'Restes de la veille', soir: 'Riz' },
-    Vendredi: { midi: 'Restes de la veille', soir: 'Pommes de terre' },
-    Samedi: { midi: 'Restes de la veille', soir: 'Repas plaisir (Pizza, Burger...)' },
-    Dimanche: { midi: 'Restes de la veille', soir: 'Pâtes' },
+    Lundi: { midi: 'Restes de la veille', soir: 'Bléotto aux courgettes (Été)' },
+    Mardi: { midi: 'Restes de la veille', soir: 'Poulet coco et semoule' },
+    Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et patate sautée' },
+    Jeudi: { midi: 'Restes de la veille', soir: 'Poulet coco et riz' },
+    Vendredi: { midi: 'Restes de la veille', soir: 'Poêlée de pommes de terre et lardons' },
+    Samedi: { midi: 'Restes de la veille', soir: 'Pizza maison rapide' },
+    Dimanche: { midi: 'Restes de la veille', soir: 'Gratin de pâtes' },
   });
 
-  // Catalogue des Plats & Repas (Catégories strictes : pâtes, pdt, semoule, riz, blé)
+  // Goûters de la semaine (Choix n°1 et Choix n°2)
+  const [weeklyCakes, setWeeklyCakes] = useState({
+    choix1: 'Gâteau au yaourt moelleux',
+    choix2: 'Cookies aux pépites de chocolat'
+  });
+
+  // Catalogue des Plats & Repas
   const [dishes, setDishes] = useState([
     {
       id: 1,
@@ -62,6 +68,46 @@ export default function App() {
       link: '',
       ingredients: ['200g de blé Ebly', '2 courgettes', '1 bouillon cube', 'Crème fraîche'],
       instructions: '1. Couper les courgettes.\n2. Cuire le blé avec le bouillon et les courgettes.'
+    },
+    {
+      id: 4,
+      title: 'Poulet coco et semoule',
+      category: 'Semoule',
+      appliance: 'Casserole',
+      season: 'Toutes',
+      link: '',
+      ingredients: ['Semoule', 'Poulet', 'Légumes'],
+      instructions: '1. Préparer la semoule.\n2. Cuire le poulet.'
+    },
+    {
+      id: 5,
+      title: 'Poêlée de pommes de terre et lardons',
+      category: 'Pommes de terre',
+      appliance: 'Poêle',
+      season: 'Toutes',
+      link: '',
+      ingredients: ['Pommes de terre', 'Lardons', 'Oignons'],
+      instructions: '1. Faire revenir les lardons et oignons.\n2. Ajouter les pommes de terre cuites.'
+    },
+    {
+      id: 6,
+      title: 'Pizza maison rapide',
+      category: 'Plaisir',
+      appliance: 'Four',
+      season: 'Toutes',
+      link: '',
+      ingredients: ['Pâte à pizza', 'Coulis de tomate', 'Jambon', 'Fromage'],
+      instructions: '1. Étaler la pâte.\n2. Garnir et cuire 15 min à 210°C.'
+    },
+    {
+      id: 7,
+      title: 'Gratin de pâtes',
+      category: 'Pâtes',
+      appliance: 'Four',
+      season: 'Toutes',
+      link: '',
+      ingredients: ['Pâtes', 'Jambon', 'Béchamel', 'Fromage râpé'],
+      instructions: '1. Cuire les pâtes.\n2. Mélanger avec la béchamel et le jambon.\n3. Gratiner au four.'
     }
   ]);
 
@@ -76,10 +122,20 @@ export default function App() {
       link: '',
       ingredients: ['1 yaourt nature', '3 pots de farine', '2 pots de sucre', '1/2 pot d\'huile', '3 œufs', '1 levure'],
       instructions: '1. Mélanger tous les ingrédients.\n2. Cuire 35 min à 180°C.'
+    },
+    {
+      id: 102,
+      title: 'Cookies aux pépites de chocolat',
+      category: 'Plaisir',
+      appliance: 'Four',
+      season: 'Toutes',
+      link: '',
+      ingredients: ['150g de beurre', '100g de sucre', '200g de farine', 'Pépites de chocolat'],
+      instructions: '1. Mélanger le beurre et le sucre.\n2. Ajouter la farine et le chocolat.\n3. Former des boules et cuire 10 min à 180°C.'
     }
   ]);
 
-  // Placard & Frigo (avec gestion fine de l'état : Plein, Entamé, Presque vide)
+  // Placard & Frigo
   const [pantry, setPantry] = useState([
     { id: 1, name: 'Riz', status: 'Entamé' },
     { id: 2, name: 'Pâtes', status: 'Plein' },
@@ -175,8 +231,8 @@ export default function App() {
         <div className="flex items-center gap-3">
           <div className="bg-white/20 p-2 rounded-xl text-xl">🍲</div>
           <div>
-            <h1 className="text-lg font-bold">Mes Menus Famille (2 adultes + Diane)</h1>
-            <p className="text-xs text-indigo-200">Équilibré, de saison, anti-gaspillage & économique</p>
+            <h1 className="text-lg font-bold">Mon app menus</h1>
+            <p className="text-xs text-indigo-200">Foyer 2 adultes + Diane | De saison & anti-gaspillage</p>
           </div>
         </div>
         <div className="bg-amber-300 text-slate-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1.5">
@@ -211,40 +267,62 @@ export default function App() {
 
             {menuSubTab === 'semaine' && (
               <div className="space-y-4">
-                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                  <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                    <div>
-                      <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                        <Sparkles className="text-indigo-600" size={20} /> Organisation Semaine & Équilibre Appareils
-                      </h2>
-                      <p className="text-xs text-slate-500">
-                        Règles appliquées : Mercredi (Cordon bleu/patate), Samedi (Plaisir), soirs fixes (Blé, Semoule, Riz, Pdt, Pâtes) + restes prévus pour le midi.
-                      </p>
-                    </div>
-                    <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-xl text-sm transition-colors shadow-sm flex items-center gap-2 whitespace-nowrap">
-                      Générer selon la saison ({currentSeason})
-                    </button>
+                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                      <Sparkles className="text-indigo-600" size={20} /> Organisation Semaine & Équilibre Appareils
+                    </h2>
+                    <p className="text-xs text-slate-500">
+                      Règles : Soirs fixes (Blé, Semoule, Cordon bleu/patate, Riz, Pdt, Plaisir, Pâtes) + restes prévus pour le midi.
+                    </p>
                   </div>
+                  <button 
+                    onClick={() => alert(`Menus de la semaine générés automatiquement selon la saison (${currentSeason}) et l'équilibre des appareils !`)}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-xl text-sm transition-colors shadow-sm flex items-center gap-2 whitespace-nowrap"
+                  >
+                    Générer selon la saison ({currentSeason})
+                  </button>
                 </div>
 
-                {/* Liste des jours avec contraintes fixes */}
+                {/* Liste des jours */}
                 {Object.entries(weeklyMenu).map(([day, meals]) => (
                   <div key={day} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
                     <div className="flex justify-between items-center border-b border-slate-100 pb-2">
                       <h3 className="font-bold text-slate-800 flex items-center gap-2">
                         <Calendar size={18} className="text-indigo-600" /> {day}
                       </h3>
-                      <span className="text-xs font-semibold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full">
-                        Féculent : {meals.soir.includes('Blé') ? 'Blé' : meals.soir.includes('Semoule') ? 'Semoule' : meals.soir.includes('patate') || meals.soir.includes('Pommes') ? 'Pommes de terre' : meals.soir.includes('Riz') ? 'Riz' : meals.soir.includes('Pâtes') ? 'Pâtes' : 'Plaisir'}
-                      </span>
+                      {day !== 'Mercredi' && (
+                        <span className="text-xs font-semibold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full">
+                          {day === 'Lundi' ? 'Blé' : day === 'Mardi' ? 'Semoule' : day === 'Jeudi' ? 'Riz' : day === 'Vendredi' ? 'Pommes de terre' : day === 'Samedi' ? 'Repas plaisir' : 'Pâtes'}
+                        </span>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Midi : Déroulant pour Mercredi, Samedi, Dimanche / Simple texte pour les autres (avec modif possible) */}
                       <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Midi (Restes J-1)</span>
-                        <p className="text-sm font-medium text-slate-700">🍲 {meals.midi}</p>
+                        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Midi</span>
+                        {['Mercredi', 'Samedi', 'Dimanche'].includes(day) ? (
+                          <select 
+                            value={meals.midi}
+                            onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, midi: e.target.value }})}
+                            className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          >
+                            <option>{meals.midi}</option>
+                            <option>Restes de la veille</option>
+                            {dishes.map(d => <option key={d.id} value={d.title}>{d.title} ({d.category})</option>)}
+                          </select>
+                        ) : (
+                          <input 
+                            type="text"
+                            value={meals.midi}
+                            onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, midi: e.target.value }})}
+                            className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          />
+                        )}
                       </div>
 
+                      {/* Soir : Toujours un menu déroulant */}
                       <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                         <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Soir (Cuisiné pour 2 adultes + Diane + restes)</span>
                         <select 
@@ -253,7 +331,7 @@ export default function App() {
                           className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         >
                           <option>{meals.soir}</option>
-                          {dishes.map(d => <option key={d.id} value={d.title}>{d.title} ({d.category})</option>)}
+                          {dishes.map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
                         </select>
                       </div>
                     </div>
@@ -358,18 +436,43 @@ export default function App() {
 
             {gateauSubTab === 'semaine' && (
               <div className="space-y-4">
-                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex justify-between items-center">
+                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
                   <div>
                     <h2 className="text-lg font-bold text-slate-800">Pâtisseries pour Diane & Goûters</h2>
-                    <p className="text-xs text-slate-500">Planifiez vos gâteaux faits maison.</p>
+                    <p className="text-xs text-slate-500">Planifiez vos choix de goûters de la semaine.</p>
                   </div>
+                  <button 
+                    onClick={() => alert(`Goûters de la semaine générés automatiquement selon la saison (${currentSeason}) !`)}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-xl text-sm transition-colors shadow-sm flex items-center gap-2 whitespace-nowrap"
+                  >
+                    Générer selon la saison ({currentSeason})
+                  </button>
                 </div>
 
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                  <h3 className="font-bold text-slate-800 text-sm">Goûter sélectionné</h3>
-                  <select className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none">
-                    {cakes.map(c => <option key={c.id} value={c.title}>{c.title}</option>)}
-                  </select>
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                  <div>
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Goûter - Choix n°1</label>
+                    <select 
+                      value={weeklyCakes.choix1}
+                      onChange={(e) => setWeeklyCakes({...weeklyCakes, choix1: e.target.value})}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
+                    >
+                      <option>{weeklyCakes.choix1}</option>
+                      {cakes.map(c => <option key={c.id} value={c.title}>{c.title}</option>)}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Goûter - Choix n°2</label>
+                    <select 
+                      value={weeklyCakes.choix2}
+                      onChange={(e) => setWeeklyCakes({...weeklyCakes, choix2: e.target.value})}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
+                    >
+                      <option>{weeklyCakes.choix2}</option>
+                      {cakes.map(c => <option key={c.id} value={c.title}>{c.title}</option>)}
+                    </select>
+                  </div>
                 </div>
               </div>
             )}
@@ -419,7 +522,7 @@ export default function App() {
                 <p className="text-xs text-indigo-700">Prenez une photo de votre livre de cuisine ou collez un lien internet pour pré-remplir.</p>
               </div>
               <div className="flex gap-2 w-full md:w-auto">
-                <label className="flex-1 md:flex-initial bg-white hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-semibold px-4 py-2.5 rounded-xl text-xs cursor-bezier flex items-center justify-center gap-2 transition-colors">
+                <label className="flex-1 md:flex-initial bg-white hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-semibold px-4 py-2.5 rounded-xl text-xs cursor-pointer flex items-center justify-center gap-2 transition-colors">
                   <Camera size={16} /> Photo (Livre)
                   <input type="file" accept="image/*" className="hidden" onChange={() => alert("Simulation : Photo importée et analysée !")} />
                 </label>
@@ -636,7 +739,7 @@ export default function App() {
                   <span className="text-xs bg-rose-50 text-rose-600 font-bold px-2 py-1 rounded-md">Urgent</span>
                 </li>
                 <li className="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
-                  <span className="font-medium">🧀 Cordons bleus & Pommes de terre (Mercredi)</span>
+                  <span className="font-medium">🧀 Ingrédients des menus de la semaine</span>
                   <span className="text-xs bg-indigo-50 text-indigo-600 font-bold px-2 py-1 rounded-md">Menu Semaine</span>
                 </li>
               </ul>
