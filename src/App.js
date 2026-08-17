@@ -290,7 +290,7 @@ export default function App() {
           </div>
         </div>
         <div className="bg-amber-300 text-slate-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1.5">
-          <span>☀️</span> Saison actuelle : {currentSeason}
+          <span>☼</span> Saison actuelle : {currentSeason}
         </div>
       </header>
 
@@ -591,7 +591,7 @@ export default function App() {
                       addType === 'plat' ? 'bg-indigo-50 border-indigo-600 text-indigo-700 shadow-sm' : 'border-slate-200 text-slate-600'
                     }`}
                   >
-                    🍲 Plat / Repas
+                    🍽️ Plat / Repas
                   </button>
                   <button
                     type="button"
@@ -600,7 +600,7 @@ export default function App() {
                       addType === 'gateau' ? 'bg-indigo-50 border-indigo-600 text-indigo-700 shadow-sm' : 'border-slate-200 text-slate-600'
                     }`}
                   >
-                    🍰 Gâteau
+                    🍰 Gâteau / Goûter
                   </button>
                 </div>
               </div>
