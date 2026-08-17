@@ -194,14 +194,56 @@ function NavButton({ active, onClick, icon, label }) {
   return (
     <button
       onClick={onClick}
-      className={`flex flex-col items-center gap-1 p-2 min-w-[70px] flex-shrink-0 md:w-auto md:flex-row md:px-5 md:py-3 md:rounded-xl md:shadow-sm transition-all
-        ${active ? 'text-indigo-600 md:bg-indigo-600 md:text-white scale-105 md:scale-100 font-semibold' : 'text-slate-400 hover:text-indigo-500 md:bg-white'}`}
+      className={`flex flex-col items-center p-2 rounded-xl transition-colors ${
+        active ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'
+      }`}
     >
-      <div className="w-5 h-5 flex items-center justify-center">{icon}</div>
-      <span className="text-[10px] md:text-sm font-medium">{label}</span>
+      <div className="w-5 h-5 flex items-center justify-center mb-1">{icon}</div>
+      <span className="text-[10px] font-bold">{label}</span>
     </button>
   );
 }
+
+{/* BOTTOM NAVIGATION */}
+<nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-[0_-10px_15px_-3px_rgb(0,0,0,0.05)] z-40 px-6 py-2 pb-safe">
+  <div className="max-w-md mx-auto flex justify-between items-center">
+    <NavButton 
+      active={activeTab === 'menus'} 
+      onClick={() => setActiveTab('menus')} 
+      icon={<Calendar size={22} />} 
+      label="Menus" 
+    />
+    
+    <NavButton 
+      active={activeTab === 'gateaux'} 
+      onClick={() => setActiveTab('gateaux')} 
+      icon={<Cake size={22} />} 
+      label="Gâteaux" 
+    />
+    
+    {/* GROS BOUTON "+" DU MILIEU EN RELIEF */}
+    <button 
+      onClick={() => setActiveTab('ajouter')} 
+      className="bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-lg transform -translate-y-5 transition-transform hover:scale-105 border-4 border-white flex items-center justify-center"
+    >
+      <Plus size={26} />
+    </button>
+    
+    <NavButton 
+      active={activeTab === 'placard'} 
+      onClick={() => setActiveTab('placard')} 
+      icon={<Archive size={22} />} 
+      label="Placard" 
+    />
+
+    <NavButton 
+      active={activeTab === 'courses'} 
+      onClick={() => setActiveTab('courses')} 
+      icon={<ShoppingBag size={22} />} 
+      label="Courses" 
+    />
+  </div>
+</nav>
 
 function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, deleteRecipe, setViewingRecipe, currentSeason }) {
   const [subTab, setSubTab] = useState('planning');
