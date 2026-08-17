@@ -1,659 +1,1178 @@
-import React, { useState } from 'react';
-import { 
-  BookOpen, 
-  Package, 
-  ShoppingCart, 
-  Plus, 
-  Trash2, 
-  Clock, 
-  Users, 
-  Check, 
-  X, 
-  Search, 
-  ArrowRight,
-  ChevronRight
-} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, List, Calendar, Trash2, Utensils, Info, Tag, Sun, Settings, Link as LinkIcon, Camera, RefreshCw, AlertTriangle, Eye, X, Image as ImageIcon, ShoppingBag, Package, Check, Copy, Sparkles, Filter, Cake } from 'lucide-react';
+
+const DEFAULT_RECIPES = [
+  { id: '1', name: 'Poêlée de blé façon risotto aux champignons', carb: 'Blé', equipment: 'Poêle', season: 'Toutes', type: 'text', instructions: 'Faire revenir les champignons. Ajouter le blé, puis le bouillon louche par louche jusqu\'à absorption.', ingredients: ['250g de blé', '500g de champignons', '1 oignon', 'Bouillon de volaille', 'Crème liquide'], category: 'repas' },
+  { id: '2', name: 'Couscous express aux légumes et pois chiches', carb: 'Semoule', equipment: 'Cookeo', season: 'Toutes', type: 'text', instructions: 'Mettre les légumes coupés, les pois chiches, les épices et l\'eau. Cuisson sous pression 10 min. Préparer la semoule à part.', ingredients: ['300g de semoule', '1 boîte de pois chiches', '3 carottes', '2 courgettes', 'Épices à couscous'], category: 'repas' },
+  { id: '3', name: 'Dhal de lentilles et riz basmati', carb: 'Riz', equipment: 'Casserole', season: 'Toutes', type: 'link', url: 'https://www.marmiton.org/recettes/recette_dhal-de-lentilles-corail_345759.aspx', ingredients: ['250g de lentilles corail', '200g de riz basmati', '400ml de lait de coco', 'Curry', '1 oignon'], category: 'repas' },
+  { id: '4', name: 'Pommes de terre rôties et poisson', carb: 'Pommes de terre', equipment: 'Airfryer', season: 'Toutes', type: 'text', instructions: 'Couper les pdt en dés, filet d\'huile, 20 min à 200°C à l\'Airfryer. Ajouter le poisson les 8 dernières minutes.', ingredients: ['800g de pommes de terre', '4 filets de poisson blanc', 'Huile d\'olive', 'Herbes de Provence'], category: 'repas' },
+  { id: '5', name: 'Pâtes au pesto et tomates cerises', carb: 'Pâtes', equipment: 'Casserole', season: 'Été', type: 'text', instructions: 'Cuire les pâtes. Mélanger avec le pesto et des tomates cerises coupées en deux.', ingredients: ['400g de pâtes', '1 pot de pesto', '250g de tomates cerises', 'Parmesan'], category: 'repas' },
+  { id: '6', name: 'Pizza Maison Reine', carb: 'Plaisir', equipment: 'Four', season: 'Toutes', type: 'text', instructions: 'Étaler la pâte, sauce tomate, jambon, mozza, champignons. Cuire 15 min à 220°C.', ingredients: ['1 pâte à pizza', 'Sauce tomate', '4 tranches de jambon', '2 boules de mozzarella', 'Champignons de Paris'], category: 'repas' },
+  { id: '7', name: 'Poulet coco et riz', carb: 'Riz', equipment: 'Cookeo', season: 'Toutes', type: 'text', instructions: 'Faire dorer le poulet. Ajouter lait de coco et curry. Cuisson 8 min.', ingredients: ['4 blancs de poulet', '250g de riz', '400ml de lait de coco', 'Curry en poudre'], category: 'repas' },
+  { id: '8', name: 'Gratin de potiron / chou-fleur', carb: 'Pommes de terre', equipment: 'Four', season: 'Hiver', type: 'text', instructions: 'Cuire le chou-fleur ou potiron. Mélanger crème, muscade, gruyère. Cuire 30 min au four.', ingredients: ['1 chou-fleur ou potiron', '50cl de crème liquide', 'Gruyère râpé', 'Muscade'], category: 'repas' },
+  { id: '9', name: 'Tian de courgettes et tomates', carb: 'Plaisir', equipment: 'Four', season: 'Été', type: 'text', instructions: 'Trancher courgettes et tomates en rondelles, alterner dans un plat, herbes de Provence, huile d\'olive, 45 min au four.', ingredients: ['3 courgettes', '4 tomates', 'Huile d\'olive', 'Herbes de Provence', 'Ail'], category: 'repas' },
+  { id: '10', name: 'Soupe de chou et lardons', carb: 'Pommes de terre', equipment: 'Casserole', season: 'Hiver', type: 'text', instructions: 'Faire bouillir le chou, les pommes de terre et des lardons. Mixer ou servir tel quel.', ingredients: ['1/2 chou vert', '4 pommes de terre', '100g de lardons', 'Bouillon'], category: 'repas' },
+  { id: '11', name: 'Gnocchis Saucisse', carb: 'Pâtes', equipment: 'Poêle', season: 'Toutes', type: 'text', instructions: 'Faire poêler les gnocchis avec les saucisses coupées en morceaux jusqu\'à dorage.', ingredients: ['500g de gnocchis', '4 saucisses', '1 filet d\'huile d\'olive'], category: 'repas' },
+  { id: '12', name: 'Cordon bleu et Pommes de terre', carb: 'Pommes de terre', equipment: 'Poêle', season: 'Toutes', type: 'text', instructions: 'Cuire les cordons bleus à la poêle et accompagner de pommes de terre sautées.', ingredients: ['4 cordons bleus', '600g de pommes de terre cuites', 'Beurre'], category: 'repas' },
+  { id: '13', name: 'Gâteau au yaourt moelleux', carb: 'Plaisir', equipment: 'Four', season: 'Toutes', type: 'text', instructions: 'Mélanger un pot de yaourt, 2 pots de sucre, 3 pots de farine, 1/2 pot d\'huile, 3 œufs et de la levure. Cuire 35 min à 180°C.', ingredients: ['1 yaourt nature', '3 pots de farine', '2 pots de sucre', '1/2 pot d\'huile', '3 œufs', '1 sachet de levure'], category: 'gateau' },
+  { id: '14', name: 'Cookies pépites de chocolat', carb: 'Plaisir', equipment: 'Four', season: 'Toutes', type: 'text', instructions: 'Mélanger beurre mou, sucre, sucre vanillé, œuf, farine et pépites. Faire des boules et cuire 10 min à 180°C.', ingredients: ['150g de beurre', '100g de sucre', '1 œuf', '220g de farine', '100g de pépites de chocolat'], category: 'gateau' },
+];
+
+const EQUIPMENTS = ['Thermomix', 'Cookeo', 'Poêle', 'Four', 'Casserole', 'Airfryer', 'Sans Cuisson'];
+const CARBS = ['Pâtes', 'Pommes de terre', 'Semoule', 'Riz', 'Blé', 'Plaisir'];
+const SEASONS = ['Toutes', 'Printemps', 'Été', 'Automne', 'Hiver'];
+
+const getCurrentSeason = () => {
+  const month = new Date().getMonth();
+  if (month >= 2 && month <= 4) return 'Printemps';
+  if (month >= 5 && month <= 7) return 'Été';
+  if (month >= 8 && month <= 10) return 'Automne';
+  return 'Hiver';
+};
 
 export default function App() {
-  // --- ÉTATS ---
-  const [activeTab, setActiveTab] = useState('gateaux');
-  const [searchQuery, setSearchQuery] = useState('');
-  
-  // Modal de détail de recette
-  const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [activeTab, setActiveTab] = useState('menu');
+  const [viewingRecipe, setViewingRecipe] = useState(null);
+  const currentSeason = getCurrentSeason();
 
-  // État des gâteaux / recettes
-  const [recipes, setRecipes] = useState([
-    {
-      id: 1,
-      title: 'Moelleux au Chocolat Fondant',
-      category: 'Chocolat',
-      prepTime: '20 min',
-      bakingTime: '25 min',
-      servings: 6,
-      difficulty: 'Facile',
-      image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=500&auto=format&fit=crop&q=60',
-      ingredients: [
-        { name: 'Chocolat noir', qty: '200g' },
-        { name: 'Beurre', qty: '150g' },
-        { name: 'Œufs', qty: '4' },
-        { name: 'Sucre', qty: '100g' },
-        { name: 'Farine', qty: '50g' }
-      ],
-      steps: [
-        'Préchauffer le four à 180°C.',
-        'Faire fondre le chocolat et le beurre ensemble.',
-        'Battre les œufs et le sucre jusqu\'à blanchiment.',
-        'Incorporer le mélange chocolat/beurre, puis la farine.',
-        'Verser dans un moule beurré et enfourner 25 minutes.'
-      ]
-    },
-    {
-      id: 2,
-      title: 'Tarte Citron Meringuée',
-      category: 'Fruits',
-      prepTime: '45 min',
-      bakingTime: '30 min',
-      servings: 8,
-      difficulty: 'Intermédiaire',
-      image: 'https://images.unsplash.com/photo-1519869325930-281384150729?w=500&auto=format&fit=crop&q=60',
-      ingredients: [
-        { name: 'Pâte sablée', qty: '1 rouleau' },
-        { name: 'Citrons (jus et zeste)', qty: '3' },
-        { name: 'Œufs', qty: '4' },
-        { name: 'Sucre en poudre', qty: '150g' },
-        { name: 'Beurre', qty: '100g' }
-      ],
-      steps: [
-        'Étaler la pâte dans un moule et la cuire à blanc 15 min à 180°C.',
-        'Préparer la crème au citron en chauffant le jus, les zests, le sucre, les œufs et le beurre.',
-        'Verser la crème sur le fond de tarte cuit.',
-        'Monter les blancs en neige avec du sucre pour la meringue, décorer et passer au chalumeau.'
-      ]
-    }
-  ]);
+  const [recipes, setRecipes] = useState(() => {
+    const saved = localStorage.getItem('mealAppRecipesV8');
+    return saved ? JSON.parse(saved) : DEFAULT_RECIPES;
+  });
 
-  // Modal d'ajout de recette
-  const [isAddRecipeOpen, setIsAddRecipeOpen] = useState(false);
-  const [newTitle, setNewTitle] = useState('');
-  const [newCategory, setNewCategory] = useState('Chocolat');
-  const [newPrepTime, setNewPrepTime] = useState('20 min');
-  const [newBakingTime, setNewBakingTime] = useState('30 min');
-  const [newServings, setNewServings] = useState(6);
-  const [newIngredients, setNewIngredients] = useState([{ name: '', qty: '' }]);
-  const [newSteps, setNewSteps] = useState(['']);
-
-  // État du placard
-  const [pantryItems, setPantryItems] = useState([
-    { id: 1, name: 'Farine de blé', category: 'Secs', quantity: '1.5 kg', alert: false },
-    { id: 2, name: 'Chocolat noir', category: 'Chocolat & Sucre', quantity: '4 tablettes', alert: true },
-    { id: 3, name: 'Beurre doux', category: 'Frais', quantity: '2 plaquettes', alert: false },
-    { id: 4, name: 'Œufs', category: 'Frais', quantity: '6 pièces', alert: false },
-    { id: 5, name: 'Sucre en poudre', category: 'Chocolat & Sucre', quantity: '1 kg', alert: false }
-  ]);
-  const [newPantryName, setNewPantryName] = useState('');
-  const [newPantryCategory, setNewPantryCategory] = useState('Secs');
-  const [newPantryQty, setNewPantryQty] = useState('');
-
-  // État de la liste de courses
-  const [shoppingList, setShoppingList] = useState([
-    { id: 1, name: 'Levure chimique', qty: '1 sachet', checked: false },
-    { id: 2, name: 'Crème fraîche', qty: '20 cl', checked: true },
-    { id: 3, name: 'Pistoles de chocolat blanc', qty: '200g', checked: false }
-  ]);
-  const [newShoppingItem, setNewShoppingItem] = useState('');
-  const [newShoppingQty, setNewShoppingQty] = useState('');
-
-  // --- FONCTIONS GÎTE / GÂTEAUX ---
-  const handleAddIngredientField = () => {
-    setNewIngredients([...newIngredients, { name: '', qty: '' }]);
-  };
-
-  const handleAddStepField = () => {
-    setNewSteps([...newSteps, '']);
-  };
-
-  const handleSaveRecipe = (e) => {
-    e.preventDefault();
-    if (!newTitle.trim()) return;
-
-    const newRecipeObj = {
-      id: Date.now(),
-      title: newTitle,
-      category: newCategory,
-      prepTime: newPrepTime,
-      bakingTime: newBakingTime,
-      servings: Number(newServings),
-      difficulty: 'Facile',
-      image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500&auto=format&fit=crop&q=60',
-      ingredients: newIngredients.filter(i => i.name.trim() !== ''),
-      steps: newSteps.filter(s => s.trim() !== '')
+  const [menu, setMenu] = useState(() => {
+    const saved = localStorage.getItem('mealAppMenuV8');
+    return saved ? JSON.parse(saved) : {
+      mondayDinner: '', 
+      tuesdayDinner: '', 
+      wednesdayDinner: '', 
+      thursdayDinner: '', 
+      fridayDinner: '', 
+      saturdayDinner: '', 
+      sundayDinner: '',
+      mondayLunch: 'restes',
+      tuesdayLunch: 'restes',
+      wednesdayLunch: '',
+      thursdayLunch: 'restes',
+      fridayLunch: 'restes',
+      saturdayLunch: '',
+      sundayLunch: ''
     };
+  });
 
-    setRecipes([newRecipeObj, ...recipes]);
-    setIsAddRecipeOpen(false);
-    // Reset form
-    setNewTitle('');
-    setNewIngredients([{ name: '', qty: '' }]);
-    setNewSteps(['']);
+  const [inventory, setInventory] = useState(() => {
+    const saved = localStorage.getItem('mealAppInventoryV3');
+    return saved ? JSON.parse(saved) : [
+      { name: 'Sel', status: 'Plein' },
+      { name: 'Poivre', status: 'Plein' },
+      { name: "Huile d'olive", status: 'Plein' },
+      { name: 'Beurre', status: 'Entamé' },
+      { name: 'Pâtes', status: 'Entamé' },
+      { name: 'Riz', status: 'Presque vide' },
+      { name: 'Oignons', status: 'Plein' },
+      { name: 'Ail', status: 'Plein' }
+    ];
+  });
+
+  const [bakingItems, setBakingItems] = useState(() => {
+    const saved = localStorage.getItem('mealAppBakingV2');
+    return saved ? JSON.parse(saved) : ['', ''];
+  });
+
+  const [shoppingChecks, setShoppingChecks] = useState(() => {
+    const saved = localStorage.getItem('mealAppShoppingChecksV2');
+    return saved ? JSON.parse(saved) : {};
+  });
+
+  useEffect(() => {
+    localStorage.setItem('mealAppRecipesV8', JSON.stringify(recipes));
+  }, [recipes]);
+
+  useEffect(() => {
+    localStorage.setItem('mealAppMenuV8', JSON.stringify(menu));
+  }, [menu]);
+
+  useEffect(() => {
+    localStorage.setItem('mealAppInventoryV3', JSON.stringify(inventory));
+  }, [inventory]);
+
+  useEffect(() => {
+    localStorage.setItem('mealAppBakingV2', JSON.stringify(bakingItems));
+  }, [bakingItems]);
+
+  useEffect(() => {
+    localStorage.setItem('mealAppShoppingChecksV2', JSON.stringify(shoppingChecks));
+  }, [shoppingChecks]);
+
+  const addRecipe = (newRecipe) => {
+    setRecipes(prev => [...prev, { ...newRecipe, id: Date.now().toString() }]);
+    setActiveTab(newRecipe.category === 'gateau' ? 'baking' : 'menu');
   };
 
-  // --- FONCTIONS PLACARD ---
-  const handleAddPantryItem = (e) => {
-    e.preventDefault();
-    if (!newPantryName.trim()) return;
-    const newItem = {
-      id: Date.now(),
-      name: newPantryName,
-      category: newPantryCategory,
-      quantity: newPantryQty || '1',
-      alert: false
-    };
-    setPantryItems([newItem, ...pantryItems]);
-    setNewPantryName('');
-    setNewPantryQty('');
+  const deleteRecipe = (id) => {
+    setRecipes(recipes.filter(r => r.id !== id));
+    const newMenu = { ...menu };
+    Object.keys(newMenu).forEach(day => {
+      if (newMenu[day] === id) newMenu[day] = '';
+    });
+    setMenu(newMenu);
   };
 
-  const handleDeletePantryItem = (id) => {
-    setPantryItems(pantryItems.filter(item => item.id !== id));
+  const updateMenu = (key, value) => {
+    setMenu({ ...menu, [key]: value });
   };
 
-  // --- FONCTIONS COURSES ---
-  const handleAddShoppingItem = (e) => {
-    e.preventDefault();
-    if (!newShoppingItem.trim()) return;
-    const newItem = {
-      id: Date.now(),
-      name: newShoppingItem,
-      qty: newShoppingQty || '1',
-      checked: false
-    };
-    setShoppingList([newItem, ...shoppingList]);
-    setNewShoppingItem('');
-    setNewShoppingQty('');
-  };
-
-  const toggleShoppingItem = (id) => {
-    setShoppingList(shoppingList.map(item => 
-      item.id === id ? { ...item, checked: !item.checked } : item
-    ));
-  };
-
-  const handleDeleteShoppingItem = (id) => {
-    setShoppingList(shoppingList.filter(item => item.id !== id));
-  };
-
-  // Filtrer les recettes
-  const filteredRecipes = recipes.filter(r => 
-    r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    r.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const mealRecipes = recipes.filter(r => r.category !== 'gateau');
+  const bakingRecipes = recipes.filter(r => r.category === 'gateau');
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 pb-24 font-sans">
-      
-      {/* HEADER PRINCIPAL */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
-        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="bg-amber-500 text-white p-2 rounded-xl shadow-sm">
-              <BookOpen className="w-6 h-6" />
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-20 md:pb-0 relative">
+      <header className="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+          <h1 className="text-xl font-bold flex items-center gap-2">
+            <Utensils className="w-6 h-6" />
+            Mon Menu Organisé
+          </h1>
+          
+          <div className="flex items-center gap-2">
+            <div className="text-xs bg-amber-400 text-slate-900 font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
+              <Sun className="w-3.5 h-3.5" />
+              Saison actuelle : {currentSeason}
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-slate-900 tracking-tight">Mes Douceurs</h1>
-              <p className="text-xs text-slate-500">Recettes, Placard & Courses</p>
+            <div className="text-xs bg-indigo-700 py-1.5 px-3 rounded-full opacity-90 hidden md:flex items-center gap-1">
+               <Info className="w-3.5 h-3.5" /> {recipes.length} recettes
             </div>
           </div>
-          {activeTab === 'gateaux' && (
-            <button 
-              onClick={() => setIsAddRecipeOpen(true)}
-              className="bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium px-3.5 py-2 rounded-xl shadow-xs flex items-center space-x-1.5 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Nouvelle recette</span>
-            </button>
-          )}
         </div>
       </header>
 
-      {/* CONTENU PRINCIPAL SELON L'ONGLET */}
-      <main className="max-w-4xl mx-auto px-4 py-6">
-        
-        {/* ================= ONGLET 1 : GÂTEAUX ================= */}
-        {activeTab === 'gateaux' && (
-          <div className="space-y-6">
-            {/* Barre de recherche */}
-            <div className="relative">
-              <Search className="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input 
-                type="text" 
-                placeholder="Rechercher un gâteau, un ingrédient..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white border border-slate-200 rounded-2xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 shadow-xs"
-              />
-            </div>
-
-            {/* Grille des recettes */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {filteredRecipes.map((recipe) => (
-                <div 
-                  key={recipe.id}
-                  onClick={() => setSelectedRecipe(recipe)}
-                  className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-md transition-all cursor-pointer group flex flex-col"
-                >
-                  <div className="h-40 overflow-hidden relative bg-slate-100">
-                    <img 
-                      src={recipe.image} 
-                      alt={recipe.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-xs text-slate-700 text-xs font-semibold px-2.5 py-1 rounded-full shadow-xs">
-                      {recipe.category}
-                    </span>
-                  </div>
-                  <div className="p-4 flex-1 flex flex-col justify-between">
-                    <div>
-                      <h3 className="font-semibold text-slate-900 group-hover:text-amber-600 transition-colors text-base line-clamp-1">
-                        {recipe.title}
-                      </h3>
-                      <div className="flex items-center space-x-4 mt-2 text-xs text-slate-500">
-                        <span className="flex items-center space-x-1">
-                          <Clock className="w-3.5 h-3.5 text-amber-500" />
-                          <span>{recipe.prepTime}</span>
-                        </span>
-                        <span className="flex items-center space-x-1">
-                          <Users className="w-3.5 h-3.5 text-amber-500" />
-                          <span>{recipe.servings} pers.</span>
-                        </span>
-                      </div>
-                    </div>
-                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-medium text-amber-600">
-                      <span>Voir la recette</span>
-                      <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+      <main className="max-w-4xl mx-auto p-4 mt-2">
+        {activeTab === 'menu' && (
+          <MenuContainer 
+            menu={menu} 
+            updateMenu={updateMenu} 
+            recipes={recipes}
+            mealRecipes={mealRecipes}
+            setMenu={setMenu} 
+            deleteRecipe={deleteRecipe}
+            setViewingRecipe={setViewingRecipe} 
+            currentSeason={currentSeason} 
+          />
         )}
-
-        {/* ================= ONGLET 2 : PLACARD ================= */}
-        {activeTab === 'placard' && (
-          <div className="space-y-6">
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-              <h2 className="text-base font-semibold text-slate-900 mb-4">Ajouter un produit au placard</h2>
-              <form onSubmit={handleAddPantryItem} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <input 
-                  type="text" 
-                  placeholder="Nom du produit..." 
-                  value={newPantryName}
-                  onChange={(e) => setNewPantryName(e.target.value)}
-                  className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
-                />
-                <select 
-                  value={newPantryCategory}
-                  onChange={(e) => setNewPantryCategory(e.target.value)}
-                  className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
-                >
-                  <option value="Secs">Secs</option>
-                  <option value="Chocolat & Sucre">Chocolat & Sucre</option>
-                  <option value="Frais">Frais</option>
-                  <option value="Ustensiles">Ustensiles</option>
-                </select>
-                <div className="flex space-x-2">
-                  <input 
-                    type="text" 
-                    placeholder="Qté (ex: 2kg)" 
-                    value={newPantryQty}
-                    onChange={(e) => setNewPantryQty(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
-                  />
-                  <button 
-                    type="submit" 
-                    className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-xl font-medium text-sm transition-colors shrink-0"
-                  >
-                    Ajouter
-                  </button>
-                </div>
-              </form>
-            </div>
-
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
-              <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-                <h2 className="font-semibold text-slate-900">Mon Inventaire</h2>
-                <span className="text-xs bg-amber-50 text-amber-700 font-medium px-2.5 py-1 rounded-full">
-                  {pantryItems.length} articles
-                </span>
-              </div>
-              <div className="divide-y divide-slate-100">
-                {pantryItems.map((item) => (
-                  <div key={item.id} className="px-5 py-3.5 flex items-center justify-between hover:bg-slate-50/50 transition-colors">
-                    <div className="flex items-center space-x-3">
-                      <div>
-                        <p className="text-sm font-medium text-slate-900">{item.name}</p>
-                        <span className="text-xs text-slate-500">{item.category} • Quantité : <strong className="text-slate-700">{item.quantity}</strong></span>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <button 
-                        onClick={() => handleDeletePantryItem(item.id)}
-                        className="text-slate-400 hover:text-red-500 p-1.5 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+        {activeTab === 'baking' && (
+          <BakingPlanner 
+            bakingItems={bakingItems} 
+            setBakingItems={setBakingItems} 
+            bakingRecipes={bakingRecipes} 
+            recipes={recipes}
+            deleteRecipe={deleteRecipe}
+            setViewingRecipe={setViewingRecipe} 
+            currentSeason={currentSeason}
+          />
         )}
-
-        {/* ================= ONGLET 3 : COURSES ================= */}
-        {activeTab === 'courses' && (
-          <div className="space-y-6">
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-              <h2 className="text-base font-semibold text-slate-900 mb-4">Ajouter un article à acheter</h2>
-              <form onSubmit={handleAddShoppingItem} className="flex gap-3">
-                <input 
-                  type="text" 
-                  placeholder="Article..." 
-                  value={newShoppingItem}
-                  onChange={(e) => setNewShoppingItem(e.target.value)}
-                  className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
-                />
-                <input 
-                  type="text" 
-                  placeholder="Qté" 
-                  value={newShoppingQty}
-                  onChange={(e) => setNewShoppingQty(e.target.value)}
-                  className="w-24 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
-                />
-                <button 
-                  type="submit" 
-                  className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-xl font-medium text-sm transition-colors shrink-0"
-                >
-                  Ajouter
-                </button>
-              </form>
-            </div>
-
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
-              <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-                <h2 className="font-semibold text-slate-900">Liste de courses</h2>
-                <span className="text-xs text-slate-500">
-                  {shoppingList.filter(i => i.checked).length} / {shoppingList.length} achetés
-                </span>
-              </div>
-              <div className="divide-y divide-slate-100">
-                {shoppingList.map((item) => (
-                  <div key={item.id} className="px-5 py-3.5 flex items-center justify-between hover:bg-slate-50/50 transition-colors">
-                    <div className="flex items-center space-x-3 cursor-pointer" onClick={() => toggleShoppingItem(item.id)}>
-                      <div className={`w-5 h-5 rounded-lg border flex items-center justify-center transition-colors ${item.checked ? 'bg-amber-500 border-amber-500 text-white' : 'border-slate-300 bg-white'}`}>
-                        {item.checked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
-                      </div>
-                      <span className={`text-sm font-medium ${item.checked ? 'line-through text-slate-400' : 'text-slate-900'}`}>
-                        {item.name} <span className="text-xs text-slate-500 font-normal">({item.qty})</span>
-                      </span>
-                    </div>
-                    <button 
-                      onClick={() => handleDeleteShoppingItem(item.id)}
-                      className="text-slate-400 hover:text-red-500 p-1.5 rounded-lg transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
+        {activeTab === 'add' && <AddRecipeForm addRecipe={addRecipe} />}
+        {activeTab === 'inventory' && <InventoryManager inventory={inventory} setInventory={setInventory} />}
+        {activeTab === 'shopping' && <ShoppingListView menu={menu} recipes={recipes} inventory={inventory} bakingItems={bakingItems} shoppingChecks={shoppingChecks} setShoppingChecks={setShoppingChecks} setActiveTab={setActiveTab} />}
       </main>
 
-      {/* ================= MODAL : DÉTAIL D'UNE RECETTE ================= */}
-      {selectedRecipe && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className="bg-white w-full max-w-2xl rounded-t-3xl sm:rounded-3xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col animate-in fade-in zoom-in-95 duration-200">
-            <div className="relative h-56 bg-slate-100">
-              <img src={selectedRecipe.image} alt={selectedRecipe.title} className="w-full h-full object-cover" />
-              <button 
-                onClick={() => setSelectedRecipe(null)}
-                className="absolute top-4 right-4 bg-white/80 hover:bg-white text-slate-700 p-2 rounded-full shadow-md transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="p-6 space-y-6">
-              <div>
-                <span className="text-xs font-semibold uppercase tracking-wider text-amber-600 bg-amber-50 px-2.5 py-1 rounded-md">
-                  {selectedRecipe.category}
-                </span>
-                <h2 className="text-2xl font-bold text-slate-900 mt-2">{selectedRecipe.title}</h2>
-                
-                <div className="flex items-center space-x-6 mt-4 text-sm text-slate-600">
-                  <div className="flex items-center space-x-1.5">
-                    <Clock className="w-4 h-4 text-amber-500" />
-                    <span>Prépa : {selectedRecipe.prepTime}</span>
-                  </div>
-                  <div className="flex items-center space-x-1.5">
-                    <Users className="w-4 h-4 text-amber-500" />
-                    <span>{selectedRecipe.servings} personnes</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Ingrédients */}
-              <div>
-                <h3 className="font-semibold text-slate-900 mb-3">Ingrédients</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {selectedRecipe.ingredients.map((ing, index) => (
-                    <div key={index} className="flex justify-between items-center bg-slate-50 px-3.5 py-2 rounded-xl text-sm border border-slate-100">
-                      <span className="text-slate-700">{ing.name}</span>
-                      <span className="font-semibold text-amber-600">{ing.qty}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Étapes */}
-              <div>
-                <h3 className="font-semibold text-slate-900 mb-3">Préparation</h3>
-                <div className="space-y-3">
-                  {selectedRecipe.steps.map((step, index) => (
-                    <div key={index} className="flex space-x-3 text-sm">
-                      <span className="w-6 h-6 rounded-full bg-amber-100 text-amber-700 font-semibold flex items-center justify-center shrink-0 text-xs">
-                        {index + 1}
-                      </span>
-                      <p className="text-slate-600 pt-0.5">{step}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-slate-100 flex justify-end">
-                <button 
-                  onClick={() => setSelectedRecipe(null)}
-                  className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition-colors"
-                >
-                  Fermer
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+      {viewingRecipe && (
+        <RecipeModal recipe={viewingRecipe} onClose={() => setViewingRecipe(null)} />
       )}
 
-      {/* ================= MODAL : AJOUT DE RECETTE ================= */}
-      {isAddRecipeOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className="bg-white w-full max-w-xl rounded-t-3xl sm:rounded-3xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
-              <h2 className="font-bold text-lg text-slate-900">Nouvelle Recette</h2>
-              <button onClick={() => setIsAddRecipeOpen(false)} className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <form onSubmit={handleSaveRecipe} className="p-6 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Titre de la recette</label>
-                <input 
-                  type="text" 
-                  placeholder="Ex: Fondant au chocolat..."
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Catégorie</label>
-                  <select 
-                    value={newCategory}
-                    onChange={(e) => setNewCategory(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
-                  >
-                    <option value="Chocolat">Chocolat</option>
-                    <option value="Fruits">Fruits</option>
-                    <option value="Biscuits">Biscuits</option>
-                    <option value="Entremets">Entremets</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Portions</label>
-                  <input 
-                    type="number" 
-                    value={newServings}
-                    onChange={(e) => setNewServings(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
-                  />
-                </div>
-              </div>
-
-              {/* Ingrédients dynamiques */}
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Ingrédients</label>
-                <div className="space-y-2">
-                  {newIngredients.map((ing, idx) => (
-                    <div key={idx} className="flex gap-2">
-                      <input 
-                        type="text" 
-                        placeholder="Nom (ex: Farine)" 
-                        value={ing.name}
-                        onChange={(e) => {
-                          const updated = [...newIngredients];
-                          updated[idx].name = e.target.value;
-                          setNewIngredients(updated);
-                        }}
-                        className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm"
-                      />
-                      <input 
-                        type="text" 
-                        placeholder="Qté (ex: 150g)" 
-                        value={ing.qty}
-                        onChange={(e) => {
-                          const updated = [...newIngredients];
-                          updated[idx].qty = e.target.value;
-                          setNewIngredients(updated);
-                        }}
-                        className="w-28 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm"
-                      />
-                    </div>
-                  ))}
-                  <button 
-                    type="button" 
-                    onClick={handleAddIngredientField}
-                    className="text-xs font-medium text-amber-600 hover:text-amber-700 mt-1"
-                  >
-                    + Ajouter un ingrédient
-                  </button>
-                </div>
-              </div>
-
-              {/* Étapes dynamiques */}
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Étapes de préparation</label>
-                <div className="space-y-2">
-                  {newSteps.map((step, idx) => (
-                    <div key={idx} className="flex gap-2">
-                      <input 
-                        type="text" 
-                        placeholder={`Étape ${idx + 1}...`} 
-                        value={step}
-                        onChange={(e) => {
-                          const updated = [...newSteps];
-                          updated[idx] = e.target.value;
-                          setNewSteps(updated);
-                        }}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm"
-                      />
-                    </div>
-                  ))}
-                  <button 
-                    type="button" 
-                    onClick={handleAddStepField}
-                    className="text-xs font-medium text-amber-600 hover:text-amber-700 mt-1"
-                  >
-                    + Ajouter une étape
-                  </button>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-slate-100 flex justify-end space-x-3">
-                <button 
-                  type="button"
-                  onClick={() => setIsAddRecipeOpen(false)}
-                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
-                >
-                  Annuler
-                </button>
-                <button 
-                  type="submit"
-                  className="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-xs"
-                >
-                  Enregistrer
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ================= BARRE DE NAVIGATION FIXE (BOTTOM) ================= */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-200 z-40 py-2">
-        <div className="max-w-md mx-auto px-6 flex justify-around">
-          <button 
-            onClick={() => setActiveTab('gateaux')}
-            className={`flex flex-col items-center space-y-1 transition-colors ${activeTab === 'gateaux' ? 'text-amber-600 font-semibold' : 'text-slate-400 hover:text-slate-600'}`}
-          >
-            <BookOpen className="w-5 h-5" />
-            <span className="text-[11px]">Gâteaux</span>
-          </button>
-
-          <button 
-            onClick={() => setActiveTab('placard')}
-            className={`flex flex-col items-center space-y-1 transition-colors ${activeTab === 'placard' ? 'text-amber-600 font-semibold' : 'text-slate-400 hover:text-slate-600'}`}
-          >
-            <Package className="w-5 h-5" />
-            <span className="text-[11px]">Placard</span>
-          </button>
-
-          <button 
-            onClick={() => setActiveTab('courses')}
-            className={`flex flex-col items-center space-y-1 transition-colors ${activeTab === 'courses' ? 'text-amber-600 font-semibold' : 'text-slate-400 hover:text-slate-600'}`}
-          >
-            <ShoppingCart className="w-5 h-5" />
-            <span className="text-[11px]">Courses</span>
-          </button>
-        </div>
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex overflow-x-auto justify-start md:justify-center p-2 gap-1 md:relative md:border-t-0 md:bg-transparent md:max-w-4xl md:mx-auto md:p-0 md:mb-6 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] md:shadow-none z-10" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        <NavButton active={activeTab === 'menu'} onClick={() => setActiveTab('menu')} icon={<Calendar />} label="Menus" />
+        <NavButton active={activeTab === 'baking'} onClick={() => setActiveTab('baking')} icon={<Cake />} label="Gâteaux" />
+        <NavButton active={activeTab === 'add'} onClick={() => setActiveTab('add')} icon={<Plus />} label="Ajouter" />
+        <NavButton active={activeTab === 'inventory'} onClick={() => setActiveTab('inventory')} icon={<Package />} label="Placard" />
+        <NavButton active={activeTab === 'shopping'} onClick={() => setActiveTab('shopping')} icon={<ShoppingBag />} label="Courses" />
       </nav>
+    </div>
+  );
+}
 
+function NavButton({ active, onClick, icon, label }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex flex-col items-center gap-1 p-2 min-w-[70px] flex-shrink-0 md:w-auto md:flex-row md:px-5 md:py-3 md:rounded-xl md:shadow-sm transition-all
+        ${active ? 'text-indigo-600 md:bg-indigo-600 md:text-white scale-105 md:scale-100 font-semibold' : 'text-slate-400 hover:text-indigo-500 md:bg-white'}`}
+    >
+      <div className="w-5 h-5 flex items-center justify-center">{icon}</div>
+      <span className="text-[10px] md:text-sm font-medium">{label}</span>
+    </button>
+  );
+}
+
+function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, deleteRecipe, setViewingRecipe, currentSeason }) {
+  const [subTab, setSubTab] = useState('planning');
+
+  return (
+    <div className="space-y-6">
+      <div className="flex bg-slate-200/70 p-1 rounded-xl max-w-md mx-auto">
+        <button 
+          onClick={() => setSubTab('planning')}
+          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2
+            ${subTab === 'planning' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
+          `}
+        >
+          <Calendar className="w-4 h-4" /> Choix de la semaine
+        </button>
+        <button 
+          onClick={() => setSubTab('catalog')}
+          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2
+            ${subTab === 'catalog' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
+          `}
+        >
+          <List className="w-4 h-4" /> Catalogue Repas ({mealRecipes.length})
+        </button>
+      </div>
+
+      {subTab === 'planning' ? (
+        <MenuPlanner 
+          menu={menu} 
+          updateMenu={updateMenu} 
+          recipes={mealRecipes} 
+          setMenu={setMenu} 
+          setViewingRecipe={setViewingRecipe} 
+          currentSeason={currentSeason} 
+        />
+      ) : (
+        <RecipeList 
+          recipes={mealRecipes} 
+          deleteRecipe={deleteRecipe} 
+          setViewingRecipe={setViewingRecipe} 
+          currentSeason={currentSeason}
+          title="Toutes les recettes de repas"
+        />
+      )}
+    </div>
+  );
+}
+
+function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, currentSeason }) {
+  const daysConfig = [
+    { key: 'monday', label: 'Lundi', reqCarb: 'Blé' },
+    { key: 'tuesday', label: 'Mardi', reqCarb: 'Semoule' },
+    { key: 'wednesday', label: 'Mercredi', reqCarb: '' },
+    { key: 'thursday', label: 'Jeudi', reqCarb: 'Riz' },
+    { key: 'friday', label: 'Vendredi', reqCarb: 'Pommes de terre' },
+    { key: 'saturday', label: 'Samedi', reqCarb: 'Plaisir' },
+    { key: 'sunday', label: 'Dimanche', reqCarb: 'Pâtes' },
+  ];
+
+  const getEligibleRecipes = (reqCarb) => {
+    return recipes.filter(r => {
+      const matchCarb = reqCarb ? r.carb === reqCarb : true;
+      if (!matchCarb) return false;
+      return r.season === 'Toutes' || r.season === currentSeason;
+    });
+  };
+
+  const equipmentCounts = {};
+  Object.values(menu).forEach(val => {
+    if (!val || val === 'restes') return;
+    const r = recipes.find(x => x.id === val);
+    if (r) {
+      equipmentCounts[r.equipment] = (equipmentCounts[r.equipment] || 0) + 1;
+    }
+  });
+
+  const generateSmartMenu = () => {
+    let newMenu = { ...menu };
+    let tempEquipCounts = {};
+    
+    const eveningDays = [
+      { key: 'mondayDinner', reqCarb: 'Blé' },
+      { key: 'tuesdayDinner', reqCarb: 'Semoule' },
+      { key: 'wednesdayDinner', reqCarb: '' },
+      { key: 'thursdayDinner', reqCarb: 'Riz' },
+      { key: 'fridayDinner', reqCarb: 'Pommes de terre' },
+      { key: 'saturdayDinner', reqCarb: 'Plaisir' },
+      { key: 'sundayDinner', reqCarb: 'Pâtes' },
+    ];
+
+    eveningDays.forEach(day => {
+      if (day.key === 'wednesdayDinner') return;
+      let possibleRecipes = getEligibleRecipes(day.reqCarb);
+      if (possibleRecipes.length === 0) {
+        possibleRecipes = recipes.filter(r => r.carb === day.reqCarb);
+      }
+      if (possibleRecipes.length === 0) return;
+
+      possibleRecipes.sort((a, b) => {
+        const countA = tempEquipCounts[a.equipment] || 0;
+        const countB = tempEquipCounts[b.equipment] || 0;
+        return countA - countB;
+      });
+
+      const minUsage = tempEquipCounts[possibleRecipes[0].equipment] || 0;
+      const bestCandidates = possibleRecipes.filter(r => (tempEquipCounts[r.equipment] || 0) === minUsage);
+      const picked = bestCandidates[Math.floor(Math.random() * bestCandidates.length)];
+      
+      newMenu[day.key] = picked.id;
+      tempEquipCounts[picked.equipment] = (tempEquipCounts[picked.equipment] || 0) + 1;
+    });
+
+    setMenu(newMenu);
+  };
+
+  const hasImbalance = Object.values(equipmentCounts).some(count => count > 2);
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+          <div>
+            <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-indigo-600" />
+              Générateur Intelligent
+            </h2>
+            <p className="text-xs text-slate-500">
+              Suggestions automatiques basées sur la saison actuelle ({currentSeason}).
+            </p>
+          </div>
+          <button 
+            onClick={generateSmartMenu}
+            className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl font-medium transition-colors text-sm shadow-sm"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Générer un menu équilibré
+          </button>
+        </div>
+        
+        <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
+          {Object.entries(equipmentCounts).length === 0 && <span className="text-sm text-slate-500">Menu vide pour l'instant.</span>}
+          {Object.entries(equipmentCounts).map(([equip, count]) => (
+            <span key={equip} className={`text-xs px-2.5 py-1 rounded-md font-medium border flex items-center gap-1.5
+              ${count > 2 ? 'bg-orange-50 border-orange-200 text-orange-700' : 'bg-slate-100 border-slate-200 text-slate-700'}
+            `}>
+              <Settings className="w-3.5 h-3.5" />
+              {equip} : {count}x
+            </span>
+          ))}
+        </div>
+        {hasImbalance && (
+          <p className="text-xs text-orange-600 mt-2 flex items-center gap-1 font-medium">
+            <AlertTriangle className="w-4 h-4" /> Attention, vous utilisez le même appareil plus de 2 fois dans la semaine !
+          </p>
+        )}
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        {daysConfig.map(day => (
+          <FullDayCard 
+            key={day.key}
+            day={day}
+            menu={menu}
+            updateMenu={updateMenu}
+            recipes={recipes}
+            currentSeason={currentSeason}
+            setViewingRecipe={setViewingRecipe}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function FullDayCard({ day, menu, updateMenu, recipes, currentSeason, setViewingRecipe }) {
+  const lunchKey = `${day.key}Lunch`;
+  const dinnerKey = `${day.key}Dinner`;
+
+  const getAvailableRecipes = (reqCarb) => {
+    return recipes.filter(r => {
+      const matchCarb = reqCarb ? r.carb === reqCarb : true;
+      if (!matchCarb) return false;
+      return r.season === 'Toutes' || r.season === currentSeason;
+    });
+  };
+
+  const dinnerRecipes = getAvailableRecipes(day.reqCarb);
+  const anyRecipes = recipes.filter(r => r.season === 'Toutes' || r.season === currentSeason);
+
+  const lunchVal = menu[lunchKey] || '';
+  const dinnerVal = menu[dinnerKey] || '';
+
+  const lunchRecipe = recipes.find(r => r.id === lunchVal);
+  const dinnerRecipe = recipes.find(r => r.id === dinnerVal);
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col justify-between hover:shadow-md transition-shadow">
+      <div>
+        <div className="flex justify-between items-center mb-3 pb-2 border-b border-slate-100">
+          <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-indigo-600" />
+            {day.label}
+          </h3>
+          {day.reqCarb && (
+            <span className="bg-slate-100 text-slate-600 text-xs px-2.5 py-1 rounded-md font-semibold border border-slate-200">
+               {day.reqCarb}
+            </span>
+          )}
+        </div>
+        
+        <div className="space-y-3">
+          <div className="bg-slate-50/70 p-3 rounded-lg border border-slate-200/60 space-y-2">
+            <div className="flex justify-between items-center text-xs font-semibold text-slate-500 uppercase">
+              <span>Midi</span>
+            </div>
+            <select
+              value={lunchVal}
+              onChange={(e) => updateMenu(lunchKey, e.target.value)}
+              className="w-full bg-white border border-slate-300 text-slate-900 text-xs rounded-lg focus:ring-indigo-500 p-2"
+            >
+              <option value="">-- Choisir le midi --</option>
+              <option value="restes">🔁 Restes de la veille</option>
+              {anyRecipes.map(r => (
+                <option key={r.id} value={r.id}>
+                  {r.name} {r.season !== 'Toutes' ? `(${r.season})` : ''}
+                </option>
+              ))}
+            </select>
+
+            {lunchRecipe && (
+              <div className="flex justify-between items-center pt-1">
+                <span className="text-[11px] text-slate-500 flex items-center gap-1 font-medium">
+                  <Settings className="w-3 h-3 text-slate-400" /> {lunchRecipe.equipment}
+                </span>
+                <button 
+                  onClick={() => setViewingRecipe(lunchRecipe)}
+                  className="text-[11px] font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded transition-colors flex items-center gap-1"
+                >
+                  <Eye className="w-3 h-3" /> Voir
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="bg-slate-50/70 p-3 rounded-lg border border-slate-200/60 space-y-2">
+            <div className="flex justify-between items-center text-xs font-semibold text-slate-500 uppercase">
+              <span>Soir</span>
+            </div>
+            {day.key === 'wednesday' ? (
+              <div className="w-full bg-slate-100 border border-slate-300 text-slate-800 text-xs rounded-lg p-2 font-medium flex items-center justify-between">
+                <span>Cordon bleu et Pommes de terre</span>
+                <span className="text-[10px] bg-slate-200 px-2 py-0.5 rounded text-slate-600">Fixe</span>
+              </div>
+            ) : dinnerRecipes.length === 0 ? (
+              <div className="text-xs text-amber-700 bg-amber-50 p-2.5 rounded-lg border border-amber-200">
+                Aucune recette de {currentSeason} pour ce féculent.
+              </div>
+            ) : (
+              <select
+                value={dinnerVal}
+                onChange={(e) => updateMenu(dinnerKey, e.target.value)}
+                className="w-full bg-white border border-slate-300 text-slate-900 text-xs rounded-lg focus:ring-indigo-500 p-2"
+              >
+                <option value="">-- Choisir le soir --</option>
+                {dinnerRecipes.map(r => (
+                  <option key={r.id} value={r.id}>
+                    {r.name} {r.season !== 'Toutes' ? `(${r.season})` : ''}
+                  </option>
+                ))}
+              </select>
+            )}
+
+            {dinnerRecipe && (
+              <div className="flex justify-between items-center pt-1">
+                <span className="text-[11px] text-slate-500 flex items-center gap-1 font-medium">
+                  <Settings className="w-3 h-3 text-slate-400" /> {dinnerRecipe.equipment}
+                  <span className="ml-1 px-1.5 py-0.5 bg-slate-100 rounded text-[9px]">{dinnerRecipe.season}</span>
+                </span>
+                <button 
+                  onClick={() => setViewingRecipe(dinnerRecipe)}
+                  className="text-[11px] font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded transition-colors flex items-center gap-1"
+                >
+                  <Eye className="w-3 h-3" /> Voir
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RecipeList({ recipes, deleteRecipe, setViewingRecipe, currentSeason, title }) {
+  const [filterSeason, setFilterSeason] = useState('Tous');
+  const [filterEquip, setFilterEquip] = useState('Tous');
+
+  const filteredRecipes = recipes.filter(r => {
+    if (filterSeason !== 'Tous' && r.season !== filterSeason) return false;
+    if (filterEquip !== 'Tous' && r.equipment !== filterEquip) return false;
+    return true;
+  });
+
+  return (
+    <div className="space-y-4">
+      {title && (
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex justify-between items-center">
+          <h2 className="font-bold text-slate-800 text-base flex items-center gap-2">
+            <List className="w-5 h-5 text-indigo-600" /> {title}
+          </h2>
+          <span className="text-xs text-slate-500 font-medium">{filteredRecipes.length} recette(s)</span>
+        </div>
+      )}
+
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap gap-3 items-center justify-between">
+        <div className="flex flex-wrap gap-2 items-center text-xs">
+          <span className="font-semibold text-slate-600 flex items-center gap-1">
+            <Filter className="w-3.5 h-3.5" /> Filtres :
+          </span>
+
+          <select 
+            value={filterSeason} 
+            onChange={(e) => setFilterSeason(e.target.value)}
+            className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800"
+          >
+            <option value="Tous">Toutes les saisons</option>
+            {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+
+          <select 
+            value={filterEquip} 
+            onChange={(e) => setFilterEquip(e.target.value)}
+            className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800"
+          >
+            <option value="Tous">Tous les appareils</option>
+            {EQUIPMENTS.map(eq => <option key={eq} value={eq}>{eq}</option>)}
+          </select>
+        </div>
+
+        <div className="text-xs text-slate-500 font-medium">
+          {filteredRecipes.length} affichée(s)
+        </div>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        {filteredRecipes.map(recipe => (
+          <div key={recipe.id} className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div>
+              <div className="flex justify-between items-start gap-2 mb-2">
+                <h3 className="font-bold text-slate-800 text-sm leading-tight">{recipe.name}</h3>
+                <span className="text-xs bg-indigo-50 text-indigo-700 font-semibold px-2 py-0.5 rounded flex-shrink-0 border border-indigo-100">
+                  {recipe.carb}
+                </span>
+              </div>
+              
+              {recipe.image && (
+                <div className="mb-2 h-32 w-full overflow-hidden rounded-lg border border-slate-200">
+                  <img src={recipe.image} alt={recipe.name} className="w-full h-full object-cover" />
+                </div>
+              )}
+
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                <span className="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded flex items-center gap-1 font-medium">
+                  <Settings className="w-3 h-3 text-slate-400" /> {recipe.equipment}
+                </span>
+                <span className={`text-[11px] px-2 py-0.5 rounded font-medium flex items-center gap-1
+                  ${recipe.season === currentSeason ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-slate-100 text-slate-600'}
+                `}>
+                  <Sun className="w-3 h-3" /> {recipe.season}
+                </span>
+              </div>
+
+              {recipe.ingredients && recipe.ingredients.length > 0 && (
+                <p className="text-xs text-slate-500 line-clamp-2 mb-3">
+                  <span className="font-medium text-slate-700">Ingrédients : </span>
+                  {recipe.ingredients.join(', ')}
+                </p>
+              )}
+            </div>
+
+            <div className="flex justify-between items-center pt-3 border-t border-slate-100 mt-2">
+              <button 
+                onClick={() => setViewingRecipe(recipe)}
+                className="text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-md transition-colors flex items-center gap-1"
+              >
+                <Eye className="w-3.5 h-3.5" /> Voir la fiche
+              </button>
+              <button 
+                onClick={() => deleteRecipe(recipe.id)}
+                className="text-slate-400 hover:text-red-600 p-1.5 rounded transition-colors"
+                title="Supprimer la recette"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        ))}
+        {filteredRecipes.length === 0 && (
+          <div className="col-span-full py-12 text-center text-slate-400 text-sm bg-white rounded-xl border border-slate-200">
+            Aucune recette ne correspond à ces filtres.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function BakingPlanner({ bakingItems, setBakingItems, bakingRecipes, recipes, deleteRecipe, setViewingRecipe, currentSeason }) {
+  const [subTab, setSubTab] = useState('planning');
+
+  const updateBakingItem = (index, recipeId) => {
+    const updated = [...bakingItems];
+    updated[index] = recipeId;
+    setBakingItems(updated);
+  };
+
+  const generateSmartBaking = () => {
+    if (bakingRecipes.length === 0) return;
+    
+    const shuffled = [...bakingRecipes].sort(() => 0.5 - Math.random());
+    const first = shuffled[0] ? shuffled[0].id : '';
+    const second = shuffled[1] ? shuffled[1].id : first;
+    
+    setBakingItems([first, second]);
+  };
+
+  return (
+    <div className="space-y-6 max-w-2xl mx-auto">
+      <div className="flex bg-slate-200/70 p-1 rounded-xl">
+        <button 
+          onClick={() => setSubTab('planning')}
+          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2
+            ${subTab === 'planning' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
+          `}
+        >
+          <Calendar className="w-4 h-4" /> Choix de la semaine ({bakingItems.filter(Boolean).length}/2)
+        </button>
+        <button 
+          onClick={() => setSubTab('list')}
+          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2
+            ${subTab === 'list' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
+          `}
+        >
+          <Cake className="w-4 h-4" /> Catalogue Gâteaux ({bakingRecipes.length})
+        </button>
+      </div>
+
+      {subTab === 'planning' ? (
+        <div className="space-y-4">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="font-bold text-slate-800 text-base flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-indigo-600" /> Gâteaux & Goûters de la semaine
+              </h2>
+              <p className="text-xs text-slate-500">Sélectionnez ou générez vos pâtisseries de la semaine.</p>
+            </div>
+            <button 
+              onClick={generateSmartBaking}
+              className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl font-medium transition-colors text-sm shadow-sm"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Générer les gâteaux
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            {bakingItems.map((selectedId, idx) => {
+              const selectedRecipe = recipes.find(r => r.id === selectedId);
+
+              return (
+                <div key={idx} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs font-bold text-slate-700 uppercase">Choix n°{idx + 1}</span>
+                  </div>
+                  <select
+                    value={selectedId}
+                    onChange={(e) => updateBakingItem(idx, e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg p-2.5"
+                  >
+                    <option value="">-- Choisir une recette de gâteau --</option>
+                    {bakingRecipes.map(r => (
+                      <option key={r.id} value={r.id}>{r.name} ({r.equipment})</option>
+                    ))}
+                  </select>
+
+                  {selectedRecipe && (
+                    <div className="flex justify-between items-center pt-2 border-t border-slate-100">
+                      <span className="text-xs text-slate-600 font-medium">Appareil : {selectedRecipe.equipment}</span>
+                      <button 
+                        onClick={() => setViewingRecipe(selectedRecipe)}
+                        className="text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded transition-colors flex items-center gap-1"
+                      >
+                        <Eye className="w-3.5 h-3.5" /> Voir la recette
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        <RecipeList 
+          recipes={bakingRecipes} 
+          deleteRecipe={deleteRecipe} 
+          setViewingRecipe={setViewingRecipe} 
+          currentSeason={currentSeason}
+        />
+      )}
+    </div>
+  );
+}
+
+function AddRecipeForm({ addRecipe }) {
+  const [name, setName] = useState('');
+  const [carb, setCarb] = useState('Plaisir');
+  const [equipment, setEquipment] = useState('Four');
+  const [season, setSeason] = useState('Toutes');
+  const [category, setCategory] = useState('repas');
+  const [url, setUrl] = useState('');
+  const [image, setImage] = useState('');
+  const [instructions, setInstructions] = useState('');
+  const [ingredientsText, setIngredientsText] = useState('');
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+
+    const ingredients = ingredientsText
+      .split('\n')
+      .map(i => i.trim().replace(/^[-*•]\s*/, ''))
+      .filter(i => i.length > 0);
+
+    addRecipe({
+      name,
+      carb,
+      equipment,
+      season,
+      category,
+      url,
+      image,
+      instructions,
+      ingredients
+    });
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 max-w-2xl mx-auto relative">
+      <h2 className="font-bold text-slate-800 text-lg mb-4 flex items-center gap-2">
+        <Plus className="w-5 h-5 text-indigo-600" /> Ajouter une nouvelle recette
+      </h2>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Type de recette</label>
+          <div className="flex gap-4 text-xs font-semibold">
+            <label className={`flex-1 p-3 rounded-xl border flex items-center justify-center gap-2 cursor-pointer transition-all
+              ${category === 'repas' ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'bg-slate-50 border-slate-300 text-slate-700'}`}
+            >
+              <input type="radio" name="recipeCat" checked={category === 'repas'} onChange={() => { setCategory('repas'); setCarb('Pâtes'); }} className="hidden" />
+              🍽️ Plat / Repas
+            </label>
+            <label className={`flex-1 p-3 rounded-xl border flex items-center justify-center gap-2 cursor-pointer transition-all
+              ${category === 'gateau' ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'bg-slate-50 border-slate-300 text-slate-700'}`}
+            >
+              <input type="radio" name="recipeCat" checked={category === 'gateau'} onChange={() => { setCategory('gateau'); setCarb('Plaisir'); }} className="hidden" />
+              🍰 Gâteau / Goûter
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Nom de la recette</label>
+          <input 
+            type="text" 
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={category === 'gateau' ? "Ex: Gâteau au chocolat moelleux..." : "Ex: Gratin de courgettes au chèvre..."}
+            className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {category === 'repas' && (
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Féculent / Catégorie</label>
+              <select 
+                value={carb}
+                onChange={(e) => setCarb(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
+              >
+                {CARBS.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+          )}
+
+          <div className={category === 'gateau' ? 'col-span-full' : ''}>
+            <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Appareil utilisé</label>
+            <select 
+              value={equipment}
+              onChange={(e) => setEquipment(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
+            >
+              {EQUIPMENTS.map(eq => <option key={eq} value={eq}>{eq}</option>)}
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="col-span-full">
+            <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Saison idéale</label>
+            <select 
+              value={season}
+              onChange={(e) => setSeason(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
+            >
+              {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Lien internet optionnel</label>
+            <input 
+              type="url" 
+              placeholder="https://www.marmiton.org/..."
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Photo optionnelle</label>
+            <input 
+              type="file" 
+              accept="image/*"
+              onChange={handleImageChange}
+              className="w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+            />
+          </div>
+        </div>
+
+        {image && (
+          <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-slate-200">
+            <img src={image} alt="Aperçu" className="w-full h-full object-cover" />
+            <button 
+              type="button" 
+              onClick={() => setImage('')}
+              className="absolute top-1 right-1 bg-slate-900/70 text-white rounded-full p-1 text-xs"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </div>
+        )}
+
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Ingrédients (1 par ligne)</label>
+          <textarea 
+            rows={3}
+            value={ingredientsText}
+            onChange={(e) => setIngredientsText(e.target.value)}
+            placeholder="250g de farine&#10;1 sachet de levure&#10;100g de sucre"
+            className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Instructions de préparation</label>
+          <textarea 
+            rows={3}
+            value={instructions}
+            onChange={(e) => setInstructions(e.target.value)}
+            placeholder="Mélanger tous les ingrédients..."
+            className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
+          />
+        </div>
+
+        <button 
+          type="submit"
+          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-xl transition-colors shadow-sm text-sm"
+        >
+          Enregistrer la recette
+        </button>
+      </form>
+    </div>
+  );
+}
+
+function InventoryManager({ inventory, setInventory }) {
+  const [newItemName, setNewItemName] = useState('');
+  const [newItemStatus, setNewItemStatus] = useState('Plein');
+
+  const addItem = (e) => {
+    e.preventDefault();
+    if (!newItemName.trim()) return;
+    setInventory([...inventory, { name: newItemName.trim(), status: newItemStatus }]);
+    setNewItemName('');
+  };
+
+  const updateStatus = (index, status) => {
+    const updated = [...inventory];
+    updated[index].status = status;
+    setInventory(updated);
+  };
+
+  const removeItem = (index) => {
+    setInventory(inventory.filter((_, i) => i !== index));
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 max-w-2xl mx-auto space-y-6">
+      <div>
+        <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2 mb-1">
+          <Package className="w-5 h-5 text-indigo-600" /> Mon Placard & Frigo
+        </h2>
+        <p className="text-xs text-slate-500">
+          Listez vos provisions et leur état actuel pour affiner la liste de courses.
+        </p>
+      </div>
+
+      <form onSubmit={addItem} className="flex gap-2">
+        <input 
+          type="text" 
+          placeholder="Ex: Riz, Farine, Lait..." 
+          value={newItemName}
+          onChange={(e) => setNewItemName(e.target.value)}
+          className="flex-1 bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm"
+        />
+        <select 
+          value={newItemStatus}
+          onChange={(e) => setNewItemStatus(e.target.value)}
+          className="bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs"
+        >
+          <option value="Plein">Plein</option>
+          <option value="Entamé">Entamé</option>
+          <option value="Presque vide">Presque vide</option>
+        </select>
+        <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+          Ajouter
+        </button>
+      </form>
+
+      <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
+        {inventory.map((item, index) => (
+          <div key={index} className="flex items-center justify-between p-3 bg-white hover:bg-slate-50 transition-colors">
+            <span className="font-medium text-slate-800 text-sm">{item.name}</span>
+            <div className="flex items-center gap-3">
+              <select 
+                value={item.status} 
+                onChange={(e) => updateStatus(index, e.target.value)}
+                className={`text-xs font-semibold rounded-md px-2 py-1 border
+                  ${item.status === 'Plein' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : ''}
+                  ${item.status === 'Entamé' ? 'bg-amber-50 text-amber-700 border-amber-200' : ''}
+                  ${item.status === 'Presque vide' ? 'bg-red-50 text-red-700 border-red-200' : ''}
+                `}
+              >
+                <option value="Plein">Plein</option>
+                <option value="Entamé">Entamé</option>
+                <option value="Presque vide">Presque vide</option>
+              </select>
+              <button onClick={() => removeItem(index)} className="text-slate-400 hover:text-red-600 p-1">
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        ))}
+        {inventory.length === 0 && (
+          <div className="p-6 text-center text-slate-400 text-sm">Votre placard est vide.</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingChecks, setShoppingChecks, setActiveTab }) {
+  const [copied, setCopied] = useState(false);
+
+  const activeRecipeIds = [
+    ...Object.values(menu).filter(val => val && val !== 'restes'),
+    ...bakingItems.filter(Boolean)
+  ];
+  
+  const ingredientMap = {};
+
+  activeRecipeIds.forEach(id => {
+    const r = recipes.find(x => x.id === id);
+    if (r && r.ingredients) {
+      r.ingredients.forEach(ing => {
+        const cleanIng = ing.toLowerCase();
+        ingredientMap[cleanIng] = (ingredientMap[cleanIng] || 0) + 1;
+      });
+    }
+  });
+
+  const rawList = Object.keys(ingredientMap);
+
+  const getStockStatus = (ingName) => {
+    const found = inventory.find(i => ingName.toLowerCase().includes(i.name.toLowerCase()));
+    if (!found) return { status: 'A acheter', color: 'text-indigo-600 bg-indigo-50 border-indigo-200' };
+    if (found.status === 'Plein') return { status: 'En stock (Plein)', color: 'text-emerald-700 bg-emerald-50 border-emerald-200' };
+    if (found.status === 'Entamé') return { status: 'En stock (Entamé - Attention quantité)', color: 'text-amber-700 bg-amber-50 border-amber-200' };
+    return { status: 'Presque vide (A racheter)', color: 'text-red-700 bg-red-50 border-red-200' };
+  };
+
+  const toggleCheck = (ing) => {
+    setShoppingChecks({ ...shoppingChecks, [ing]: !shoppingChecks[ing] });
+  };
+
+  const copyListText = () => {
+    const text = rawList.map(i => `- [ ] ${i} (${getStockStatus(i).status})`).join('\n');
+    navigator.clipboard.writeText(`Liste de courses :\n${text}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 max-w-2xl mx-auto space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div>
+          <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+            <ShoppingBag className="w-5 h-5 text-indigo-600" /> Liste de Courses Intelligente
+          </h2>
+          <p className="text-xs text-slate-500">Basée sur les menus et les gâteaux de la semaine.</p>
+        </div>
+        {rawList.length > 0 && (
+          <button 
+            onClick={copyListText}
+            className="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg transition-colors"
+          >
+            {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+            {copied ? 'Copié !' : 'Copier la liste'}
+          </button>
+        )}
+      </div>
+
+      {rawList.length === 0 ? (
+        <div className="text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+          <p className="text-slate-500 text-sm mb-2">Aucun menu ou gâteau planifié pour l'instant.</p>
+          <button 
+            onClick={() => setActiveTab('menu')}
+            className="text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-lg transition-colors"
+          >
+            Aller planifier le menu
+          </button>
+        </div>
+      ) : (
+        <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
+          {rawList.map((ing, idx) => {
+            const stock = getStockStatus(ing);
+            const isChecked = !!shoppingChecks[ing];
+
+            return (
+              <div 
+                key={idx} 
+                onClick={() => toggleCheck(ing)}
+                className={`flex items-center justify-between p-3.5 cursor-pointer transition-colors
+                  ${isChecked ? 'bg-slate-50 opacity-60 line-through' : 'bg-white hover:bg-slate-50'}
+                `}
+              >
+                <div className="flex items-center gap-3">
+                  <input 
+                    type="checkbox" 
+                    checked={isChecked} 
+                    onChange={() => {}} 
+                    className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500"
+                  />
+                  <span className="font-medium text-slate-800 text-sm capitalize">{ing}</span>
+                </div>
+                <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-md border ${stock.color}`}>
+                  {stock.status}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RecipeModal({ recipe, onClose }) {
+  return (
+    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+      <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 space-y-6 relative">
+        <button 
+          onClick={onClose}
+          className="absolute top-4 right-4 bg-slate-100 hover:bg-slate-200 p-2 rounded-full text-slate-600 transition-colors z-10"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-xs font-semibold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md border border-indigo-100">
+              {recipe.category === 'gateau' ? '🍰 Gâteau' : recipe.carb}
+            </span>
+            <span className="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md font-medium">
+              {recipe.equipment}
+            </span>
+            <span className="text-xs bg-amber-50 text-amber-700 px-2.5 py-1 rounded-md font-medium">
+              {recipe.season}
+            </span>
+          </div>
+          <h2 className="text-xl font-bold text-slate-900">{recipe.name}</h2>
+        </div>
+
+        {recipe.image && (
+          <div className="w-full bg-slate-900 rounded-xl overflow-hidden border border-slate-200 flex items-center justify-center">
+            <img src={recipe.image} alt={recipe.name} className="w-full h-auto max-h-[350px] object-contain" />
+          </div>
+        )}
+
+        {recipe.url && (
+          <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex items-center justify-between">
+            <div>
+              <h4 className="font-semibold text-indigo-900 text-sm">Recette sur le web</h4>
+              <p className="text-xs text-indigo-700 truncate max-w-[250px]">{recipe.url}</p>
+            </div>
+            <a 
+              href={recipe.url} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5"
+            >
+              <LinkIcon className="w-3.5 h-3.5" /> Ouvrir le lien
+            </a>
+          </div>
+        )}
+
+        {recipe.ingredients && recipe.ingredients.length > 0 && (
+          <div>
+            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Ingrédients</h3>
+            <ul className="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-1.5">
+              {recipe.ingredients.map((ing, idx) => (
+                <li key={idx} className="text-sm text-slate-800 flex items-center gap-2 list-none">
+                  <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full inline-block mr-2"></span>
+                  {ing}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {recipe.instructions && (
+          <div>
+            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Préparation</h3>
+            <p className="text-sm text-slate-700 leading-relaxed bg-slate-50 rounded-xl p-4 border border-slate-200 whitespace-pre-line">
+              {recipe.instructions}
+            </p>
+          </div>
+        )}
+
+        <button 
+          onClick={onClose}
+          className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 rounded-xl transition-colors text-sm"
+        >
+          Fermer
+        </button>
+      </div>
     </div>
   );
 }
