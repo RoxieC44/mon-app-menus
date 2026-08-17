@@ -126,7 +126,7 @@ export default function App() {
   const bakingRecipes = recipes.filter(r => r.category === 'gateau');
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-20 md:pb-0 relative">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-24 md:pb-0 relative">
       <header className="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-10">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <h1 className="text-xl font-bold flex items-center gap-2">
@@ -179,12 +179,23 @@ export default function App() {
         <RecipeModal recipe={viewingRecipe} onClose={() => setViewingRecipe(null)} />
       )}
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex overflow-x-auto justify-start md:justify-center p-2 gap-1 md:relative md:border-t-0 md:bg-transparent md:max-w-4xl md:mx-auto md:p-0 md:mb-6 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] md:shadow-none z-10" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-        <NavButton active={activeTab === 'menu'} onClick={() => setActiveTab('menu')} icon={<Calendar />} label="Menus" />
-        <NavButton active={activeTab === 'baking'} onClick={() => setActiveTab('baking')} icon={<Cake />} label="Gâteaux" />
-        <NavButton active={activeTab === 'add'} onClick={() => setActiveTab('add')} icon={<Plus />} label="Ajouter" />
-        <NavButton active={activeTab === 'inventory'} onClick={() => setActiveTab('inventory')} icon={<Package />} label="Placard" />
-        <NavButton active={activeTab === 'shopping'} onClick={() => setActiveTab('shopping')} icon={<ShoppingBag />} label="Courses" />
+      {/* BOTTOM NAVIGATION FIXED WITH CENTRAL FLOATING ADD BUTTON */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-40 px-4 py-2 shadow-[0_-10px_15px_-3px_rgb(0,0,0,0.05)] md:relative md:border-t-0 md:bg-transparent md:max-w-4xl md:mx-auto md:p-0 md:mb-6 md:shadow-none">
+        <div className="max-w-md mx-auto flex justify-between items-center relative">
+          <NavButton active={activeTab === 'menu'} onClick={() => setActiveTab('menu')} icon={<Calendar />} label="Menus" />
+          <NavButton active={activeTab === 'baking'} onClick={() => setActiveTab('baking')} icon={<Cake />} label="Gâteaux" />
+          
+          {/* GROS BOUTON "+" DU MILIEU EN RELIEF */}
+          <button
+            onClick={() => setActiveTab('add')}
+            className={`bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-lg transform -translate-y-4 transition-transform hover:scale-105 border-4 border-white flex items-center justify-center flex-shrink-0 ${activeTab === 'add' ? 'ring-2 ring-indigo-400 scale-105' : ''}`}
+          >
+            <Plus size={26} />
+          </button>
+
+          <NavButton active={activeTab === 'inventory'} onClick={() => setActiveTab('inventory')} icon={<Package />} label="Placard" />
+          <NavButton active={activeTab === 'shopping'} onClick={() => setActiveTab('shopping')} icon={<ShoppingBag />} label="Courses" />
+        </div>
       </nav>
     </div>
   );
