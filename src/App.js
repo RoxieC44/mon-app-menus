@@ -290,7 +290,7 @@ export default function App() {
           </div>
         </div>
         <div className="bg-amber-300 text-slate-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1.5">
-          <span>☼</span> Saison actuelle : {currentSeason}
+          <span>☀️</span> Saison actuelle : {currentSeason}
         </div>
       </header>
 
@@ -510,7 +510,7 @@ export default function App() {
                     onClick={handleGenerateBalancedCakes}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-xl text-sm transition-colors shadow-sm flex items-center gap-2 whitespace-nowrap"
                   >
-                    <Sparkles size={16} /> Générer un menu équilibré
+                    <Sparkles size={16} /> Générer les recettes
                   </button>
                 </div>
 
@@ -704,7 +704,7 @@ export default function App() {
               <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2 mb-1">
                 <Archive className="text-indigo-600" size={24} /> Mon Placard & Frigo
               </h2>
-              <p className="text-xs text-slate-500">Gérez votre stock pour ajuster intelligemment votre liste de courses.</p>
+              <p className="text-xs text-slate-500">Listez vos provisions et leur état actuel pour affiner la liste de courses.</p>
             </div>
 
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
