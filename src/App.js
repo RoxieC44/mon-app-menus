@@ -327,7 +327,7 @@ export default function App() {
                       <Sparkles className="text-indigo-600" size={20} /> Générateur Intelligent
                     </h2>
                     <p className="text-xs text-slate-500">
-                      Remplit automatiquement chaque jour selon les contraintes strictes ({currentSeason}).
+                      Suggestions automatiques basées sur la saison actuelle ({currentSeason}).
                     </p>
                   </div>
                   <button 
