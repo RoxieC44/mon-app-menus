@@ -22,7 +22,7 @@ export default function App() {
 
   // Planning de la semaine (Midi et Soir modifiables / avec listes déroulantes)
   const [weeklyMenu, setWeeklyMenu] = useState({
-    Lundi: { midi: 'Restes de la veille', soir: 'Bléotto aux courgettes' },
+    Lundi: { midi: 'Restes de la veille', soir: 'Blé' },
     Mardi: { midi: 'Restes de la veille', soir: 'Poulet coco et semoule' },
     Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et patate sautée' }, // Fixé et inchangé
     Jeudi: { midi: 'Restes de la veille', soir: 'Poulet coco et riz' },
@@ -108,6 +108,16 @@ export default function App() {
       link: '',
       ingredients: ['Pâtes', 'Jambon', 'Béchamel', 'Fromage râpé'],
       instructions: '1. Cuire les pâtes.\n2. Mélanger avec la béchamel et le jambon.\n3. Gratiner au four.'
+    },
+    {
+      id: 8,
+      title: 'Blé',
+      category: 'Blé',
+      appliance: 'Casserole',
+      season: 'Toutes',
+      link: '',
+      ingredients: ['Blé'],
+      instructions: '1. Cuire le blé dans de l\'eau bouillante salée.'
     }
   ]);
 
@@ -182,7 +192,7 @@ export default function App() {
     };
 
     setWeeklyMenu({
-      Lundi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Blé') },
+      Lundi: { midi: 'Restes de la veille', soir: 'Blé' },
       Mardi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Semoule') },
       Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et patate sautée' }, // Fixé (ne bouge pas)
       Jeudi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Riz') },
@@ -290,7 +300,7 @@ export default function App() {
         {/* ================= ONGLET MENUS ================= */}
         {activeTab === 'menus' && (
           <div className="space-y-6">
-            <div className="flex bg-slate-200/70 p-1 rounded-2xl max-w-md mx-auto">
+            <div className="flex bg-slate-200/70 p-1 rounded-2xl max-w-md mx-auto items-center">
               <button
                 onClick={() => setMenuSubTab('semaine')}
                 className={`flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
@@ -305,7 +315,12 @@ export default function App() {
                   menuSubTab === 'catalogue' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <Menu size={18} /> Catalogue Repas ({dishes.length})
+                <div className="flex flex-col justify-center gap-[3px] w-4 h-4 items-center mr-0.5">
+                  <span className="w-1 h-1 bg-current rounded-full"></span>
+                  <span className="w-1 h-1 bg-current rounded-full"></span>
+                  <span className="w-1 h-1 bg-current rounded-full"></span>
+                </div>
+                Catalogue Repas ({dishes.length})
               </button>
             </div>
 
