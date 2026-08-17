@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Cake, Plus, Archive, ShoppingBag, X, Trash2, Sparkles, Utensils, Menu, RefreshCw } from 'lucide-react';
+import { Calendar, Cake, Plus, Archive, ShoppingBag, X, Trash2, Sparkles, Utensils, List, RefreshCw, Cpu } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('menus');
@@ -20,13 +20,13 @@ export default function App() {
     else setCurrentSeason('Hiver');
   }, []);
 
-  // Planning de la semaine
+  // Planning de la semaine (Mise à jour des valeurs par défaut demandées)
   const [weeklyMenu, setWeeklyMenu] = useState({
-    Lundi: { midi: '', soir: '' },
-    Mardi: { midi: '', soir: '' },
+    Lundi: { midi: 'Restes de la veille', soir: '' },
+    Mardi: { midi: 'Restes de la veille', soir: '' },
     Mercredi: { midi: '', soir: 'Cordon bleu et Pomme de terre' },
-    Jeudi: { midi: '', soir: '' },
-    Vendredi: { midi: '', soir: '' },
+    Jeudi: { midi: 'Restes de la veille', soir: '' },
+    Vendredi: { midi: 'Restes de la veille', soir: '' },
     Samedi: { midi: '', soir: '' },
     Dimanche: { midi: '', soir: '' },
   });
@@ -180,13 +180,31 @@ export default function App() {
     setWeeklyMenu({
       Lundi: { midi: 'Restes de la veille', soir: getRand('Blé') },
       Mardi: { midi: 'Restes de la veille', soir: getRand('Semoule') },
-      Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et Pomme de terre' },
+      Mercredi: { midi: '', soir: 'Cordon bleu et Pomme de terre' },
       Jeudi: { midi: 'Restes de la veille', soir: getRand('Riz') },
       Vendredi: { midi: 'Restes de la veille', soir: getRand('Pommes de terre') },
-      Samedi: { midi: 'Restes de la veille', soir: getRand('Plaisir') },
-      Dimanche: { midi: 'Restes de la veille', soir: '' },
+      Samedi: { midi: '', soir: getRand('Plaisir') },
+      Dimanche: { midi: '', soir: '' },
     });
   };
+
+  // Calcul du résumé des appareils utilisés pour les soirs de la semaine
+  const getWeeklyAppliancesSummary = () => {
+    const counts = {};
+    Object.entries(weeklyMenu).forEach(([day, meals]) => {
+      // On regarde principalement le soir (et le mercredi midi si rempli)
+      [meals.midi, meals.soir].forEach(mealTitle => {
+        if (!mealTitle || mealTitle === 'Restes de la veille') return;
+        const found = dishes.find(d => d.title === mealTitle);
+        if (found && found.appliance) {
+          counts[found.appliance] = (counts[found.appliance] || 0) + 1;
+        }
+      });
+    });
+    return counts;
+  };
+
+  const applianceSummary = getWeeklyAppliancesSummary();
 
   const handleGenerateBalancedCakes = () => {
     const seasonalCakes = cakes.filter(c => c.season === currentSeason || c.season === 'Toutes');
@@ -309,13 +327,14 @@ export default function App() {
               >
                 <Calendar size={18} /> Choix de la semaine
               </button>
+              {/* MODIFICATION: Icône liste (List) à côté de catalogue repas */}
               <button
                 onClick={() => setMenuSubTab('catalogue')}
                 className={`flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
                   menuSubTab === 'catalogue' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <Menu size={18} /> Catalogue repas ({dishes.length})
+                <List size={18} /> Catalogue repas ({dishes.length})
               </button>
             </div>
 
@@ -330,7 +349,6 @@ export default function App() {
                       Remplit automatiquement chaque jour selon les contraintes strictes ({currentSeason}).
                     </p>
                   </div>
-                  {/* MODIFICATION: Icône RefreshCw (🔄) */}
                   <button 
                     onClick={handleGenerateBalancedMenu}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-xl text-sm transition-colors shadow-sm flex items-center gap-2 whitespace-nowrap"
@@ -339,13 +357,32 @@ export default function App() {
                   </button>
                 </div>
 
-                {/* MODIFICATION: Affichage en grille de carrés (cols-1 sur mobile, cols-2 tablette, cols-3 desktop) */}
+                {/* MODIFICATION: Affichage de l'équilibre des appareils utilisés pour la semaine */}
+                {Object.keys(applianceSummary).length > 0 && (
+                  <div className="bg-indigo-50 border border-indigo-100 p-4 rounded-2xl flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-2 text-indigo-900 font-bold text-xs uppercase tracking-wider">
+                      <Cpu size={16} className="text-indigo-600" /> Équilibre des appareils :
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {Object.entries(applianceSummary).map(([app, count]) => (
+                        <span key={app} className="bg-white text-indigo-700 font-semibold text-xs px-3 py-1 rounded-lg border border-indigo-200 shadow-sm">
+                          {app} : <strong className="text-indigo-900">{count}</strong>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {Object.entries(weeklyMenu).map(([day, meals]) => {
                     const isWednesday = day === 'Mercredi';
                     const badgeText = dayBadges[day];
                     const strictCat = getDayCategoryFilter(day);
                     const eveningRecipes = strictCat ? getRecipesByCategory(strictCat) : getAvailableRecipes();
+
+                    // Rôles spécifiques pour les midis
+                    const isRestDayMidi = ['Lundi', 'Mardi', 'Jeudi', 'Vendredi'].includes(day);
+                    const isChooseDayMidi = ['Mercredi', 'Samedi', 'Dimanche'].includes(day);
 
                     return (
                       <div key={day} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col relative">
@@ -360,33 +397,47 @@ export default function App() {
                           )}
                         </div>
 
-                        {/* MODIFICATION: flex-col pour que Soir soit sous Midi */}
                         <div className="flex flex-col gap-3 flex-1">
+                          {/* MIDI */}
                           <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Midi</span>
-                            <select 
-                              value={meals.midi}
-                              onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, midi: e.target.value }})}
-                              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            >
-                              <option value="">-- Choisir ou laisser vide --</option>
-                              <option value="Restes de la veille">Restes de la veille</option>
-                              {getAvailableRecipes().map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
-                            </select>
+                            {isRestDayMidi ? (
+                              <div className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 flex items-center gap-2 font-medium">
+                                <span>🔄</span> Restes de la veille
+                              </div>
+                            ) : (
+                              <select 
+                                value={meals.midi}
+                                onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, midi: e.target.value }})}
+                                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                              >
+                                <option value="">-- Choisir le midi --</option>
+                                <option value="Restes de la veille">Restes de la veille</option>
+                                {getAvailableRecipes().map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
+                              </select>
+                            )}
                           </div>
 
+                          {/* SOIR */}
                           <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
                               Soir
                             </span>
-                            <select 
-                              value={meals.soir}
-                              onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, soir: e.target.value }})}
-                              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            >
-                              <option value="">-- Choisir ou laisser vide --</option>
-                              {eveningRecipes.map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
-                            </select>
+                            {isWednesday ? (
+                              <div className="w-full bg-indigo-50/70 border border-indigo-200 rounded-lg p-2 text-sm text-indigo-900 font-semibold flex items-center justify-between">
+                                <span>Cordon bleu et Pomme de terre</span>
+                                <span className="text-[10px] bg-indigo-200 text-indigo-800 px-1.5 py-0.5 rounded font-bold">Fixe</span>
+                              </div>
+                            ) : (
+                              <select 
+                                value={meals.soir}
+                                onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, soir: e.target.value }})}
+                                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                              >
+                                <option value="">-- Choisir le soir --</option>
+                                {eveningRecipes.map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
+                              </select>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -511,7 +562,6 @@ export default function App() {
                     <h2 className="text-lg font-bold text-slate-800">Pâtisseries</h2>
                     <p className="text-xs text-slate-500">Planifiez vos choix de la semaine.</p>
                   </div>
-                  {/* MODIFICATION: Icône RefreshCw (🔄) ajoutée ici aussi par cohérence */}
                   <button 
                     onClick={handleGenerateBalancedCakes}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-xl text-sm transition-colors shadow-sm flex items-center gap-2 whitespace-nowrap"
