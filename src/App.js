@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Cake, Plus, Archive, ShoppingBag, X, Trash2, Sparkles, ExternalLink, Camera, Check, Utensils, Menu, GripVertical } from 'lucide-react';
+import { Calendar, Cake, Plus, Archive, ShoppingBag, X, Trash2, Sparkles, ExternalLink, Camera, Check, Utensils, Menu } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('menus');
@@ -168,7 +168,6 @@ export default function App() {
   // Obtenir les recettes filtrées par catégorie exacte pour un jour donné
   const getRecipesByCategory = (targetCategory) => {
     const seasonal = getAvailableRecipes();
-    // Correspondance exacte ou tolérante (ex: "Pommes de terre" / "Pomme de terre")
     let match = seasonal.filter(d => d.category.toLowerCase().includes(targetCategory.toLowerCase()));
     if (match.length === 0) {
       match = dishes.filter(d => d.category.toLowerCase().includes(targetCategory.toLowerCase()));
@@ -187,7 +186,7 @@ export default function App() {
     setWeeklyMenu({
       Lundi: { midi: 'Restes de la veille', soir: getRand('Blé') },
       Mardi: { midi: 'Restes de la veille', soir: getRand('Semoule') },
-      Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et Pomme de terre' }, // Fixé
+      Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et Pomme de terre' },
       Jeudi: { midi: 'Restes de la veille', soir: getRand('Riz') },
       Vendredi: { midi: 'Restes de la veille', soir: getRand('Pommes de terre') },
       Samedi: { midi: 'Restes de la veille', soir: getRand('Plaisir') },
@@ -195,7 +194,7 @@ export default function App() {
     });
   };
 
-  // Génération automatique des goûters de la semaine
+  // Génération automatique des choix de la semaine
   const handleGenerateBalancedCakes = () => {
     const seasonalCakes = cakes.filter(c => c.season === currentSeason || c.season === 'Toutes');
     const pool = seasonalCakes.length > 0 ? seasonalCakes : cakes;
@@ -223,7 +222,7 @@ export default function App() {
   };
 
   // Suppression recette
-  const handleDeleteRecipe =(id, type) => {
+  const handleDeleteRecipe = (id, type) => {
     if (type === 'plat') setDishes(dishes.filter(d => d.id !== id));
     else setCakes(cakes.filter(c => c.id !== id));
   };
@@ -269,7 +268,7 @@ export default function App() {
     });
   };
 
-  // Correspondance des badges par jour (Mercredi et Dimanche n'ont pas de badge)
+  // Correspondance des badges par jour
   const dayBadges = {
     Lundi: 'Blé',
     Mardi: 'Semoule',
@@ -331,9 +330,6 @@ export default function App() {
                   menuSubTab === 'catalogue' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <div className="flex items-center gap-1 text-slate-500 mr-0.5">
-                  <GripVertical size={16} />
-                </div>
                 <Menu size={18} /> Catalogue Repas ({dishes.length})
               </button>
             </div>
@@ -397,7 +393,7 @@ export default function App() {
                         {/* Soir */}
                         <div className={`p-3 rounded-xl border ${isWednesday ? 'bg-slate-100 border-slate-200' : 'bg-slate-50 border-slate-100'}`}>
                           <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
-                            Soir {strictCat ? `(${strictCat})` : ''}
+                            Soir
                           </span>
                           {isWednesday ? (
                             <input 
@@ -521,7 +517,7 @@ export default function App() {
                   gateauSubTab === 'semaine' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <Cake size={18} /> Goûters de la semaine
+                <Cake size={18} /> Choix de la semaine
               </button>
               <button
                 onClick={() => setGateauSubTab('catalogue')}
@@ -538,7 +534,7 @@ export default function App() {
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
                   <div>
                     <h2 className="text-lg font-bold text-slate-800">Pâtisseries & Goûters</h2>
-                    <p className="text-xs text-slate-500">Planifiez vos choix de goûters de la semaine.</p>
+                    <p className="text-xs text-slate-500">Planifiez vos choix de la semaine.</p>
                   </div>
                   <button 
                     onClick={handleGenerateBalancedCakes}
@@ -550,7 +546,7 @@ export default function App() {
 
                 <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                   <div>
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Goûter - Choix n°1</label>
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Choix n° 1</label>
                     <select 
                       value={weeklyCakes.choix1}
                       onChange={(e) => setWeeklyCakes({...weeklyCakes, choix1: e.target.value})}
@@ -562,7 +558,7 @@ export default function App() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Goûter - Choix n°2</label>
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Choix n° 2</label>
                     <select 
                       value={weeklyCakes.choix2}
                       onChange={(e) => setWeeklyCakes({...weeklyCakes, choix2: e.target.value})}
@@ -761,7 +757,7 @@ export default function App() {
             <div>
               <h2 className="text-xl font-bold text-slate-800">Mon Placard & Frigo Intelligent</h2>
               <p className="text-xs text-slate-500">
-                Gérez vos stocks avec précision (ex: "Entamé" ou "Presque vide") pour que la liste de courses sache s'il y en a assez !
+                Listez vos provisions et leur état actuel pour affiner la liste de courses.
               </p>
             </div>
 
