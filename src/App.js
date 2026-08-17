@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Cake, Plus, Archive, ShoppingBag, X, Trash2, Sparkles, Utensils, List, RefreshCw } from 'lucide-react';
+import { Calendar, Cake, Plus, Archive, ShoppingBag, X, Trash2, Sparkles, Utensils, List, RefreshCw, Sun, Settings } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('menus');
@@ -312,7 +312,7 @@ export default function App() {
           </div>
         </div>
         <div className="bg-amber-300 text-slate-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1.5">
-          <span>☀️</span> Saison actuelle : {currentSeason}
+          <Sun size={14} className="text-black stroke-[2.2]" /> Saison actuelle : {currentSeason}
         </div>
       </header>
 
@@ -360,17 +360,17 @@ export default function App() {
                   </button>
                 </div>
 
-                {/* Récapitulatif des appareils utilisés */}
+                {/* Récapitulatif des appareils utilisés (généré au début des recettes/planning de la semaine) */}
                 <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center gap-3">
                   <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                    ⚙️ Équilibre des appareils :
+                    <Settings size={14} className="text-black stroke-[2.2]" /> Récapitulatif des appareils de la semaine :
                   </span>
                   {Object.keys(weeklyAppliances).length === 0 ? (
                     <span className="text-xs text-slate-400 italic">Aucun appareil planifié pour le moment</span>
                   ) : (
                     Object.entries(weeklyAppliances).map(([app, count]) => (
-                      <span key={app} className="bg-indigo-50 text-indigo-700 text-xs font-bold px-3 py-1 rounded-xl border border-indigo-100">
-                        {app} : <span className="font-extrabold">{count}</span>
+                      <span key={app} className="bg-indigo-50 text-indigo-700 text-xs font-bold px-3 py-1 rounded-xl border border-indigo-100 flex items-center gap-1">
+                        <Settings size={12} className="text-black stroke-[2.2]" /> {app} : <span className="font-extrabold">{count}</span>
                       </span>
                     ))
                   )}
@@ -390,11 +390,11 @@ export default function App() {
                     return (
                       <div key={day} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col relative">
                         <div className="flex justify-between items-center border-b border-slate-100 pb-3 mb-3">
-                          <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                            <Calendar size={18} className="text-indigo-600" /> {day}
+                          <h3 className="font-extrabold text-slate-900 text-base flex items-center gap-2">
+                            <Calendar size={20} className="text-indigo-600" /> {day}
                           </h3>
                           {badgeText && (
-                            <span className="bg-slate-100 text-slate-600 text-[10px] font-semibold px-2 py-1 rounded-md uppercase tracking-wide">
+                            <span className="bg-slate-100 text-slate-700 text-xs font-bold px-2 py-1 rounded-md uppercase tracking-wide">
                               {badgeText}
                             </span>
                           )}
@@ -406,8 +406,8 @@ export default function App() {
                             <div className="flex justify-between items-center mb-1">
                               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Midi</span>
                               {midiAppliance && (
-                                <span className="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-md">
-                                  ⚙️ {midiAppliance}
+                                <span className="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                                  <Settings size={10} className="text-black stroke-[2.2]" /> {midiAppliance}
                                 </span>
                               )}
                             </div>
@@ -427,7 +427,7 @@ export default function App() {
                                 onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, midi: e.target.value }})}
                                 className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                               >
-                                <option value="">-- Choisir le midi --</option>
+                                <option value="">-- Choisir --</option>
                                 <option value="Restes de la veille">🔄 Restes de la veille</option>
                                 {getAvailableRecipes().map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
                               </select>
@@ -439,8 +439,8 @@ export default function App() {
                             <div className="flex justify-between items-center mb-1">
                               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Soir</span>
                               {soirAppliance && (
-                                <span className="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-md">
-                                  ⚙️ {soirAppliance}
+                                <span className="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                                  <Settings size={10} className="text-black stroke-[2.2]" /> {soirAppliance}
                                 </span>
                               )}
                             </div>
@@ -456,7 +456,7 @@ export default function App() {
                                 onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, soir: e.target.value }})}
                                 className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                               >
-                                <option value="">-- Choisir le soir --</option>
+                                <option value="">-- Choisir --</option>
                                 {eveningRecipes.map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
                               </select>
                             )}
@@ -521,8 +521,12 @@ export default function App() {
                                   <span className="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2.5 py-0.5 rounded-full">{recipe.category}</span>
                                 </div>
                                 <div className="flex gap-2 text-[10px]">
-                                  <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-medium">⚙️ {recipe.appliance}</span>
-                                  <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-medium">☀️ {recipe.season}</span>
+                                  <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-medium flex items-center gap-1">
+                                    <Settings size={10} className="text-black stroke-[2.2]" /> {recipe.appliance}
+                                  </span>
+                                  <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-medium flex items-center gap-1">
+                                    <Sun size={10} className="text-black stroke-[2.2]" /> {recipe.season}
+                                  </span>
                                 </div>
                                 <p className="text-xs text-slate-600 line-clamp-2">
                                   <strong className="text-slate-700">Ingrédients :</strong> {recipe.ingredients.join(', ')}
@@ -600,7 +604,7 @@ export default function App() {
                       onChange={(e) => setWeeklyCakes({...weeklyCakes, choix1: e.target.value})}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
                     >
-                      <option value="">-- Choisir le gâteau --</option>
+                      <option value="">-- Choisir --</option>
                       {cakes.map(c => <option key={c.id} value={c.title}>{c.title}</option>)}
                     </select>
                   </div>
@@ -612,7 +616,7 @@ export default function App() {
                       onChange={(e) => setWeeklyCakes({...weeklyCakes, choix2: e.target.value})}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
                     >
-                      <option value="">-- Choisir le gâteau --</option>
+                      <option value="">-- Choisir --</option>
                       {cakes.map(c => <option key={c.id} value={c.title}>{c.title}</option>)}
                     </select>
                   </div>
@@ -912,8 +916,12 @@ export default function App() {
             <div className="p-6 overflow-y-auto flex-1 space-y-6">
               <div className="flex flex-wrap gap-2">
                 <span className="bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-lg text-xs font-bold">{selectedRecipe.category}</span>
-                <span className="bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-semibold">⚙️ {selectedRecipe.appliance}</span>
-                <span className="bg-amber-50 text-amber-700 px-3 py-1.5 rounded-lg text-xs font-semibold">☀️ {selectedRecipe.season}</span>
+                <span className="bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5">
+                  <Settings size={14} className="text-black stroke-[2.2]" /> {selectedRecipe.appliance}
+                </span>
+                <span className="bg-amber-50 text-amber-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5">
+                  <Sun size={14} className="text-black stroke-[2.2]" /> {selectedRecipe.season}
+                </span>
               </div>
               
               <div>
