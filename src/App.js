@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Cake, Plus, Archive, ShoppingBag, X, Trash2, Sparkles, ExternalLink, Camera, Check } from 'lucide-react';
+import { Calendar, Cake, Plus, Archive, ShoppingBag, X, Trash2, Sparkles, ExternalLink, Camera, Check, Utensils, Menu } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('menus');
@@ -272,13 +272,15 @@ export default function App() {
       {/* HEADER */}
       <header className="bg-indigo-600 text-white px-6 py-4 shadow-md flex justify-between items-center sticky top-0 z-25">
         <div className="flex items-center gap-3">
-          <div className="bg-white/20 p-2 rounded-xl text-xl">🍲</div>
+          <div className="bg-white/20 p-2 rounded-xl text-xl">
+            <Utensils size={22} />
+          </div>
           <div>
-            <h1 className="text-lg font-bold">Mon App Menus</h1>
+            <h1 className="text-lg font-bold">Mon Menu Organisé</h1>
           </div>
         </div>
         <div className="bg-amber-300 text-slate-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1.5">
-          <span>☀️</span> {currentSeason}
+          <span>☀️</span> Saison actuelle : {currentSeason}
         </div>
       </header>
 
@@ -295,7 +297,7 @@ export default function App() {
                   menuSubTab === 'semaine' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <Calendar size={18} /> Semaine type & Menus
+                <Calendar size={18} /> Choix de la semaine
               </button>
               <button
                 onClick={() => setMenuSubTab('catalogue')}
@@ -303,7 +305,7 @@ export default function App() {
                   menuSubTab === 'catalogue' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                Catalogue Repas ({dishes.length})
+                <Menu size={18} /> Catalogue Repas ({dishes.length})
               </button>
             </div>
 
