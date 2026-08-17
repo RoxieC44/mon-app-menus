@@ -10,7 +10,7 @@ export default function App() {
   const [gateauSubTab, setGateauSubTab] = useState('semaine'); // 'semaine' | 'catalogue'
   const [addType, setAddType] = useState('plat'); // 'plat' | 'gateau'
 
-  // Saison actuelle : Été (avec 'Saison actuelle : ' devant)
+  // Saison automatique selon le mois actuel
   const [currentSeason, setCurrentSeason] = useState('Été');
   useEffect(() => {
     const month = new Date().getMonth() + 1;
@@ -160,12 +160,12 @@ export default function App() {
   const [formIngredients, setFormIngredients] = useState('');
   const [formInstructions, setFormInstructions] = useState('');
 
-  // Fonction de filtrage intelligent pour les menus
+  // Fonction de filtrage intelligent pour les menus (Saison actuelle ou 'Toutes')
   const getAvailableRecipes = () => {
     return dishes.filter(d => d.season === currentSeason || d.season === 'Toutes');
   };
 
-  // Fonction de génération automatique de menus
+  // Fonction de génération automatique de menus respectant les contraintes par jour
   const handleGenerateBalancedMenu = () => {
     const seasonalDishes = getAvailableRecipes();
     if (seasonalDishes.length === 0) {
@@ -184,15 +184,15 @@ export default function App() {
     setWeeklyMenu({
       Lundi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Blé') },
       Mardi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Semoule') },
-      Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et patate sautée' },
+      Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et patate sautée' }, // Fixé (ne bouge pas)
       Jeudi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Riz') },
       Vendredi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Pommes de terre') },
-      Samedi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Plaisir') },
+      Samedi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Plaisir') }, // Repas plaisir
       Dimanche: { midi: 'Restes de la veille', soir: getRandomDishByCat('Pâtes') },
     });
   };
 
-  // Génération automatique des goûters
+  // Fonction de génération automatique des goûters de la semaine basée sur la saison (sans alerte pop-up)
   const handleGenerateBalancedCakes = () => {
     const seasonalCakes = cakes.filter(c => c.season === currentSeason || c.season === 'Toutes');
     const pool = seasonalCakes.length > 0 ? seasonalCakes : cakes;
@@ -266,13 +266,24 @@ export default function App() {
     });
   };
 
+  // Correspondance des badges par jour
+  const dayBadges = {
+    Lundi: 'Blé',
+    Mardi: 'Semoule',
+    Mercredi: 'Pommes de terre',
+    Jeudi: 'Riz',
+    Vendredi: 'Pomme de terre',
+    Samedi: 'Plaisir',
+    Dimanche: 'Pâte'
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans pb-24">
       
       {/* HEADER */}
       <header className="bg-indigo-600 text-white px-6 py-4 shadow-md flex justify-between items-center sticky top-0 z-25">
         <div className="flex items-center gap-3">
-          <div className="bg-white/20 p-2 rounded-xl text-xl">
+          <div className="bg-white/20 p-2 rounded-xl text-xl flex items-center justify-center">
             <Utensils size={22} />
           </div>
           <div>
@@ -305,11 +316,10 @@ export default function App() {
                   menuSubTab === 'catalogue' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <div className="flex items-center gap-1">
-                  <GripVertical size={16} className="text-slate-400" />
-                  <Menu size={18} />
+                <div className="flex items-center gap-1 text-slate-500 mr-0.5">
+                  <GripVertical size={16} />
                 </div>
-                Catalogue Repas ({dishes.length})
+                <Menu size={18} /> Catalogue Repas ({dishes.length})
               </button>
             </div>
 
@@ -332,50 +342,63 @@ export default function App() {
                   </button>
                 </div>
 
-                {/* Liste des jours avec menus déroulants partout */}
-                {Object.entries(weeklyMenu).map(([day, meals]) => (
-                  <div key={day} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3 relative">
-                    <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                      <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                        <Calendar size={18} className="text-indigo-600" /> {day}
-                        {day === 'Samedi' && <span className="text-[10px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-semibold">🎉 Plaisir</span>}
-                      </h3>
-                      {day === 'Lundi' && (
-                        <span className="bg-blue-500 text-white text-[11px] font-bold px-3 py-0.5 rounded-full shadow-sm">
-                          blé
-                        </span>
-                      )}
-                    </div>
+                {/* Liste des jours avec badge et menus déroulants */}
+                {Object.entries(weeklyMenu).map(([day, meals]) => {
+                  const isWednesday = day === 'Mercredi';
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Midi : Déroulant avec 'Restes de la veille' en priorité */}
-                      <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Midi</span>
-                        <select 
-                          value={meals.midi}
-                          onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, midi: e.target.value }})}
-                          className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        >
-                          <option value="Restes de la veille">Restes de la veille</option>
-                          {getAvailableRecipes().map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
-                        </select>
+                  return (
+                    <div key={day} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3 relative">
+                      <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                        <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                          <Calendar size={18} className="text-indigo-600" /> {day}
+                          {day === 'Samedi' && <span className="text-[10px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-semibold">🎉 Plaisir</span>}
+                        </h3>
+                        {dayBadges[day] && (
+                          <span className="bg-slate-100 text-slate-600 text-xs font-semibold px-2.5 py-1 rounded-md">
+                            {dayBadges[day]}
+                          </span>
+                        )}
                       </div>
 
-                      {/* Soir : Déroulant de recettes filtrées */}
-                      <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Soir</span>
-                        <select 
-                          value={meals.soir}
-                          onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, soir: e.target.value }})}
-                          className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        >
-                          <option value={meals.soir}>{meals.soir}</option>
-                          {getAvailableRecipes().map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
-                        </select>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Midi */}
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Midi</span>
+                          <select 
+                            value={meals.midi}
+                            onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, midi: e.target.value }})}
+                            className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          >
+                            <option value="Restes de la veille">Restes de la veille</option>
+                            {getAvailableRecipes().map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
+                          </select>
+                        </div>
+
+                        {/* Soir (Mercredi grisé et désactivé) */}
+                        <div className={`p-3 rounded-xl border ${isWednesday ? 'bg-slate-100 border-slate-200' : 'bg-slate-50 border-slate-100'}`}>
+                          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Soir</span>
+                          {isWednesday ? (
+                            <input 
+                              type="text" 
+                              disabled 
+                              value={meals.soir} 
+                              className="w-full bg-slate-200 text-slate-500 border border-slate-300 rounded-lg p-2 text-sm cursor-not-allowed font-medium"
+                            />
+                          ) : (
+                            <select 
+                              value={meals.soir}
+                              onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, soir: e.target.value }})}
+                              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            >
+                              <option value={meals.soir}>{meals.soir}</option>
+                              {getAvailableRecipes().map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
+                            </select>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 
