@@ -603,7 +603,7 @@ export default function App() {
                   gateauSubTab === 'catalogue' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                Catalogue Gâteaux ({cakes.length})
+                <List size={18} /> Catalogue Gâteaux ({cakes.length})
               </button>
             </div>
 
@@ -611,7 +611,9 @@ export default function App() {
               <div className="space-y-4">
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
                   <div>
-                    <h2 className="text-lg font-bold text-slate-800">Gâteaux & Goûters de la semaine</h2>
+                    <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                      <Sparkles className="text-indigo-600" size={20} /> Gâteaux & Goûters de la semaine
+                    </h2>
                     <p className="text-xs text-slate-500">Sélectionnez ou générez vos pâtisseries de la semaine.</p>
                   </div>
                   <button 
@@ -631,7 +633,7 @@ export default function App() {
                         onChange={(e) => setWeeklyCakes({...weeklyCakes, choix1: e.target.value})}
                         className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
                       >
-                        <option value="">-- Choisir --</option>
+                        <option value="">-- Choisir une recette de gâteau --</option>
                         {cakes.map(c => <option key={c.id} value={c.title}>{c.title}</option>)}
                       </select>
                     </div>
@@ -661,7 +663,7 @@ export default function App() {
                         onChange={(e) => setWeeklyCakes({...weeklyCakes, choix2: e.target.value})}
                         className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
                       >
-                        <option value="">-- Choisir --</option>
+                        <option value="">-- Choisir une recette de gâteau --</option>
                         {cakes.map(c => <option key={c.id} value={c.title}>{c.title}</option>)}
                       </select>
                     </div>
