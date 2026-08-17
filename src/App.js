@@ -192,14 +192,53 @@ export default function App() {
 
 function NavButton({ active, onClick, icon, label }) {
   return (
-    <button
-      onClick={onClick}
-      className={`flex flex-col items-center gap-1 p-2 min-w-[70px] flex-shrink-0 md:w-auto md:flex-row md:px-5 md:py-3 md:rounded-xl md:shadow-sm transition-all
-        ${active ? 'text-indigo-600 md:bg-indigo-600 md:text-white scale-105 md:scale-100 font-semibold' : 'text-slate-400 hover:text-indigo-500 md:bg-white'}`}
-    >
-      <div className="w-5 h-5 flex items-center justify-center">{icon}</div>
-      <span className="text-[10px] md:text-sm font-medium">{label}</span>
-    </button>
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-lg z-40 px-4 py-2">
+      <div className="max-w-md mx-auto flex justify-between items-center">
+        <button
+          onClick={() => onClick('menus')}
+          className={`flex flex-col items-center gap-1 p-2 min-w-[70px] flex-shrink-0 md:w-auto md:flex-row md:px-5 md:py-3 md:rounded-xl md:shadow-sm transition-all
+            ${active === 'menus' ? 'text-indigo-600 md:bg-indigo-600 md:text-white scale-105 md:scale-100 font-semibold' : 'text-slate-400 hover:text-indigo-500 md:bg-white'}`}
+        >
+          <div className="w-5 h-5 flex items-center justify-center"><Calendar size={20} /></div>
+          <span className="text-[10px] md:text-sm font-medium">Menus</span>
+        </button>
+
+        <button
+          onClick={() => onClick('gateaux')}
+          className={`flex flex-col items-center gap-1 p-2 min-w-[70px] flex-shrink-0 md:w-auto md:flex-row md:px-5 md:py-3 md:rounded-xl md:shadow-sm transition-all
+            ${active === 'gateaux' ? 'text-indigo-600 md:bg-indigo-600 md:text-white scale-105 md:scale-100 font-semibold' : 'text-slate-400 hover:text-indigo-500 md:bg-white'}`}
+        >
+          <div className="w-5 h-5 flex items-center justify-center"><Cake size={20} /></div>
+          <span className="text-[10px] md:text-sm font-medium">Gâteaux</span>
+        </button>
+
+        {/* GROS BOUTON "+" DU MILIEU EN RELIEF */}
+        <button 
+          onClick={() => onClick('ajouter')} 
+          className="bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-lg transform -translate-y-5 transition-transform hover:scale-105 border-4 border-white flex items-center justify-center flex-shrink-0"
+        >
+          <Plus size={26} />
+        </button>
+
+        <button
+          onClick={() => onClick('placard')}
+          className={`flex flex-col items-center gap-1 p-2 min-w-[70px] flex-shrink-0 md:w-auto md:flex-row md:px-5 md:py-3 md:rounded-xl md:shadow-sm transition-all
+            ${active === 'placard' ? 'text-indigo-600 md:bg-indigo-600 md:text-white scale-105 md:scale-100 font-semibold' : 'text-slate-400 hover:text-indigo-500 md:bg-white'}`}
+        >
+          <div className="w-5 h-5 flex items-center justify-center"><Archive size={20} /></div>
+          <span className="text-[10px] md:text-sm font-medium">Placard</span>
+        </button>
+
+        <button
+          onClick={() => onClick('courses')}
+          className={`flex flex-col items-center gap-1 p-2 min-w-[70px] flex-shrink-0 md:w-auto md:flex-row md:px-5 md:py-3 md:rounded-xl md:shadow-sm transition-all
+            ${active === 'courses' ? 'text-indigo-600 md:bg-indigo-600 md:text-white scale-105 md:scale-100 font-semibold' : 'text-slate-400 hover:text-indigo-500 md:bg-white'}`}
+        >
+          <div className="w-5 h-5 flex items-center justify-center"><ShoppingBag size={20} /></div>
+          <span className="text-[10px] md:text-sm font-medium">Courses</span>
+        </button>
+      </div>
+    </div>
   );
 }
 
