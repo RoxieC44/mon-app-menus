@@ -563,19 +563,22 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, currentSeason, ti
         </div>
       </div>
 
-     {recipe.images && recipe.images.length > 0 ? (
-                <div className="grid grid-cols-2 gap-2 mb-2">
-                  {recipe.images.map((img, index) => (
-                    <div key={index} className="h-28 w-full overflow-hidden rounded-lg border border-slate-200">
-                      <img src={img} alt={`${recipe.name} ${index + 1}`} className="w-full h-full object-cover" />
-                    </div>
-                  ))}
-                </div>
-              ) : recipe.image ? (
-                <div className="mb-2 h-32 w-full overflow-hidden rounded-lg border border-slate-200">
-                  <img src={recipe.image} alt={recipe.name} className="w-full h-full object-cover" />
-                </div>
-              ) : null}
+      <div className="grid gap-3 sm:grid-cols-2">
+        {filteredRecipes.map(recipe => (
+          <div key={recipe.id} className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div>
+              <div className="flex justify-between items-start gap-2 mb-2">
+                <h3 className="font-bold text-slate-800 text-sm leading-tight">{recipe.name}</h3>
+                <span className="text-xs bg-indigo-50 text-indigo-700 font-semibold px-2 py-0.5 rounded flex-shrink-0 border border-indigo-100">
+                  {recipe.carb}
+                </span>
+              </div>
+              
+              {recipe.image && (
+                <div className="mb-2 h-32 w-full overflow-hidden rounded-lg border border-slate-200">
+                  <img src={recipe.image} alt={recipe.name} className="w-full h-full object-cover" />
+                </div>
+              )}
 
               <div className="flex flex-wrap gap-1.5 mb-3">
                 <span className="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded flex items-center gap-1 font-medium">
