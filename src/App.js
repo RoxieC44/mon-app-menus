@@ -20,11 +20,11 @@ export default function App() {
     else setCurrentSeason('Hiver');
   }, []);
 
-  // Planning de la semaine initialement vide
+  // Planning de la semaine initialement vide (sauf mercredi soir fixe)
   const [weeklyMenu, setWeeklyMenu] = useState({
     Lundi: { midi: '', soir: '' },
     Mardi: { midi: '', soir: '' },
-    Mercredi: { midi: '', soir: 'Cordon bleu et Pomme de terre' }, // Fixé et inchangé
+    Mercredi: { midi: '', soir: 'Cordon bleu et Pomme de terre' },
     Jeudi: { midi: '', soir: '' },
     Vendredi: { midi: '', soir: '' },
     Samedi: { midi: '', soir: '' },
@@ -160,39 +160,42 @@ export default function App() {
   const [formIngredients, setFormIngredients] = useState('');
   const [formInstructions, setFormInstructions] = useState('');
 
-  // Fonction de filtrage intelligent pour les menus (Saison actuelle ou 'Toutes')
+  // Fonction de filtrage intelligent pour les menus
   const getAvailableRecipes = () => {
     return dishes.filter(d => d.season === currentSeason || d.season === 'Toutes');
   };
 
-  // Fonction de génération automatique de menus respectant les contraintes par jour
-  const handleGenerateBalancedMenu = () => {
-    const seasonalDishes = getAvailableRecipes();
-    if (seasonalDishes.length === 0) {
-      alert(`Aucune recette spécifique trouvée pour la saison ${currentSeason}.`);
-      return;
+  // Obtenir les recettes filtrées par catégorie exacte pour un jour donné
+  const getRecipesByCategory = (targetCategory) => {
+    const seasonal = getAvailableRecipes();
+    // Correspondance exacte ou tolérante (ex: "Pommes de terre" / "Pomme de terre")
+    let match = seasonal.filter(d => d.category.toLowerCase().includes(targetCategory.toLowerCase()));
+    if (match.length === 0) {
+      match = dishes.filter(d => d.category.toLowerCase().includes(targetCategory.toLowerCase()));
     }
+    return match;
+  };
 
-    const getRandomDishByCat = (cat) => {
-      const match = seasonalDishes.filter(d => d.category === cat);
-      if (match.length > 0) return match[Math.floor(Math.random() * match.length)].title;
-      const fallback = dishes.filter(d => d.category === cat);
-      if (fallback.length > 0) return fallback[Math.floor(Math.random() * fallback.length)].title;
-      return seasonalDishes[Math.floor(Math.random() * seasonalDishes.length)].title;
+  // Fonction de génération automatique respectant strictement les catégories par jour
+  const handleGenerateBalancedMenu = () => {
+    const getRand = (cat) => {
+      const list = getRecipesByCategory(cat);
+      if (list.length > 0) return list[Math.floor(Math.random() * list.length)].title;
+      return '';
     };
 
     setWeeklyMenu({
-      Lundi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Blé') },
-      Mardi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Semoule') },
-      Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et Pomme de terre' }, // Fixé (ne bouge pas)
-      Jeudi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Riz') },
-      Vendredi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Pommes de terre') },
-      Samedi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Plaisir') },
-      Dimanche: { midi: 'Restes de la veille', soir: getRandomDishByCat('Pâtes') },
+      Lundi: { midi: 'Restes de la veille', soir: getRand('Blé') },
+      Mardi: { midi: 'Restes de la veille', soir: getRand('Semoule') },
+      Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et Pomme de terre' }, // Fixé
+      Jeudi: { midi: 'Restes de la veille', soir: getRand('Riz') },
+      Vendredi: { midi: 'Restes de la veille', soir: getRand('Pommes de terre') },
+      Samedi: { midi: 'Restes de la veille', soir: getRand('Plaisir') },
+      Dimanche: { midi: 'Restes de la veille', soir: '' },
     });
   };
 
-  // Fonction de génération automatique des goûters de la semaine basée sur la saison
+  // Génération automatique des goûters de la semaine
   const handleGenerateBalancedCakes = () => {
     const seasonalCakes = cakes.filter(c => c.season === currentSeason || c.season === 'Toutes');
     const pool = seasonalCakes.length > 0 ? seasonalCakes : cakes;
@@ -220,7 +223,7 @@ export default function App() {
   };
 
   // Suppression recette
-  const handleDeleteRecipe = (id, type) => {
+  const handleDeleteRecipe =(id, type) => {
     if (type === 'plat') setDishes(dishes.filter(d => d.id !== id));
     else setCakes(cakes.filter(c => c.id !== id));
   };
@@ -266,7 +269,7 @@ export default function App() {
     });
   };
 
-  // Correspondance des badges par jour (Mercredi n'a plus de badge affiché)
+  // Correspondance des badges par jour (Mercredi et Dimanche n'ont pas de badge)
   const dayBadges = {
     Lundi: 'Blé',
     Mardi: 'Semoule',
@@ -274,7 +277,19 @@ export default function App() {
     Jeudi: 'Riz',
     Vendredi: 'Pomme de terre',
     Samedi: 'Plaisir',
-    Dimanche: 'Pâte'
+    Dimanche: null
+  };
+
+  // Définition stricte des catégories autorisées par jour pour les menus du soir
+  const getDayCategoryFilter = (day) => {
+    switch (day) {
+      case 'Lundi': return 'Blé';
+      case 'Mardi': return 'Semoule';
+      case 'Jeudi': return 'Riz';
+      case 'Vendredi': return 'Pommes de terre';
+      case 'Samedi': return 'Plaisir';
+      default: return null;
+    }
   };
 
   return (
@@ -331,7 +346,7 @@ export default function App() {
                       <Sparkles className="text-indigo-600" size={20} /> Générateur Intelligent
                     </h2>
                     <p className="text-xs text-slate-500">
-                      Suggestions automatiques basées sur la saison actuelle ({currentSeason}).
+                      Remplit automatiquement chaque jour selon les contraintes strictes ({currentSeason}).
                     </p>
                   </div>
                   <button 
@@ -342,10 +357,14 @@ export default function App() {
                   </button>
                 </div>
 
-                {/* Liste des jours avec badge et menus déroulants */}
+                {/* Liste des jours avec menus déroulants filtrés */}
                 {Object.entries(weeklyMenu).map(([day, meals]) => {
                   const isWednesday = day === 'Mercredi';
                   const badgeText = dayBadges[day];
+                  const strictCat = getDayCategoryFilter(day);
+
+                  // Liste des recettes disponibles pour le soir de ce jour
+                  const eveningRecipes = strictCat ? getRecipesByCategory(strictCat) : getAvailableRecipes();
 
                   return (
                     <div key={day} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3 relative">
@@ -375,9 +394,11 @@ export default function App() {
                           </select>
                         </div>
 
-                        {/* Soir (Mercredi grisé et désactivé) */}
+                        {/* Soir */}
                         <div className={`p-3 rounded-xl border ${isWednesday ? 'bg-slate-100 border-slate-200' : 'bg-slate-50 border-slate-100'}`}>
-                          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Soir</span>
+                          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
+                            Soir {strictCat ? `(${strictCat})` : ''}
+                          </span>
                           {isWednesday ? (
                             <input 
                               type="text" 
@@ -392,7 +413,7 @@ export default function App() {
                               className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             >
                               <option value="">-- Choisir ou laisser vide --</option>
-                              {getAvailableRecipes().map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
+                              {eveningRecipes.map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
                             </select>
                           )}
                         </div>
