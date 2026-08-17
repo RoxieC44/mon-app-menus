@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Cake, Plus, Archive, ShoppingBag, X, Trash2, Sparkles, ExternalLink, Camera, Check, Utensils, Menu } from 'lucide-react';
+import { Calendar, Cake, Plus, Archive, ShoppingBag, X, Trash2, Sparkles, Utensils, Menu } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('menus');
+  const [activeTab, setActiveTab] = useState('courses');
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   
   // Sous-onglets
@@ -20,10 +20,10 @@ export default function App() {
     else setCurrentSeason('Hiver');
   }, []);
 
-  // Planning de la semaine initialement vide (sauf mercredi soir fixe)
+  // Planning de la semaine initialement avec des menus pour tester la liste de courses
   const [weeklyMenu, setWeeklyMenu] = useState({
-    Lundi: { midi: '', soir: '' },
-    Mardi: { midi: '', soir: '' },
+    Lundi: { midi: '', soir: 'Poulet coco et riz' },
+    Mardi: { midi: '', soir: 'Bléotto aux courgettes' },
     Mercredi: { midi: '', soir: 'Cordon bleu et Pomme de terre' },
     Jeudi: { midi: '', soir: '' },
     Vendredi: { midi: '', soir: '' },
@@ -31,9 +31,8 @@ export default function App() {
     Dimanche: { midi: '', soir: '' },
   });
 
-  // Choix de la semaine
   const [weeklyCakes, setWeeklyCakes] = useState({
-    choix1: '',
+    choix1: 'Gâteau au yaourt moelleux',
     choix2: ''
   });
 
@@ -45,8 +44,7 @@ export default function App() {
       category: 'Pommes de terre',
       appliance: 'Poêle',
       season: 'Toutes',
-      link: '',
-      ingredients: ['Cordon bleu', 'Pommes de terre', 'Huile d\'olive', 'Sel', 'Poivre'],
+      ingredients: ['Cordon bleu', '800g De Pommes De Terre', 'Huile d\'olive', 'Sel', 'Poivre'],
       instructions: '1. Éplucher et couper les pommes de terre.\n2. Faire cuire à la poêle avec un filet d\'huile.\n3. Faire dorer les cordons bleus en même temps.'
     },
     {
@@ -55,8 +53,7 @@ export default function App() {
       category: 'Riz',
       appliance: 'Cookeo',
       season: 'Toutes',
-      link: '',
-      ingredients: ['4 blancs de poulet', '250g de riz', '400ml de lait de coco', 'Curry'],
+      ingredients: ['4 blancs de poulet', '400ml De Lait De Coco', 'Curry', '400g De Pâtes'],
       instructions: '1. Dorer le poulet.\n2. Ajouter le riz, le lait de coco et le curry.\n3. Cuisson sous pression 10 min.'
     },
     {
@@ -65,49 +62,8 @@ export default function App() {
       category: 'Blé',
       appliance: 'Thermomix',
       season: 'Été',
-      link: '',
-      ingredients: ['200g de blé Ebly', '2 courgettes', '1 bouillon cube', 'Crème fraîche'],
+      ingredients: ['3 Courgettes', '4 Tomates', 'Ail', '1 Pot De Pesto', '250g De Tomates Cerises'],
       instructions: '1. Couper les courgettes.\n2. Cuire le blé avec le bouillon et les courgettes.'
-    },
-    {
-      id: 4,
-      title: 'Poulet coco et semoule',
-      category: 'Semoule',
-      appliance: 'Casserole',
-      season: 'Toutes',
-      link: '',
-      ingredients: ['Semoule', 'Poulet', 'Légumes'],
-      instructions: '1. Préparer la semoule.\n2. Cuire le poulet.'
-    },
-    {
-      id: 5,
-      title: 'Poêlée de pommes de terre et lardons',
-      category: 'Pommes de terre',
-      appliance: 'Poêle',
-      season: 'Toutes',
-      link: '',
-      ingredients: ['Pommes de terre', 'Lardons', 'Oignons'],
-      instructions: '1. Faire revenir les lardons et oignons.\n2. Ajouter les pommes de terre cuites.'
-    },
-    {
-      id: 6,
-      title: 'Pizza maison rapide',
-      category: 'Plaisir',
-      appliance: 'Four',
-      season: 'Toutes',
-      link: '',
-      ingredients: ['Pâte à pizza', 'Coulis de tomate', 'Jambon', 'Fromage'],
-      instructions: '1. Étaler la pâte.\n2. Garnir et cuire 15 min à 210°C.'
-    },
-    {
-      id: 7,
-      title: 'Gratin de pâtes',
-      category: 'Pâtes',
-      appliance: 'Four',
-      season: 'Toutes',
-      link: '',
-      ingredients: ['Pâtes', 'Jambon', 'Béchamel', 'Fromage râpé'],
-      instructions: '1. Cuire les pâtes.\n2. Mélanger avec la béchamel et le jambon.\n3. Gratiner au four.'
     }
   ]);
 
@@ -119,30 +75,16 @@ export default function App() {
       category: 'Plaisir',
       appliance: 'Four',
       season: 'Toutes',
-      link: '',
-      ingredients: ['1 yaourt nature', '3 pots de farine', '2 pots de sucre', '1/2 pot d\'huile', '3 œufs', '1 levure'],
+      ingredients: ['1 yaourt nature', 'Herbes De Provence', 'Huile d\'olive'],
       instructions: '1. Mélanger tous les ingrédients.\n2. Cuire 35 min à 180°C.'
-    },
-    {
-      id: 102,
-      title: 'Cookies aux pépites de chocolat',
-      category: 'Plaisir',
-      appliance: 'Four',
-      season: 'Toutes',
-      link: '',
-      ingredients: ['150g de beurre', '100g de sucre', '200g de farine', 'Pépites de chocolat'],
-      instructions: '1. Mélanger le beurre et le sucre.\n2. Ajouter la farine et le chocolat.\n3. Former des boules et cuire 10 min à 180°C.'
     }
   ]);
 
   // Placard & Frigo
   const [pantry, setPantry] = useState([
-    { id: 1, name: 'Riz', status: 'Entamé' },
-    { id: 2, name: 'Pâtes', status: 'Plein' },
-    { id: 3, name: 'Semoule', status: 'Presque vide' },
-    { id: 4, name: 'Blé', status: 'Plein' },
-    { id: 5, name: 'Pommes de terre', status: 'Entamé' },
-    { id: 6, name: 'Huile d\'olive', status: 'Plein' }
+    { id: 1, name: 'Huile d\'olive', status: 'Plein' },
+    { id: 2, name: 'Ail', status: 'Plein' },
+    { id: 3, name: '400g De Pâtes', status: 'Entamé' }
   ]);
   const [newItemName, setNewItemName] = useState('');
   const [newItemStatus, setNewItemStatus] = useState('Plein');
@@ -160,8 +102,55 @@ export default function App() {
   const [formIngredients, setFormIngredients] = useState('');
   const [formInstructions, setFormInstructions] = useState('');
 
-  // Vérifier si des menus ou gâteaux sont planifiés
-  const hasPlannedItems = Object.values(weeklyMenu).some(meals => meals.midi !== '' || meals.soir !== '') || weeklyCakes.choix1 !== '' || weeklyCakes.choix2 !== '';
+  // Génération dynamique de la liste de courses basée sur les menus/gâteaux et le placard
+  const getSmartShoppingList = () => {
+    const itemsMap = new Map();
+
+    // Récupérer tous les ingrédients nécessaires des plats planifiés
+    Object.values(weeklyMenu).forEach(meals => {
+      [meals.midi, meals.soir].forEach(mealTitle => {
+        if (!mealTitle || mealTitle === 'Restes de la veille') return;
+        const foundDish = dishes.find(d => d.title === mealTitle);
+        if (foundDish) {
+          foundDish.ingredients.forEach(ing => {
+            const key = ing.trim().toLowerCase();
+            itemsMap.set(key, { name: ing.trim() });
+          });
+        }
+      });
+    });
+
+    // Récupérer les ingrédients des gâteaux planifiés
+    [weeklyCakes.choix1, weeklyCakes.choix2].forEach(cakeTitle => {
+      if (!cakeTitle) return;
+      const foundCake = cakes.find(c => c.title === cakeTitle);
+      if (foundCake) {
+        foundCake.ingredients.forEach(ing => {
+          const key = ing.trim().toLowerCase();
+          itemsMap.set(key, { name: ing.trim() });
+        });
+      }
+    });
+
+    // Convertir en tableau et associer le statut du placard si présent
+    const list = [];
+    itemsMap.forEach((val, key) => {
+      // Chercher correspondance dans le placard
+      const pantryMatch = pantry.find(p => p.name.trim().toLowerCase() === key);
+      let status = 'A acheter';
+      if (pantryMatch) {
+        if (pantryMatch.status === 'Plein') status = 'En stock (Plein)';
+        else if (pantryMatch.status === 'Entamé') status = 'En stock (Entamé - Attention quantité)';
+        else if (pantryMatch.status === 'Presque vide') status = 'A acheter';
+      }
+      list.push({ id: key, name: val.name, status });
+    });
+
+    return list;
+  };
+
+  const shoppingList = getSmartShoppingList();
+  const hasPlannedItems = shoppingList.length > 0;
 
   const getAvailableRecipes = () => {
     return dishes.filter(d => d.season === currentSeason || d.season === 'Toutes');
@@ -234,7 +223,6 @@ export default function App() {
       category: formCategory,
       appliance: formAppliance,
       season: formSeason,
-      link: formLink,
       ingredients: formIngredients.split('\n').filter(i => i.trim() !== ''),
       instructions: formInstructions
     };
@@ -780,7 +768,7 @@ export default function App() {
           </div>
         )}
 
-        {/* ================= ONGLET COURSES (STYLE IDENTIQUE À VOTRE CAPTURE) ================= */}
+        {/* ================= ONGLET COURSES (STYLE IDENTIQUE À VOTRE PHOTO) ================= */}
         {activeTab === 'courses' && (
           <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm max-w-2xl mx-auto space-y-6">
             <div className="flex items-center gap-3">
@@ -808,23 +796,41 @@ export default function App() {
                 </button>
               </div>
             ) : (
-              <div className="space-y-4">
-                <div className="space-y-2 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Articles à acheter :</h3>
-                  {/* Affichage dynamique si des éléments sont planifiés */}
-                  <ul className="space-y-2 text-sm text-slate-700">
-                    <li className="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
-                      <span className="font-medium">🛒 Ingrédients issus de vos menus et gâteaux planifiés</span>
-                    </li>
-                  </ul>
-                </div>
+              <div className="border border-slate-200 rounded-2xl overflow-hidden divide-y divide-slate-100">
+                {shoppingList.map((item) => {
+                  const isAcheter = item.status === 'A acheter';
+                  const isPlein = item.status === 'En stock (Plein)';
+                  const isEntame = item.status.includes('Entamé');
 
-                <button
-                  onClick={() => {}}
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl transition-colors shadow-sm text-sm flex items-center justify-center gap-2"
-                >
-                  <Check size={18} /> Copier ou exporter la liste de courses
-                </button>
+                  return (
+                    <div key={item.id} className="flex items-center justify-between p-4 hover:bg-slate-50/50 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <input 
+                          type="checkbox" 
+                          className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" 
+                        />
+                        <span className="font-medium text-slate-800 text-sm">{item.name}</span>
+                      </div>
+                      <div>
+                        {isAcheter && (
+                          <span className="bg-blue-50 text-blue-600 border border-blue-200 text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm">
+                            A acheter
+                          </span>
+                        )}
+                        {isPlein && (
+                          <span className="bg-emerald-50 text-emerald-600 border border-emerald-200 text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm">
+                            En stock (Plein)
+                          </span>
+                        )}
+                        {isEntame && (
+                          <span className="bg-amber-50 text-amber-700 border border-amber-200 text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm">
+                            En stock (Entamé - Attention quantité)
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
