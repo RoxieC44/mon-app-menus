@@ -89,6 +89,9 @@ export default function App() {
   const [newItemName, setNewItemName] = useState('');
   const [newItemStatus, setNewItemStatus] = useState('Plein');
 
+  // État pour stocker les éléments cochés de la liste de courses
+  const [checkedItems, setCheckedItems] = useState({});
+
   // Filtres catalogue
   const [seasonFilter, setSeasonFilter] = useState('Toutes les saisons');
   const [applianceFilter, setApplianceFilter] = useState('Tous les appareils');
@@ -106,7 +109,6 @@ export default function App() {
   const getSmartShoppingList = () => {
     const itemsMap = new Map();
 
-    // Récupérer tous les ingrédients nécessaires des plats planifiés
     Object.values(weeklyMenu).forEach(meals => {
       [meals.midi, meals.soir].forEach(mealTitle => {
         if (!mealTitle || mealTitle === 'Restes de la veille') return;
@@ -120,7 +122,6 @@ export default function App() {
       });
     });
 
-    // Récupérer les ingrédients des gâteaux planifiés
     [weeklyCakes.choix1, weeklyCakes.choix2].forEach(cakeTitle => {
       if (!cakeTitle) return;
       const foundCake = cakes.find(c => c.title === cakeTitle);
@@ -132,10 +133,8 @@ export default function App() {
       }
     });
 
-    // Convertir en tableau et associer le statut du placard si présent
     const list = [];
     itemsMap.forEach((val, key) => {
-      // Chercher correspondance dans le placard
       const pantryMatch = pantry.find(p => p.name.trim().toLowerCase() === key);
       let status = 'A acheter';
       if (pantryMatch) {
@@ -151,6 +150,13 @@ export default function App() {
 
   const shoppingList = getSmartShoppingList();
   const hasPlannedItems = shoppingList.length > 0;
+
+  const toggleCheckItem = (id) => {
+    setCheckedItems(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
 
   const getAvailableRecipes = () => {
     return dishes.filter(d => d.season === currentSeason || d.season === 'Toutes');
@@ -768,7 +774,7 @@ export default function App() {
           </div>
         )}
 
-        {/* ================= ONGLET COURSES (STYLE IDENTIQUE À VOTRE PHOTO) ================= */}
+        {/* ================= ONGLET COURSES ================= */}
         {activeTab === 'courses' && (
           <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm max-w-2xl mx-auto space-y-6">
             <div className="flex items-center gap-3">
@@ -798,32 +804,50 @@ export default function App() {
             ) : (
               <div className="border border-slate-200 rounded-2xl overflow-hidden divide-y divide-slate-100">
                 {shoppingList.map((item) => {
+                  const isChecked = !!checkedItems[item.id];
                   const isAcheter = item.status === 'A acheter';
                   const isPlein = item.status === 'En stock (Plein)';
                   const isEntame = item.status.includes('Entamé');
 
                   return (
-                    <div key={item.id} className="flex items-center justify-between p-4 hover:bg-slate-50/50 transition-colors">
+                    <div 
+                      key={item.id} 
+                      className={`flex items-center justify-between p-4 transition-colors ${
+                        isChecked ? 'bg-slate-100/80 opacity-60' : 'hover:bg-slate-50/50'
+                      }`}
+                    >
                       <div className="flex items-center gap-3">
                         <input 
                           type="checkbox" 
+                          checked={isChecked}
+                          onChange={() => toggleCheckItem(item.id)}
                           className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" 
                         />
-                        <span className="font-medium text-slate-800 text-sm">{item.name}</span>
+                        <span className={`font-medium text-sm transition-all ${
+                          isChecked ? 'line-through text-slate-400' : 'text-slate-800'
+                        }`}>
+                          {item.name}
+                        </span>
                       </div>
                       <div>
                         {isAcheter && (
-                          <span className="bg-blue-50 text-blue-600 border border-blue-200 text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm">
+                          <span className={`border text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm transition-all ${
+                            isChecked ? 'bg-slate-200 text-slate-500 border-slate-300 line-through' : 'bg-blue-50 text-blue-600 border-blue-200'
+                          }`}>
                             A acheter
                           </span>
                         )}
                         {isPlein && (
-                          <span className="bg-emerald-50 text-emerald-600 border border-emerald-200 text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm">
+                          <span className={`border text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm transition-all ${
+                            isChecked ? 'bg-slate-200 text-slate-500 border-slate-300 line-through' : 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                          }`}>
                             En stock (Plein)
                           </span>
                         )}
                         {isEntame && (
-                          <span className="bg-amber-50 text-amber-700 border border-amber-200 text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm">
+                          <span className={`border text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm transition-all ${
+                            isChecked ? 'bg-slate-200 text-slate-500 border-slate-300 line-through' : 'bg-amber-50 text-amber-700 border-amber-200'
+                          }`}>
                             En stock (Entamé - Attention quantité)
                           </span>
                         )}
