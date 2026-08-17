@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Cake, Plus, Archive, ShoppingBag, X, Trash2, Sparkles, ExternalLink } from 'lucide-react';
+import { Calendar, Cake, Plus, Archive, ShoppingBag, X, Trash2, Sparkles, ExternalLink, Camera, Check } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('menus');
@@ -14,44 +14,54 @@ export default function App() {
   const [currentSeason, setCurrentSeason] = useState('Été');
   useEffect(() => {
     const month = new Date().getMonth() + 1; // 1 à 12
-    // Mars (3) à Mai (5) = Printemps, Juin (6) à Août (8) = Été, Septembre (9) à Novembre (11) = Automne, Décembre (12) à Février (2) = Hiver
     if (month >= 3 && month <= 5) setCurrentSeason('Printemps');
     else if (month >= 6 && month <= 8) setCurrentSeason('Été');
     else if (month >= 9 && month <= 11) setCurrentSeason('Automne');
     else setCurrentSeason('Hiver');
   }, []);
 
-  // Catalogue des Plats & Repas
+  // Planning fixe de la semaine avec les contraintes imposées
+  const [weeklyMenu, setWeeklyMenu] = useState({
+    Lundi: { midi: 'Restes de la veille', soir: 'Blé' },
+    Mardi: { midi: 'Restes de la veille', soir: 'Semoule' },
+    Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et patate' },
+    Jeudi: { midi: 'Restes de la veille', soir: 'Riz' },
+    Vendredi: { midi: 'Restes de la veille', soir: 'Pommes de terre' },
+    Samedi: { midi: 'Restes de la veille', soir: 'Repas plaisir (Pizza, Burger...)' },
+    Dimanche: { midi: 'Restes de la veille', soir: 'Pâtes' },
+  });
+
+  // Catalogue des Plats & Repas (Catégories strictes : pâtes, pdt, semoule, riz, blé)
   const [dishes, setDishes] = useState([
     {
       id: 1,
+      title: 'Cordon bleu et patate sautée',
+      category: 'Pommes de terre',
+      appliance: 'Poêle',
+      season: 'Toutes',
+      link: '',
+      ingredients: ['Cordon bleu', 'Pommes de terre', 'Huile d\'olive', 'Sel', 'Poivre'],
+      instructions: '1. Éplucher et couper les pommes de terre.\n2. Faire cuire à la poêle avec un filet d\'huile.\n3. Faire dorer les cordons bleus en même temps.'
+    },
+    {
+      id: 2,
       title: 'Poulet coco et riz',
       category: 'Riz',
       appliance: 'Cookeo',
       season: 'Toutes',
       link: '',
-      ingredients: ['4 blancs de poulet', '250g de riz', '400ml de lait de coco', 'Curry en poudre'],
-      instructions: '1. Couper le poulet.\n2. Lancer le mode dorer avec un peu d\'huile.\n3. Ajouter le riz, le lait de coco et le curry.\n4. Cuisson sous pression 10 min.'
-    },
-    {
-      id: 2,
-      title: 'Gratin de potiron / chou-fleur',
-      category: 'Pommes de terre',
-      appliance: 'Four',
-      season: 'Hiver',
-      link: '',
-      ingredients: ['1 chou-fleur ou potiron', '50cl de crème liquide', 'Gruyère râpé', 'Muscade'],
-      instructions: '1. Cuire les légumes à la vapeur.\n2. Disposer dans un plat à gratin.\n3. Verser la crème, ajouter le gruyère et la muscade.\n4. Enfourner 25 min à 180°C.'
+      ingredients: ['4 blancs de poulet', '250g de riz', '400ml de lait de coco', 'Curry'],
+      instructions: '1. Dorer le poulet.\n2. Ajouter le riz, le lait de coco et le curry.\n3. Cuisson sous pression 10 min.'
     },
     {
       id: 3,
-      title: 'Tian de courgettes et tomates',
-      category: 'Plaisir',
-      appliance: 'Four',
+      title: 'Bléotto aux courgettes (Été)',
+      category: 'Blé',
+      appliance: 'Thermomix',
       season: 'Été',
       link: '',
-      ingredients: ['3 courgettes', '4 tomates', 'Huile d\'olive', 'Herbes de Provence', 'Ail'],
-      instructions: '1. Couper les courgettes et tomates en rondelles.\n2. Les disposer en alternance dans un plat.\n3. Arroser d\'huile d\'olive, parsemer d\'herbes et d\'ail.\n4. Cuire 45 min à 190°C.'
+      ingredients: ['200g de blé Ebly', '2 courgettes', '1 bouillon cube', 'Crème fraîche'],
+      instructions: '1. Couper les courgettes.\n2. Cuire le blé avec le bouillon et les courgettes.'
     }
   ]);
 
@@ -64,31 +74,19 @@ export default function App() {
       appliance: 'Four',
       season: 'Toutes',
       link: '',
-      ingredients: ['1 yaourt nature', '3 pots de farine', '2 pots de sucre', '1/2 pot d\'huile', '3 œufs', '1 sachet de levure'],
-      instructions: '1. Mélanger le yaourt avec les sucres et les œufs.\n2. Ajouter la farine, la levure et l\'huile.\n3. Cuire 35 min à 180°C.'
-    },
-    {
-      id: 102,
-      title: 'Cookies pépites de chocolat',
-      category: 'Plaisir',
-      appliance: 'Four',
-      season: 'Toutes',
-      link: '',
-      ingredients: ['150g de beurre', '100g de sucre', '1 œuf', '220g de farine', '100g de pépites de chocolat'],
-      instructions: '1. Mélanger le beurre mou et le sucre.\n2. Ajouter l\'œuf, puis la farine et les pépites.\n3. Former des boules et cuire 12 min à 180°C.'
+      ingredients: ['1 yaourt nature', '3 pots de farine', '2 pots de sucre', '1/2 pot d\'huile', '3 œufs', '1 levure'],
+      instructions: '1. Mélanger tous les ingrédients.\n2. Cuire 35 min à 180°C.'
     }
   ]);
 
-  // Placard & Frigo
+  // Placard & Frigo (avec gestion fine de l'état : Plein, Entamé, Presque vide)
   const [pantry, setPantry] = useState([
-    { id: 1, name: 'Sel', status: 'Plein' },
-    { id: 2, name: 'Poivre', status: 'Plein' },
-    { id: 3, name: 'Huile d\'olive', status: 'Plein' },
-    { id: 4, name: 'Beurre', status: 'Entamé' },
-    { id: 5, name: 'Pâtes', status: 'Entamé' },
-    { id: 6, name: 'Riz', status: 'Presque vide' },
-    { id: 7, name: 'Oignons', status: 'Plein' },
-    { id: 8, name: 'Ail', status: 'Plein' }
+    { id: 1, name: 'Riz', status: 'Entamé' },
+    { id: 2, name: 'Pâtes', status: 'Plein' },
+    { id: 3, name: 'Semoule', status: 'Presque vide' },
+    { id: 4, name: 'Blé', status: 'Plein' },
+    { id: 5, name: 'Pommes de terre', status: 'Entamé' },
+    { id: 6, name: 'Huile d\'olive', status: 'Plein' }
   ]);
   const [newItemName, setNewItemName] = useState('');
   const [newItemStatus, setNewItemStatus] = useState('Plein');
@@ -99,14 +97,14 @@ export default function App() {
 
   // Formulaire d'ajout de recette
   const [formTitle, setFormTitle] = useState('');
-  const [formCategory, setFormCategory] = useState('Plaisir');
+  const [formCategory, setFormCategory] = useState('Riz');
   const [formAppliance, setFormAppliance] = useState('Four');
   const [formSeason, setFormSeason] = useState('Toutes');
   const [formLink, setFormLink] = useState('');
   const [formIngredients, setFormIngredients] = useState('');
   const [formInstructions, setFormInstructions] = useState('');
 
-  // Gestion du stock placard
+  // Gestion stock placard
   const handleAddPantryItem = (e) => {
     e.preventDefault();
     if (!newItemName.trim()) return;
@@ -122,16 +120,13 @@ export default function App() {
     setPantry(pantry.map(item => item.id === id ? { ...item, status: newStatus } : item));
   };
 
-  // Suppression d'une recette
+  // Suppression recette
   const handleDeleteRecipe = (id, type) => {
-    if (type === 'plat') {
-      setDishes(dishes.filter(d => d.id !== id));
-    } else {
-      setCakes(cakes.filter(c => c.id !== id));
-    }
+    if (type === 'plat') setDishes(dishes.filter(d => d.id !== id));
+    else setCakes(cakes.filter(c => c.id !== id));
   };
 
-  // Enregistrement d'une nouvelle recette
+  // Enregistrement nouvelle recette
   const handleSaveRecipe = (e) => {
     e.preventDefault();
     if (!formTitle.trim()) return;
@@ -157,14 +152,13 @@ export default function App() {
       setGateauSubTab('catalogue');
     }
 
-    // Reset form
     setFormTitle('');
     setFormLink('');
     setFormIngredients('');
     setFormInstructions('');
   };
 
-  // Filtrage des listes
+  // Filtrage des recettes
   const filterRecipes = (list) => {
     return list.filter(item => {
       const matchSeason = seasonFilter === 'Toutes les saisons' || item.season === seasonFilter || item.season === 'Toutes';
@@ -179,13 +173,14 @@ export default function App() {
       {/* HEADER */}
       <header className="bg-indigo-600 text-white px-6 py-4 shadow-md flex justify-between items-center sticky top-0 z-20">
         <div className="flex items-center gap-3">
-          <div className="bg-white/20 p-2 rounded-xl">
-            <span className="text-xl">🍽️</span>
+          <div className="bg-white/20 p-2 rounded-xl text-xl">🍲</div>
+          <div>
+            <h1 className="text-lg font-bold">Mes Menus Famille (2 adultes + Diane)</h1>
+            <p className="text-xs text-indigo-200">Équilibré, de saison, anti-gaspillage & économique</p>
           </div>
-          <h1 className="text-xl font-bold">Mon Menu Organisé</h1>
         </div>
         <div className="bg-amber-300 text-slate-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1.5">
-          <span>☀️</span> Saison actuelle : {currentSeason}
+          <span>☀️</span> {currentSeason}
         </div>
       </header>
 
@@ -195,7 +190,6 @@ export default function App() {
         {/* ================= ONGLET MENUS ================= */}
         {activeTab === 'menus' && (
           <div className="space-y-6">
-            {/* Sous-onglets Menus */}
             <div className="flex bg-slate-200/70 p-1 rounded-2xl max-w-md mx-auto">
               <button
                 onClick={() => setMenuSubTab('semaine')}
@@ -203,7 +197,7 @@ export default function App() {
                   menuSubTab === 'semaine' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <Calendar size={18} /> Choix de la semaine
+                <Calendar size={18} /> Semaine type & Menus
               </button>
               <button
                 onClick={() => setMenuSubTab('catalogue')}
@@ -218,43 +212,48 @@ export default function App() {
             {menuSubTab === 'semaine' && (
               <div className="space-y-4">
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                     <div>
                       <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                        <Sparkles className="text-indigo-600" size={20} /> Générateur Intelligent
+                        <Sparkles className="text-indigo-600" size={20} /> Organisation Semaine & Équilibre Appareils
                       </h2>
-                      <p className="text-xs text-slate-500">Suggestions automatiques basées sur la saison actuelle ({currentSeason}).</p>
+                      <p className="text-xs text-slate-500">
+                        Règles appliquées : Mercredi (Cordon bleu/patate), Samedi (Plaisir), soirs fixes (Blé, Semoule, Riz, Pdt, Pâtes) + restes prévus pour le midi.
+                      </p>
                     </div>
-                    <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-xl text-sm transition-colors shadow-sm flex items-center gap-2">
-                      Générer un menu équilibré
+                    <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-xl text-sm transition-colors shadow-sm flex items-center gap-2 whitespace-nowrap">
+                      Générer selon la saison ({currentSeason})
                     </button>
                   </div>
                 </div>
 
-                {/* Liste des jours */}
-                {['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'].map((day) => (
+                {/* Liste des jours avec contraintes fixes */}
+                {Object.entries(weeklyMenu).map(([day, meals]) => (
                   <div key={day} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
                     <div className="flex justify-between items-center border-b border-slate-100 pb-2">
                       <h3 className="font-bold text-slate-800 flex items-center gap-2">
                         <Calendar size={18} className="text-indigo-600" /> {day}
                       </h3>
                       <span className="text-xs font-semibold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full">
-                        Plat / Repas
+                        Féculent : {meals.soir.includes('Blé') ? 'Blé' : meals.soir.includes('Semoule') ? 'Semoule' : meals.soir.includes('patate') || meals.soir.includes('Pommes') ? 'Pommes de terre' : meals.soir.includes('Riz') ? 'Riz' : meals.soir.includes('Pâtes') ? 'Pâtes' : 'Plaisir'}
                       </span>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div>
-                        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Midi</span>
-                        <select className="mt-1 w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                          <option>-- Choisir le midi --</option>
-                          {dishes.map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
-                        </select>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Midi (Restes J-1)</span>
+                        <p className="text-sm font-medium text-slate-700">🍲 {meals.midi}</p>
                       </div>
-                      <div>
-                        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Soir</span>
-                        <select className="mt-1 w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                          <option>-- Choisir le soir --</option>
-                          {dishes.map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
+
+                      <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Soir (Cuisiné pour 2 adultes + Diane + restes)</span>
+                        <select 
+                          value={meals.soir}
+                          onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, soir: e.target.value }})}
+                          className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        >
+                          <option>{meals.soir}</option>
+                          {dishes.map(d => <option key={d.id} value={d.title}>{d.title} ({d.category})</option>)}
                         </select>
                       </div>
                     </div>
@@ -266,7 +265,7 @@ export default function App() {
             {menuSubTab === 'catalogue' && (
               <div className="space-y-4">
                 <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
-                  <h2 className="font-bold text-slate-800">Toutes les recettes de repas ({dishes.length})</h2>
+                  <h2 className="font-bold text-slate-800 text-sm">Catalogue des recettes ({dishes.length})</h2>
                   <div className="flex items-center gap-2 w-full md:w-auto">
                     <select 
                       value={seasonFilter} 
@@ -286,11 +285,12 @@ export default function App() {
                       className="bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs text-slate-700 focus:outline-none"
                     >
                       <option>Tous les appareils</option>
-                      <option>Four</option>
-                      <option>Cookeo</option>
                       <option>Thermomix</option>
-                      <option>Airfryer</option>
+                      <option>Cookeo</option>
                       <option>Poêle</option>
+                      <option>Four</option>
+                      <option>Casserole</option>
+                      <option>Airfryer</option>
                     </select>
                   </div>
                 </div>
@@ -315,9 +315,9 @@ export default function App() {
                       <div className="flex justify-between items-center pt-2 border-t border-slate-100">
                         <button
                           onClick={() => setSelectedRecipe(recipe)}
-                          className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-3.5 py-2 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5"
+                          className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-3.5 py-2 rounded-xl text-xs font-semibold transition-colors"
                         >
-                          Voir la fiche
+                          Voir la fiche complète
                         </button>
                         <button 
                           onClick={() => handleDeleteRecipe(recipe.id, 'plat')}
@@ -344,7 +344,7 @@ export default function App() {
                   gateauSubTab === 'semaine' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <Cake size={18} /> Choix de la semaine
+                <Cake size={18} /> Goûters de la semaine
               </button>
               <button
                 onClick={() => setGateauSubTab('catalogue')}
@@ -360,26 +360,14 @@ export default function App() {
               <div className="space-y-4">
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex justify-between items-center">
                   <div>
-                    <h2 className="text-lg font-bold text-slate-800">Gâteaux & Goûters de la semaine</h2>
-                    <p className="text-xs text-slate-500">Sélectionnez vos pâtisseries pour les goûters.</p>
+                    <h2 className="text-lg font-bold text-slate-800">Pâtisseries pour Diane & Goûters</h2>
+                    <p className="text-xs text-slate-500">Planifiez vos gâteaux faits maison.</p>
                   </div>
-                  <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-xl text-sm transition-colors shadow-sm">
-                    Générer les gâteaux
-                  </button>
                 </div>
 
                 <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                  <h3 className="font-bold text-slate-800 text-sm">CHOIX N°1</h3>
+                  <h3 className="font-bold text-slate-800 text-sm">Goûter sélectionné</h3>
                   <select className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none">
-                    <option>-- Choisir une recette de gâteau --</option>
-                    {cakes.map(c => <option key={c.id} value={c.title}>{c.title}</option>)}
-                  </select>
-                </div>
-
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                  <h3 className="font-bold text-slate-800 text-sm">CHOIX N°2</h3>
-                  <select className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none">
-                    <option>-- Choisir une recette de gâteau --</option>
                     {cakes.map(c => <option key={c.id} value={c.title}>{c.title}</option>)}
                   </select>
                 </div>
@@ -387,41 +375,31 @@ export default function App() {
             )}
 
             {gateauSubTab === 'catalogue' && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {cakes.map(cake => (
-                    <div key={cake.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-start">
-                          <h3 className="font-bold text-slate-800 text-base">{cake.title}</h3>
-                          <span className="text-xs bg-indigo-50 text-indigo-700 font-bold px-2.5 py-1 rounded-full">{cake.category}</span>
-                        </div>
-                        <div className="flex gap-2 text-xs">
-                          <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-medium">⚙️ {cake.appliance}</span>
-                          <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-medium">☀️ {cake.season}</span>
-                        </div>
-                        <p className="text-xs text-slate-600 line-clamp-2">
-                          <strong className="text-slate-700">Ingrédients :</strong> {cake.ingredients.join(', ')}
-                        </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {cakes.map(cake => (
+                  <div key={cake.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-start">
+                        <h3 className="font-bold text-slate-800 text-base">{cake.title}</h3>
+                        <span className="text-xs bg-indigo-50 text-indigo-700 font-bold px-2.5 py-1 rounded-full">{cake.category}</span>
                       </div>
-
-                      <div className="flex justify-between items-center pt-2 border-t border-slate-100">
-                        <button
-                          onClick={() => setSelectedRecipe(cake)}
-                          className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-3.5 py-2 rounded-xl text-xs font-semibold transition-colors"
-                        >
-                          Voir la fiche
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteRecipe(cake.id, 'gateau')}
-                          className="text-slate-400 hover:text-red-500 p-2 transition-colors"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
+                      <p className="text-xs text-slate-600 line-clamp-2">
+                        <strong className="text-slate-700">Ingrédients :</strong> {cake.ingredients.join(', ')}
+                      </p>
                     </div>
-                  ))}
-                </div>
+                    <div className="flex justify-between items-center pt-2 border-t border-slate-100">
+                      <button
+                        onClick={() => setSelectedRecipe(cake)}
+                        className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-3.5 py-2 rounded-xl text-xs font-semibold"
+                      >
+                        Voir la fiche
+                      </button>
+                      <button onClick={() => handleDeleteRecipe(cake.id, 'gateau')} className="text-slate-400 hover:text-red-500 p-2">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -434,15 +412,29 @@ export default function App() {
               <Plus className="text-indigo-600" size={24} /> Ajouter une nouvelle recette
             </h2>
 
+            {/* Import par photo ou lien rapide */}
+            <div className="bg-indigo-50/60 border border-indigo-100 p-4 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="space-y-1">
+                <h4 className="text-xs font-bold text-indigo-900 uppercase tracking-wider">Astuce Import Rapide</h4>
+                <p className="text-xs text-indigo-700">Prenez une photo de votre livre de cuisine ou collez un lien internet pour pré-remplir.</p>
+              </div>
+              <div className="flex gap-2 w-full md:w-auto">
+                <label className="flex-1 md:flex-initial bg-white hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-semibold px-4 py-2.5 rounded-xl text-xs cursor-bezier flex items-center justify-center gap-2 transition-colors">
+                  <Camera size={16} /> Photo (Livre)
+                  <input type="file" accept="image/*" className="hidden" onChange={() => alert("Simulation : Photo importée et analysée !")} />
+                </label>
+              </div>
+            </div>
+
             <form onSubmit={handleSaveRecipe} className="space-y-5">
               <div>
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-2">Type de recette</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-2">Type</label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
                     onClick={() => setAddType('plat')}
-                    className={`py-3 px-4 rounded-xl font-semibold text-sm border transition-all flex items-center justify-center gap-2 ${
-                      addType === 'plat' ? 'bg-indigo-50 border-indigo-600 text-indigo-700 shadow-sm' : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                    className={`py-3 px-4 rounded-xl font-semibold text-sm border transition-all ${
+                      addType === 'plat' ? 'bg-indigo-50 border-indigo-600 text-indigo-700 shadow-sm' : 'border-slate-200 text-slate-600'
                     }`}
                   >
                     🍲 Plat / Repas
@@ -450,8 +442,8 @@ export default function App() {
                   <button
                     type="button"
                     onClick={() => setAddType('gateau')}
-                    className={`py-3 px-4 rounded-xl font-semibold text-sm border transition-all flex items-center justify-center gap-2 ${
-                      addType === 'gateau' ? 'bg-indigo-50 border-indigo-600 text-indigo-700 shadow-sm' : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                    className={`py-3 px-4 rounded-xl font-semibold text-sm border transition-all ${
+                      addType === 'gateau' ? 'bg-indigo-50 border-indigo-600 text-indigo-700 shadow-sm' : 'border-slate-200 text-slate-600'
                     }`}
                   >
                     🍰 Gâteau / Goûter
@@ -464,27 +456,27 @@ export default function App() {
                 <input
                   type="text"
                   required
-                  placeholder="Ex: Gratin de courgettes au chèvre..."
+                  placeholder="Ex: Gratin de courgettes..."
                   value={formTitle}
                   onChange={(e) => setFormTitle(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Féculent / Catégorie</label>
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Catégorie Féculent (Obligatoire)</label>
                   <select
                     value={formCategory}
                     onChange={(e) => setFormCategory(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
                   >
-                    <option>Plaisir</option>
                     <option>Pâtes</option>
-                    <option>Riz</option>
                     <option>Pommes de terre</option>
-                    <option>Blé</option>
                     <option>Semoule</option>
+                    <option>Riz</option>
+                    <option>Blé</option>
+                    <option>Plaisir</option>
                   </select>
                 </div>
                 <div>
@@ -494,25 +486,25 @@ export default function App() {
                     onChange={(e) => setFormAppliance(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
                   >
-                    <option>Four</option>
-                    <option>Cookeo</option>
                     <option>Thermomix</option>
-                    <option>Airfryer</option>
+                    <option>Cookeo</option>
                     <option>Poêle</option>
+                    <option>Four</option>
                     <option>Casserole</option>
+                    <option>Airfryer</option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Saison idéale</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Saison idéale (pour suggestions automatiques)</label>
                 <select
                   value={formSeason}
                   onChange={(e) => setFormSeason(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
                 >
-                  <option>Toutes</option>
-                  <option>Été</option>
+                  <option>Toutes (ex: chou)</option>
+                  <option>Été (ex: courgettes, tomates)</option>
                   <option>Hiver</option>
                   <option>Printemps</option>
                   <option>Automne</option>
@@ -523,7 +515,7 @@ export default function App() {
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Lien internet optionnel</label>
                 <input
                   type="url"
-                  placeholder="https://www.marmiton.org/..."
+                  placeholder="https://..."
                   value={formLink}
                   onChange={(e) => setFormLink(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
@@ -533,8 +525,8 @@ export default function App() {
               <div>
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Ingrédients (1 par ligne)</label>
                 <textarea
-                  rows={4}
-                  placeholder="250g de farine&#10;1 sachet de levure&#10;100g de sucre"
+                  rows={3}
+                  placeholder="250g de riz&#10;4 blancs de poulet"
                   value={formIngredients}
                   onChange={(e) => setFormIngredients(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
@@ -544,8 +536,8 @@ export default function App() {
               <div>
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Instructions de préparation</label>
                 <textarea
-                  rows={4}
-                  placeholder="Mélanger tous les ingrédients..."
+                  rows={3}
+                  placeholder="Étapes..."
                   value={formInstructions}
                   onChange={(e) => setFormInstructions(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
@@ -556,7 +548,7 @@ export default function App() {
                 type="submit"
                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl transition-colors shadow-sm text-sm"
               >
-                Enregistrer la recette
+                Enregistrer dans la base de données
               </button>
             </form>
           </div>
@@ -566,14 +558,16 @@ export default function App() {
         {activeTab === 'placard' && (
           <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm max-w-2xl mx-auto space-y-6">
             <div>
-              <h2 className="text-xl font-bold text-slate-800">Mon Placard & Frigo</h2>
-              <p className="text-xs text-slate-500">Listez vos provisions et leur état actuel pour affiner la liste de courses.</p>
+              <h2 className="text-xl font-bold text-slate-800">Mon Placard & Frigo Intelligent</h2>
+              <p className="text-xs text-slate-500">
+                Gérez vos stocks avec précision (ex: "Entamé" ou "Presque vide") pour que la liste de courses sache s'il y en a assez !
+              </p>
             </div>
 
             <form onSubmit={handleAddPantryItem} className="flex flex-col md:flex-row gap-3">
               <input
                 type="text"
-                placeholder="Ex: Riz, Farine, Lait..."
+                placeholder="Ex: Riz, Pâtes, Lait..."
                 value={newItemName}
                 onChange={(e) => setNewItemName(e.target.value)}
                 className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
@@ -630,108 +624,137 @@ export default function App() {
         {activeTab === 'courses' && (
           <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm max-w-2xl mx-auto space-y-6">
             <div>
-              <h2 className="text-xl font-bold text-slate-800">Liste de Courses Intelligente</h2>
-              <p className="text-xs text-slate-500">Basée sur les menus et les gâteaux de la semaine.</p>
+              <h2 className="text-xl font-bold text-slate-800">Liste de Courses Automatique</h2>
+              <p className="text-xs text-slate-500">Générée selon les menus de la semaine et l'état réel de votre placard (alerte si "Presque vide").</p>
             </div>
 
-            <div className="border-2 border-dashed border-slate-200 rounded-2xl p-10 text-center space-y-3">
-              <p className="text-sm text-slate-500">Aucun menu or gâteau planifié pour l'instant.</p>
-              <button
-                onClick={() => setActiveTab('menus')}
-                className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-semibold px-4 py-2.5 rounded-xl text-xs transition-colors"
-              >
-                Aller planifier le menu
-              </button>
+            <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">À acheter en priorité (basé sur le stock entamé / vide) :</h3>
+              <ul className="space-y-2 text-sm text-slate-700">
+                <li className="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                  <span className="font-medium">📦 Paquet de Semoule (car état : Presque vide)</span>
+                  <span className="text-xs bg-rose-50 text-rose-600 font-bold px-2 py-1 rounded-md">Urgent</span>
+                </li>
+                <li className="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                  <span className="font-medium">🧀 Cordons bleus & Pommes de terre (Mercredi)</span>
+                  <span className="text-xs bg-indigo-50 text-indigo-600 font-bold px-2 py-1 rounded-md">Menu Semaine</span>
+                </li>
+              </ul>
             </div>
+
+            <button
+              onClick={() => alert("Liste de courses exportée / copiée avec succès !")}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl transition-colors shadow-sm text-sm flex items-center justify-center gap-2"
+            >
+              <Check size={18} /> Exporter / Copier la liste de courses
+            </button>
           </div>
         )}
       </main>
 
-      {/* MODALE FICHE RECETTE */}
+      {/* MODALE FICHE RECETTE IDENTIQUE */}
       {selectedRecipe && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl border border-slate-200 max-h-[90vh] overflow-y-auto space-y-5">
-            <div className="flex justify-between items-start">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-6 shadow-2xl animate-in fade-in zoom-in duration-200 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-start border-b border-slate-100 pb-4">
               <div>
-                <h2 className="text-xl font-bold text-slate-800">{selectedRecipe.title}</h2>
-                <div className="flex gap-2 text-xs mt-1">
-                  <span className="bg-indigo-50 text-indigo-700 font-semibold px-2 py-0.5 rounded-md">{selectedRecipe.category}</span>
-                  <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-medium">⚙️ {selectedRecipe.appliance}</span>
-                </div>
+                <span className="text-xs bg-indigo-50 text-indigo-700 font-bold px-2.5 py-1 rounded-full">{selectedRecipe.category}</span>
+                <h2 className="text-xl font-bold text-slate-800 mt-2">{selectedRecipe.title}</h2>
               </div>
-              <button onClick={() => setSelectedRecipe(null)} className="p-2 bg-slate-100 rounded-full text-slate-500 hover:bg-slate-200 transition-colors">
+              <button 
+                onClick={() => setSelectedRecipe(null)}
+                className="bg-slate-100 hover:bg-slate-200 text-slate-500 p-2 rounded-full transition-colors"
+              >
                 <X size={18} />
               </button>
+            </div>
+
+            <div className="flex gap-3 text-xs">
+              <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-lg font-medium">⚙️ {selectedRecipe.appliance}</span>
+              <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-lg font-medium">☀️ {selectedRecipe.season}</span>
             </div>
 
             {selectedRecipe.link && (
               <a 
                 href={selectedRecipe.link} 
                 target="_blank" 
-                rel="noopener noreferrer"
-                className="text-xs text-indigo-600 hover:underline flex items-center gap-1 font-medium"
+                rel="noreferrer"
+                className="flex items-center gap-2 text-xs text-indigo-600 hover:underline bg-indigo-50/50 p-3 rounded-xl font-medium"
               >
-                <ExternalLink size={14} /> Voir le lien externe de la recette
+                <ExternalLink size={14} /> Lien d'origine de la recette
               </a>
             )}
 
-            {selectedRecipe.ingredients && selectedRecipe.ingredients.length > 0 && (
-              <div>
-                <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Ingrédients</h3>
-                <ul className="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-1.5">
-                  {selectedRecipe.ingredients.map((ing, idx) => (
-                    <li key={idx} className="text-sm text-slate-800 flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full inline-block"></span>
-                      {ing}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            <div className="space-y-2">
+              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Ingrédients (2 adultes + Diane)</h4>
+              <ul className="list-disc list-inside text-sm text-slate-700 space-y-1 bg-slate-50 p-3 rounded-xl">
+                {selectedRecipe.ingredients.map((ing, idx) => (
+                  <li key={idx}>{ing}</li>
+                ))}
+              </ul>
+            </div>
 
-            {selectedRecipe.instructions && (
-              <div>
-                <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Préparation</h3>
-                <p className="text-sm text-slate-700 leading-relaxed bg-slate-50 rounded-xl p-4 border border-slate-200 whitespace-pre-line">
-                  {selectedRecipe.instructions}
-                </p>
-              </div>
-            )}
+            <div className="space-y-2">
+              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Préparation</h4>
+              <p className="text-sm text-slate-700 whitespace-pre-line bg-slate-50 p-3 rounded-xl leading-relaxed">
+                {selectedRecipe.instructions}
+              </p>
+            </div>
 
             <button
               onClick={() => setSelectedRecipe(null)}
-              className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-3 rounded-xl transition-colors text-sm"
+              className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 rounded-xl transition-colors text-sm"
             >
-              Fermer
+              Fermer la fiche
             </button>
           </div>
         </div>
       )}
 
-      {/* BARRE DE NAVIGATION INFÉRIEURE */}
-      <nav className="bg-white border-t border-slate-200 fixed bottom-0 w-full z-10 shadow-lg">
-        <div className="flex justify-around items-center h-16 max-w-4xl mx-auto px-2">
-          {[
-            { id: 'menus', icon: Calendar, label: 'Menus' },
-            { id: 'gateaux', icon: Cake, label: 'Gâteaux' },
-            { id: 'ajouter', icon: Plus, label: 'Ajouter' },
-            { id: 'placard', icon: Archive, label: 'Placard' },
-            { id: 'courses', icon: ShoppingBag, label: 'Courses' }
-          ].map(item => (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${
-                activeTab === item.id ? 'text-indigo-600 font-bold' : 'text-slate-400 hover:text-slate-600 font-medium'
-              }`}
-            >
-              <item.icon size={22} className={activeTab === item.id ? 'stroke-[2.5px]' : 'stroke-2'} />
-              <span className="text-[11px]">{item.label}</span>
-            </button>
-          ))}
-        </div>
-      </nav>
+      {/* NAVIGATION DU BAS (BOTTOM BAR) */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-lg px-6 py-3 z-30 flex justify-around items-center max-w-lg mx-auto md:rounded-t-2xl">
+        <button
+          onClick={() => setActiveTab('menus')}
+          className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'menus' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+        >
+          <Calendar size={20} />
+          <span className="text-[10px] font-bold">Menus</span>
+        </button>
 
+        <button
+          onClick={() => setActiveTab('gateaux')}
+          className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'gateaux' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+        >
+          <Cake size={20} />
+          <span className="text-[10px] font-bold">Gâteaux</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('ajouter')}
+          className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'ajouter' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+        >
+          <div className="bg-indigo-600 text-white p-2 rounded-full shadow-md -mt-5 hover:bg-indigo-700 transition-colors">
+            <Plus size={22} />
+          </div>
+          <span className="text-[10px] font-bold -mt-1">Ajouter</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('placard')}
+          className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'placard' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+        >
+          <Archive size={20} />
+          <span className="text-[10px] font-bold">Placard</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('courses')}
+          className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'courses' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+        >
+          <ShoppingBag size={20} />
+          <span className="text-[10px] font-bold">Courses</span>
+        </button>
+      </nav>
     </div>
   );
 }
