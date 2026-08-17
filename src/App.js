@@ -24,7 +24,7 @@ export default function App() {
   const [weeklyMenu, setWeeklyMenu] = useState({
     Lundi: { midi: '', soir: '' },
     Mardi: { midi: '', soir: '' },
-    Mercredi: { midi: '', soir: '' },
+    Mercredi: { midi: '', soir: 'Cordon bleu et Pomme de terre' },
     Jeudi: { midi: '', soir: '' },
     Vendredi: { midi: '', soir: '' },
     Samedi: { midi: '', soir: '' },
@@ -334,7 +334,7 @@ export default function App() {
                     onClick={handleGenerateBalancedMenu}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-xl text-sm transition-colors shadow-sm flex items-center gap-2 whitespace-nowrap"
                   >
-                    Générer un menu équilibré
+                    <Sparkles size={16} /> Générer un menu équilibré
                   </button>
                 </div>
 
@@ -371,27 +371,18 @@ export default function App() {
                           </select>
                         </div>
 
-                        <div className={`p-3 rounded-xl border ${isWednesday ? 'bg-slate-100 border-slate-200' : 'bg-slate-50 border-slate-100'}`}>
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                           <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
                             Soir
                           </span>
-                          {isWednesday ? (
-                            <input 
-                              type="text" 
-                              disabled 
-                              value={meals.soir} 
-                              className="w-full bg-slate-200 text-slate-500 border border-slate-300 rounded-lg p-2 text-sm cursor-not-allowed font-medium"
-                            />
-                          ) : (
-                            <select 
-                              value={meals.soir}
-                              onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, soir: e.target.value }})}
-                              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            >
-                              <option value="">-- Choisir ou laisser vide --</option>
-                              {eveningRecipes.map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
-                            </select>
-                          )}
+                          <select 
+                            value={meals.soir}
+                            onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, soir: e.target.value }})}
+                            className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          >
+                            <option value="">-- Choisir ou laisser vide --</option>
+                            {eveningRecipes.map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
+                          </select>
                         </div>
                       </div>
                     </div>
@@ -519,7 +510,7 @@ export default function App() {
                     onClick={handleGenerateBalancedCakes}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-xl text-sm transition-colors shadow-sm flex items-center gap-2 whitespace-nowrap"
                   >
-                    Générer un menu équilibré
+                    <Sparkles size={16} /> Générer un menu équilibré
                   </button>
                 </div>
 
@@ -877,26 +868,11 @@ export default function App() {
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-[0_-10px_15px_-3px_rgb(0,0,0,0.05)] z-40 px-6 py-2 pb-safe">
         <div className="max-w-md mx-auto flex justify-between items-center">
           <button 
-            onClick={() => setActiveTab('courses')} 
-            className={`flex flex-col items-center p-2 rounded-xl transition-colors ${activeTab === 'courses' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
-          >
-            <ShoppingBag size={22} className="mb-1" />
-            <span className="text-[10px] font-bold">Courses</span>
-          </button>
-          
-          <button 
             onClick={() => setActiveTab('menus')} 
             className={`flex flex-col items-center p-2 rounded-xl transition-colors ${activeTab === 'menus' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
           >
             <Calendar size={22} className="mb-1" />
             <span className="text-[10px] font-bold">Menus</span>
-          </button>
-          
-          <button 
-            onClick={() => setActiveTab('ajouter')} 
-            className="bg-indigo-600 hover:bg-indigo-700 text-white p-3.5 rounded-2xl shadow-lg transform -translate-y-6 transition-transform hover:scale-105 border-4 border-slate-50"
-          >
-            <Plus size={24} />
           </button>
           
           <button 
@@ -908,11 +884,26 @@ export default function App() {
           </button>
           
           <button 
+            onClick={() => setActiveTab('ajouter')} 
+            className="bg-indigo-600 hover:bg-indigo-700 text-white p-3.5 rounded-2xl shadow-lg transform -translate-y-6 transition-transform hover:scale-105 border-4 border-slate-50"
+          >
+            <Plus size={24} />
+          </button>
+          
+          <button 
             onClick={() => setActiveTab('placard')} 
             className={`flex flex-col items-center p-2 rounded-xl transition-colors ${activeTab === 'placard' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
           >
             <Archive size={22} className="mb-1" />
             <span className="text-[10px] font-bold">Placard</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('courses')} 
+            className={`flex flex-col items-center p-2 rounded-xl transition-colors ${activeTab === 'courses' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+          >
+            <ShoppingBag size={22} className="mb-1" />
+            <span className="text-[10px] font-bold">Courses</span>
           </button>
         </div>
       </nav>
