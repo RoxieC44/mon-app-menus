@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, List, Calendar, Trash2, Utensils, Info, Tag, Sun, Settings, Link as LinkIcon, Camera, RefreshCw, AlertTriangle, Eye, X, Image as ImageIcon, ShoppingBag, Package, Check, Copy, Sparkles, Filter, Cake } from 'lucide-react';
+import { supabase } from './supabaseClient';
 
 const DEFAULT_RECIPES = [
   { id: '1', name: 'Poêlée de blé façon risotto aux champignons', carb: 'Blé', equipment: 'Poêle', season: 'Toutes', type: 'text', instructions: 'Faire revenir les champignons. Ajouter le blé, puis le bouillon louche par louche jusqu\'à absorption.', ingredients: ['250g de blé', '500g de champignons', '1 oignon', 'Bouillon de volaille', 'Crème liquide'], category: 'repas' },
@@ -35,74 +36,80 @@ export default function App() {
   const [viewingRecipe, setViewingRecipe] = useState(null);
   const currentSeason = getCurrentSeason();
 
-  const [recipes, setRecipes] = useState(() => {
-    const saved = localStorage.getItem('mealAppRecipesV8');
-    return saved ? JSON.parse(saved) : DEFAULT_RECIPES;
+  const [loading, setLoading] = useState(true);
+
+  const [recipes, setRecipes] = useState(DEFAULT_RECIPES);
+  const [menu, setMenu] = useState({
+    mondayDinner: '', tuesdayDinner: '', wednesdayDinner: '', thursdayDinner: '', fridayDinner: '', saturdayDinner: '', sundayDinner: '',
+    mondayLunch: 'restes', tuesdayLunch: 'restes', wednesdayLunch: '', thursdayLunch: 'restes', fridayLunch: 'restes', saturdayLunch: '', sundayLunch: ''
   });
+  const [inventory, setInventory] = useState([
+    { name: 'Sel', status: 'Plein' },
+    { name: 'Poivre', status: 'Plein' },
+    { name: "Huile d'olive", status: 'Plein' },
+    { name: 'Beurre', status: 'Entamé' },
+    { name: 'Pâtes', status: 'Entamé' },
+    { name: 'Riz', status: 'Presque vide' },
+    { name: 'Oignons', status: 'Plein' },
+    { name: 'Ail', status: 'Plein' }
+  ]);
+  const [bakingItems, setBakingItems] = useState(['', '']);
+  const [shoppingChecks, setShoppingChecks] = useState({});
 
-  const [menu, setMenu] = useState(() => {
-    const saved = localStorage.getItem('mealAppMenuV8');
-    return saved ? JSON.parse(saved) : {
-      mondayDinner: '', 
-      tuesdayDinner: '', 
-      wednesdayDinner: '', 
-      thursdayDinner: '', 
-      fridayDinner: '', 
-      saturdayDinner: '', 
-      sundayDinner: '',
-      mondayLunch: 'restes',
-      tuesdayLunch: 'restes',
-      wednesdayLunch: '',
-      thursdayLunch: 'restes',
-      fridayLunch: 'restes',
-      saturdayLunch: '',
-      sundayLunch: ''
-    };
-  });
-
-  const [inventory, setInventory] = useState(() => {
-    const saved = localStorage.getItem('mealAppInventoryV3');
-    return saved ? JSON.parse(saved) : [
-      { name: 'Sel', status: 'Plein' },
-      { name: 'Poivre', status: 'Plein' },
-      { name: "Huile d'olive", status: 'Plein' },
-      { name: 'Beurre', status: 'Entamé' },
-      { name: 'Pâtes', status: 'Entamé' },
-      { name: 'Riz', status: 'Presque vide' },
-      { name: 'Oignons', status: 'Plein' },
-      { name: 'Ail', status: 'Plein' }
-    ];
-  });
-
-  const [bakingItems, setBakingItems] = useState(() => {
-    const saved = localStorage.getItem('mealAppBakingV2');
-    return saved ? JSON.parse(saved) : ['', ''];
-  });
-
-  const [shoppingChecks, setShoppingChecks] = useState(() => {
-    const saved = localStorage.getItem('mealAppShoppingChecksV2');
-    return saved ? JSON.parse(saved) : {};
-  });
-
+  // CHARGEMENT INITIAL DEPUIS SUPABASE
   useEffect(() => {
-    localStorage.setItem('mealAppRecipesV8', JSON.stringify(recipes));
-  }, [recipes]);
+    async function loadData() {
+      setLoading(true);
+      const { data } = await supabase
+        .from('stockage_donnees')
+        .select('data')
+        .eq('user_key', 'ma_famille')
+        .maybeSingle();
 
-  useEffect(() => {
-    localStorage.setItem('mealAppMenuV8', JSON.stringify(menu));
-  }, [menu]);
+      if (data && data.data) {
+        const saved = data.data;
+        if (saved.recipes) setRecipes(saved.recipes);
+        if (saved.menu) setMenu(saved.menu);
+        if (saved.inventory) setInventory(saved.inventory);
+        if (saved.bakingItems) setBakingItems(saved.bakingItems);
+        if (saved.shoppingChecks) setShoppingChecks(saved.shoppingChecks);
+      }
+      setLoading(false);
+    }
+    loadData();
+  }, []);
 
+  // Sauvegarde automatique sur Supabase à chaque modification
   useEffect(() => {
-    localStorage.setItem('mealAppInventoryV3', JSON.stringify(inventory));
-  }, [inventory]);
+    if (loading) return; // Empêche d'écraser pendant le chargement initial
 
-  useEffect(() => {
-    localStorage.setItem('mealAppBakingV2', JSON.stringify(bakingItems));
-  }, [bakingItems]);
+    async function saveData() {
+      const payload = {
+        user_key: 'ma_famille',
+        data: { recipes, menu, inventory, bakingItems, shoppingChecks }
+      };
 
-  useEffect(() => {
-    localStorage.setItem('mealAppShoppingChecksV2', JSON.stringify(shoppingChecks));
-  }, [shoppingChecks]);
+      const { data: existing } = await supabase
+        .from('stockage_donnees')
+        .select('id')
+        .eq('user_key', 'ma_famille')
+        .maybeSingle();
+
+      if (existing) {
+        await supabase
+          .from('stockage_donnees')
+          .update(payload)
+          .eq('user_key', 'ma_famille');
+      } else {
+        await supabase
+          .from('stockage_donnees')
+          .insert([payload]);
+      }
+    }
+
+    const timer = setTimeout(saveData, 1000);
+    return () => clearTimeout(timer);
+  }, [recipes, menu, inventory, bakingItems, shoppingChecks]);
 
   const addRecipe = (newRecipe) => {
     setRecipes(prev => [...prev, { ...newRecipe, id: Date.now().toString() }]);
