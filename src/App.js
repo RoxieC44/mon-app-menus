@@ -276,12 +276,27 @@ export default function App() {
     }
   };
 
-  // Helper pour récupérer l'appareil d'un plat planifié
   const getApplianceForMeal = (mealTitle) => {
     if (!mealTitle || mealTitle === 'Restes de la veille') return null;
     const found = dishes.find(d => d.title === mealTitle);
     return found ? found.appliance : null;
   };
+
+  // Calcul du récapitulatif des appareils utilisés dans la semaine
+  const getWeeklyAppliancesSummary = () => {
+    const counts = {};
+    Object.values(weeklyMenu).forEach(meals => {
+      [meals.midi, meals.soir].forEach(mealTitle => {
+        const app = getApplianceForMeal(mealTitle);
+        if (app) {
+          counts[app] = (counts[app] || 0) + 1;
+        }
+      });
+    });
+    return counts;
+  };
+
+  const weeklyAppliances = getWeeklyAppliancesSummary();
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans pb-24 relative">
@@ -322,7 +337,6 @@ export default function App() {
                   menuSubTab === 'catalogue' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                {/* Modification : Icône Liste (List) */}
                 <List size={18} /> Catalogue repas ({dishes.length})
               </button>
             </div>
@@ -346,6 +360,22 @@ export default function App() {
                   </button>
                 </div>
 
+                {/* Récapitulatif des appareils utilisés */}
+                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center gap-3">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                    ⚙️ Équilibre des appareils :
+                  </span>
+                  {Object.keys(weeklyAppliances).length === 0 ? (
+                    <span className="text-xs text-slate-400 italic">Aucun appareil planifié pour le moment</span>
+                  ) : (
+                    Object.entries(weeklyAppliances).map(([app, count]) => (
+                      <span key={app} className="bg-indigo-50 text-indigo-700 text-xs font-bold px-3 py-1 rounded-xl border border-indigo-100">
+                        {app} : <span className="font-extrabold">{count}</span>
+                      </span>
+                    ))
+                  )}
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {Object.entries(weeklyMenu).map(([day, meals]) => {
                     const isWednesday = day === 'Mercredi';
@@ -354,7 +384,6 @@ export default function App() {
                     const strictCat = getDayCategoryFilter(day);
                     const eveningRecipes = strictCat ? getRecipesByCategory(strictCat) : getAvailableRecipes();
 
-                    // Appareils utilisés pour ce jour (si générés)
                     const midiAppliance = getApplianceForMeal(meals.midi);
                     const soirAppliance = getApplianceForMeal(meals.soir);
 
@@ -390,7 +419,6 @@ export default function App() {
                                 className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                               >
                                 <option value="Restes de la veille">🔄 Restes de la veille</option>
-                                <option value="">-- Choisir ou laisser vide --</option>
                                 {getAvailableRecipes().map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
                               </select>
                             ) : (
@@ -572,7 +600,7 @@ export default function App() {
                       onChange={(e) => setWeeklyCakes({...weeklyCakes, choix1: e.target.value})}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
                     >
-                      <option value="">-- Choisir ou laisser vide --</option>
+                      <option value="">-- Choisir le gâteau --</option>
                       {cakes.map(c => <option key={c.id} value={c.title}>{c.title}</option>)}
                     </select>
                   </div>
@@ -584,7 +612,7 @@ export default function App() {
                       onChange={(e) => setWeeklyCakes({...weeklyCakes, choix2: e.target.value})}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
                     >
-                      <option value="">-- Choisir ou laisser vide --</option>
+                      <option value="">-- Choisir le gâteau --</option>
                       {cakes.map(c => <option key={c.id} value={c.title}>{c.title}</option>)}
                     </select>
                   </div>
@@ -949,7 +977,6 @@ export default function App() {
           </button>
 
           <button 
-            onClick={() =>SESsetActiveTab('courses')} 
             onClick={() => setActiveTab('courses')} 
             className={`flex flex-col items-center p-2 rounded-xl transition-colors ${activeTab === 'courses' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
           >
