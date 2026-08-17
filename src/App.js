@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Cake, Plus, Archive, ShoppingBag, X, Trash2, Sparkles, Utensils, Menu } from 'lucide-react';
+import { Calendar, Cake, Plus, Archive, ShoppingBag, X, Trash2, Sparkles, Utensils, Menu, RefreshCw } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('courses');
+  const [activeTab, setActiveTab] = useState('menus');
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   
   // Sous-onglets
@@ -327,67 +327,72 @@ export default function App() {
                       <Sparkles className="text-indigo-600" size={20} /> Générateur Intelligent
                     </h2>
                     <p className="text-xs text-slate-500">
-                      Suggestions automatiques basées sur la saison actuelle ({currentSeason}).
+                      Remplit automatiquement chaque jour selon les contraintes strictes ({currentSeason}).
                     </p>
                   </div>
+                  {/* MODIFICATION: Icône RefreshCw (🔄) */}
                   <button 
                     onClick={handleGenerateBalancedMenu}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-xl text-sm transition-colors shadow-sm flex items-center gap-2 whitespace-nowrap"
                   >
-                    <Sparkles size={16} /> Générer un menu équilibré
+                    <RefreshCw size={16} /> Générer un menu équilibré
                   </button>
                 </div>
 
-                {Object.entries(weeklyMenu).map(([day, meals]) => {
-                  const isWednesday = day === 'Mercredi';
-                  const badgeText = dayBadges[day];
-                  const strictCat = getDayCategoryFilter(day);
-                  const eveningRecipes = strictCat ? getRecipesByCategory(strictCat) : getAvailableRecipes();
+                {/* MODIFICATION: Affichage en grille de carrés (cols-1 sur mobile, cols-2 tablette, cols-3 desktop) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {Object.entries(weeklyMenu).map(([day, meals]) => {
+                    const isWednesday = day === 'Mercredi';
+                    const badgeText = dayBadges[day];
+                    const strictCat = getDayCategoryFilter(day);
+                    const eveningRecipes = strictCat ? getRecipesByCategory(strictCat) : getAvailableRecipes();
 
-                  return (
-                    <div key={day} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3 relative">
-                      <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                        <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                          <Calendar size={18} className="text-indigo-600" /> {day}
-                        </h3>
-                        {badgeText && (
-                          <span className="bg-slate-100 text-slate-600 text-xs font-semibold px-2.5 py-1 rounded-md">
-                            {badgeText}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Midi</span>
-                          <select 
-                            value={meals.midi}
-                            onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, midi: e.target.value }})}
-                            className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                          >
-                            <option value="">-- Choisir ou laisser vide --</option>
-                            <option value="Restes de la veille">Restes de la veille</option>
-                            {getAvailableRecipes().map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
-                          </select>
+                    return (
+                      <div key={day} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col relative">
+                        <div className="flex justify-between items-center border-b border-slate-100 pb-3 mb-3">
+                          <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                            <Calendar size={18} className="text-indigo-600" /> {day}
+                          </h3>
+                          {badgeText && (
+                            <span className="bg-slate-100 text-slate-600 text-[10px] font-semibold px-2 py-1 rounded-md uppercase tracking-wide">
+                              {badgeText}
+                            </span>
+                          )}
                         </div>
 
-                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
-                            Soir
-                          </span>
-                          <select 
-                            value={meals.soir}
-                            onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, soir: e.target.value }})}
-                            className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                          >
-                            <option value="">-- Choisir ou laisser vide --</option>
-                            {eveningRecipes.map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
-                          </select>
+                        {/* MODIFICATION: flex-col pour que Soir soit sous Midi */}
+                        <div className="flex flex-col gap-3 flex-1">
+                          <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Midi</span>
+                            <select 
+                              value={meals.midi}
+                              onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, midi: e.target.value }})}
+                              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            >
+                              <option value="">-- Choisir ou laisser vide --</option>
+                              <option value="Restes de la veille">Restes de la veille</option>
+                              {getAvailableRecipes().map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
+                            </select>
+                          </div>
+
+                          <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
+                              Soir
+                            </span>
+                            <select 
+                              value={meals.soir}
+                              onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, soir: e.target.value }})}
+                              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            >
+                              <option value="">-- Choisir ou laisser vide --</option>
+                              {eveningRecipes.map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
+                            </select>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             )}
 
@@ -506,11 +511,12 @@ export default function App() {
                     <h2 className="text-lg font-bold text-slate-800">Pâtisseries</h2>
                     <p className="text-xs text-slate-500">Planifiez vos choix de la semaine.</p>
                   </div>
+                  {/* MODIFICATION: Icône RefreshCw (🔄) ajoutée ici aussi par cohérence */}
                   <button 
                     onClick={handleGenerateBalancedCakes}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-xl text-sm transition-colors shadow-sm flex items-center gap-2 whitespace-nowrap"
                   >
-                    <Sparkles size={16} /> Générer les recettes
+                    <RefreshCw size={16} /> Générer un menu équilibré
                   </button>
                 </div>
 
@@ -591,7 +597,7 @@ export default function App() {
                       addType === 'plat' ? 'bg-indigo-50 border-indigo-600 text-indigo-700 shadow-sm' : 'border-slate-200 text-slate-600'
                     }`}
                   >
-                    🍽️ Plat / Repas
+                    🍲 Plat / Repas
                   </button>
                   <button
                     type="button"
@@ -600,7 +606,7 @@ export default function App() {
                       addType === 'gateau' ? 'bg-indigo-50 border-indigo-600 text-indigo-700 shadow-sm' : 'border-slate-200 text-slate-600'
                     }`}
                   >
-                    🍰 Gâteau / Goûter
+                    🍰 Gâteau
                   </button>
                 </div>
               </div>
@@ -704,7 +710,7 @@ export default function App() {
               <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2 mb-1">
                 <Archive className="text-indigo-600" size={24} /> Mon Placard & Frigo
               </h2>
-              <p className="text-xs text-slate-500">Listez vos provisions et leur état actuel pour affiner la liste de courses.</p>
+              <p className="text-xs text-slate-500">Gérez votre stock pour ajuster intelligemment votre liste de courses.</p>
             </div>
 
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
