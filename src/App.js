@@ -20,11 +20,11 @@ export default function App() {
     else setCurrentSeason('Hiver');
   }, []);
 
-  // Planning de la semaine initialement avec des menus pour tester la liste de courses
+  // Planning de la semaine (initialement vide pour que la liste soit générée uniquement selon les recettes choisies/générées)
   const [weeklyMenu, setWeeklyMenu] = useState({
-    Lundi: { midi: '', soir: 'Poulet coco et riz' },
-    Mardi: { midi: '', soir: 'Bléotto aux courgettes' },
-    Mercredi: { midi: '', soir: 'Cordon bleu et Pomme de terre' },
+    Lundi: { midi: '', soir: '' },
+    Mardi: { midi: '', soir: '' },
+    Mercredi: { midi: '', soir: '' },
     Jeudi: { midi: '', soir: '' },
     Vendredi: { midi: '', soir: '' },
     Samedi: { midi: '', soir: '' },
@@ -32,7 +32,7 @@ export default function App() {
   });
 
   const [weeklyCakes, setWeeklyCakes] = useState({
-    choix1: 'Gâteau au yaourt moelleux',
+    choix1: '',
     choix2: ''
   });
 
@@ -105,7 +105,7 @@ export default function App() {
   const [formIngredients, setFormIngredients] = useState('');
   const [formInstructions, setFormInstructions] = useState('');
 
-  // Génération dynamique de la liste de courses basée sur les menus/gâteaux et le placard
+  // Génération dynamique de la liste de courses basée STRICTEMENT sur les recettes planifiées/générées
   const getSmartShoppingList = () => {
     const itemsMap = new Map();
 
@@ -784,7 +784,7 @@ export default function App() {
               <div>
                 <h2 className="text-lg font-bold text-slate-900">Liste de Courses Intelligente</h2>
                 <p className="text-xs text-slate-500">
-                  Basée sur les menus et les gâteaux de la semaine.
+                  Générée automatiquement en fonction des menus et des gâteaux choisis/générés de la semaine.
                 </p>
               </div>
             </div>
@@ -792,7 +792,7 @@ export default function App() {
             {!hasPlannedItems ? (
               <div className="border-2 border-dashed border-indigo-200 bg-indigo-50/30 rounded-2xl p-10 text-center space-y-4">
                 <p className="text-sm font-medium text-slate-600">
-                  Aucun menu ou gâteau planifié pour l'instant.
+                  Aucun menu ou gâteau planifié pour l'instant. Choisissez vos recettes dans l'onglet <strong>Menus</strong> ou utilisez le générateur automatique !
                 </p>
                 <button
                   onClick={() => { setActiveTab('menus'); setMenuSubTab('semaine'); }}
