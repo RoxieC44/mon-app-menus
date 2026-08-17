@@ -140,7 +140,7 @@ export default function App() {
       if (pantryMatch) {
         if (pantryMatch.status === 'Plein') status = 'En stock (Plein)';
         else if (pantryMatch.status === 'Entamé') status = 'En stock (Entamé - Attention quantité)';
-        else if (pantryMatch.status === 'Presque vide') status = 'A acheter';
+        else if (pantryMatch.status === 'Presque vide') status = 'En stock (Presque vide)';
       }
       list.push({ id: key, name: val.name, status });
     });
@@ -807,7 +807,8 @@ export default function App() {
                   const isChecked = !!checkedItems[item.id];
                   const isAcheter = item.status === 'A acheter';
                   const isPlein = item.status === 'En stock (Plein)';
-                  const isEntame = item.status.includes('Entamé');
+                  const isEntame = item.status === 'En stock (Entamé - Attention quantité)';
+                  const isPresqueVide = item.status === 'En stock (Presque vide)';
 
                   return (
                     <div 
@@ -849,6 +850,13 @@ export default function App() {
                             isChecked ? 'bg-slate-200 text-slate-500 border-slate-300 line-through' : 'bg-amber-50 text-amber-700 border-amber-200'
                           }`}>
                             En stock (Entamé - Attention quantité)
+                          </span>
+                        )}
+                        {isPresqueVide && (
+                          <span className={`border text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm transition-all ${
+                            isChecked ? 'bg-slate-200 text-slate-500 border-slate-300 line-through' : 'bg-rose-50 text-rose-700 border-rose-200'
+                          }`}>
+                            En stock (Presque vide)
                           </span>
                         )}
                       </div>
