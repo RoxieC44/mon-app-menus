@@ -56,7 +56,7 @@ export default function App() {
   const [bakingItems, setBakingItems] = useState(['', '']);
   const [shoppingChecks, setShoppingChecks] = useState({});
 
-  // CHARGEMENT INITIAL DEPUIS SUPABASE
+  // 1. CHARGEMENT INITIAL DEPUIS SUPABASE
   useEffect(() => {
     async function loadData() {
       setLoading(true);
@@ -79,7 +79,7 @@ export default function App() {
     loadData();
   }, []);
 
-  // Sauvegarde automatique sur Supabase à chaque modification
+  // 2. SAUVEGARDE AUTOMATIQUE SUR SUPABASE À CHAQUE MODIFICATION
   useEffect(() => {
     if (loading) return; // Empêche d'écraser pendant le chargement initial
 
