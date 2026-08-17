@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Cake, Plus, Archive, ShoppingBag, X, Trash2, Sparkles, Utensils, List, RefreshCw, Cpu } from 'lucide-react';
+import { Calendar, Cake, Plus, Archive, ShoppingBag, X, Trash2, Sparkles, Utensils, List, RefreshCw } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('menus');
@@ -20,7 +20,7 @@ export default function App() {
     else setCurrentSeason('Hiver');
   }, []);
 
-  // Planning de la semaine (Mise à jour des valeurs par défaut demandées)
+  // Planning de la semaine
   const [weeklyMenu, setWeeklyMenu] = useState({
     Lundi: { midi: 'Restes de la veille', soir: '' },
     Mardi: { midi: 'Restes de la veille', soir: '' },
@@ -188,24 +188,6 @@ export default function App() {
     });
   };
 
-  // Calcul du résumé des appareils utilisés pour les soirs de la semaine
-  const getWeeklyAppliancesSummary = () => {
-    const counts = {};
-    Object.entries(weeklyMenu).forEach(([day, meals]) => {
-      // On regarde principalement le soir (et le mercredi midi si rempli)
-      [meals.midi, meals.soir].forEach(mealTitle => {
-        if (!mealTitle || mealTitle === 'Restes de la veille') return;
-        const found = dishes.find(d => d.title === mealTitle);
-        if (found && found.appliance) {
-          counts[found.appliance] = (counts[found.appliance] || 0) + 1;
-        }
-      });
-    });
-    return counts;
-  };
-
-  const applianceSummary = getWeeklyAppliancesSummary();
-
   const handleGenerateBalancedCakes = () => {
     const seasonalCakes = cakes.filter(c => c.season === currentSeason || c.season === 'Toutes');
     const pool = seasonalCakes.length > 0 ? seasonalCakes : cakes;
@@ -294,6 +276,13 @@ export default function App() {
     }
   };
 
+  // Helper pour récupérer l'appareil d'un plat planifié
+  const getApplianceForMeal = (mealTitle) => {
+    if (!mealTitle || mealTitle === 'Restes de la veille') return null;
+    const found = dishes.find(d => d.title === mealTitle);
+    return found ? found.appliance : null;
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans pb-24 relative">
       
@@ -327,13 +316,13 @@ export default function App() {
               >
                 <Calendar size={18} /> Choix de la semaine
               </button>
-              {/* MODIFICATION: Icône liste (List) à côté de catalogue repas */}
               <button
                 onClick={() => setMenuSubTab('catalogue')}
                 className={`flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
                   menuSubTab === 'catalogue' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
+                {/* Modification : Icône Liste (List) */}
                 <List size={18} /> Catalogue repas ({dishes.length})
               </button>
             </div>
@@ -357,32 +346,17 @@ export default function App() {
                   </button>
                 </div>
 
-                {/* MODIFICATION: Affichage de l'équilibre des appareils utilisés pour la semaine */}
-                {Object.keys(applianceSummary).length > 0 && (
-                  <div className="bg-indigo-50 border border-indigo-100 p-4 rounded-2xl flex flex-wrap items-center gap-3">
-                    <div className="flex items-center gap-2 text-indigo-900 font-bold text-xs uppercase tracking-wider">
-                      <Cpu size={16} className="text-indigo-600" /> Équilibre des appareils :
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {Object.entries(applianceSummary).map(([app, count]) => (
-                        <span key={app} className="bg-white text-indigo-700 font-semibold text-xs px-3 py-1 rounded-lg border border-indigo-200 shadow-sm">
-                          {app} : <strong className="text-indigo-900">{count}</strong>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {Object.entries(weeklyMenu).map(([day, meals]) => {
                     const isWednesday = day === 'Mercredi';
+                    const isMidiRestDays = ['Lundi', 'Mardi', 'Jeudi', 'Vendredi'].includes(day);
                     const badgeText = dayBadges[day];
                     const strictCat = getDayCategoryFilter(day);
                     const eveningRecipes = strictCat ? getRecipesByCategory(strictCat) : getAvailableRecipes();
 
-                    // Rôles spécifiques pour les midis
-                    const isRestDayMidi = ['Lundi', 'Mardi', 'Jeudi', 'Vendredi'].includes(day);
-                    const isChooseDayMidi = ['Mercredi', 'Samedi', 'Dimanche'].includes(day);
+                    // Appareils utilisés pour ce jour (si générés)
+                    const midiAppliance = getApplianceForMeal(meals.midi);
+                    const soirAppliance = getApplianceForMeal(meals.soir);
 
                     return (
                       <div key={day} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col relative">
@@ -398,13 +372,27 @@ export default function App() {
                         </div>
 
                         <div className="flex flex-col gap-3 flex-1">
-                          {/* MIDI */}
+                          {/* Bloc Midi */}
                           <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Midi</span>
-                            {isRestDayMidi ? (
-                              <div className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 flex items-center gap-2 font-medium">
-                                <span>🔄</span> Restes de la veille
-                              </div>
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Midi</span>
+                              {midiAppliance && (
+                                <span className="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-md">
+                                  ⚙️ {midiAppliance}
+                                </span>
+                              )}
+                            </div>
+                            
+                            {isMidiRestDays ? (
+                              <select 
+                                value={meals.midi}
+                                onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, midi: e.target.value }})}
+                                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                              >
+                                <option value="Restes de la veille">🔄 Restes de la veille</option>
+                                <option value="">-- Choisir ou laisser vide --</option>
+                                {getAvailableRecipes().map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
+                              </select>
                             ) : (
                               <select 
                                 value={meals.midi}
@@ -412,21 +400,27 @@ export default function App() {
                                 className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                               >
                                 <option value="">-- Choisir le midi --</option>
-                                <option value="Restes de la veille">Restes de la veille</option>
+                                <option value="Restes de la veille">🔄 Restes de la veille</option>
                                 {getAvailableRecipes().map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
                               </select>
                             )}
                           </div>
 
-                          {/* SOIR */}
+                          {/* Bloc Soir */}
                           <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
-                              Soir
-                            </span>
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Soir</span>
+                              {soirAppliance && (
+                                <span className="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-md">
+                                  ⚙️ {soirAppliance}
+                                </span>
+                              )}
+                            </div>
+
                             {isWednesday ? (
-                              <div className="w-full bg-indigo-50/70 border border-indigo-200 rounded-lg p-2 text-sm text-indigo-900 font-semibold flex items-center justify-between">
+                              <div className="w-full bg-slate-100 border border-slate-200 rounded-lg p-2 text-sm text-slate-700 font-medium cursor-not-allowed flex items-center justify-between">
                                 <span>Cordon bleu et Pomme de terre</span>
-                                <span className="text-[10px] bg-indigo-200 text-indigo-800 px-1.5 py-0.5 rounded font-bold">Fixe</span>
+                                <span className="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded">Fixe</span>
                               </div>
                             ) : (
                               <select 
@@ -955,6 +949,7 @@ export default function App() {
           </button>
 
           <button 
+            onClick={() =>SESsetActiveTab('courses')} 
             onClick={() => setActiveTab('courses')} 
             className={`flex flex-col items-center p-2 rounded-xl transition-colors ${activeTab === 'courses' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
           >
