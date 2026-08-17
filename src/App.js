@@ -221,29 +221,6 @@ function NavButton({ active, onClick, icon, label }) {
       label="Gâteaux" 
     />
     
-    {/* GROS BOUTON "+" DU MILIEU EN RELIEF */}
-    <button 
-      onClick={() => setActiveTab('ajouter')} 
-      className="bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-lg transform -translate-y-5 transition-transform hover:scale-105 border-4 border-white flex items-center justify-center"
-    >
-      <Plus size={26} />
-    </button>
-    
-    <NavButton 
-      active={activeTab === 'placard'} 
-      onClick={() => setActiveTab('placard')} 
-      icon={<Archive size={22} />} 
-      label="Placard" 
-    />
-
-    <NavButton 
-      active={activeTab === 'courses'} 
-      onClick={() => setActiveTab('courses')} 
-      icon={<ShoppingBag size={22} />} 
-      label="Courses" 
-    />
-  </div>
-</nav>
 
 function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, deleteRecipe, setViewingRecipe, currentSeason }) {
   const [subTab, setSubTab] = useState('planning');
