@@ -20,7 +20,7 @@ export default function App() {
     else setCurrentSeason('Hiver');
   }, []);
 
-  // Planning de la semaine (initialement vide pour que la liste soit générée uniquement selon les recettes choisies/générées)
+  // Planning de la semaine
   const [weeklyMenu, setWeeklyMenu] = useState({
     Lundi: { midi: '', soir: '' },
     Mardi: { midi: '', soir: '' },
@@ -101,11 +101,10 @@ export default function App() {
   const [formCategory, setFormCategory] = useState('Riz');
   const [formAppliance, setFormAppliance] = useState('Four');
   const [formSeason, setFormSeason] = useState('Toutes');
-  const [formLink, setFormLink] = useState('');
   const [formIngredients, setFormIngredients] = useState('');
   const [formInstructions, setFormInstructions] = useState('');
 
-  // Génération dynamique de la liste de courses basée STRICTEMENT sur les recettes planifiées/générées
+  // Génération dynamique de la liste de courses
   const getSmartShoppingList = () => {
     const itemsMap = new Map();
 
@@ -244,7 +243,6 @@ export default function App() {
     }
 
     setFormTitle('');
-    setFormLink('');
     setFormIngredients('');
     setFormInstructions('');
   };
@@ -279,10 +277,10 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans pb-24">
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans pb-24 relative">
       
       {/* HEADER */}
-      <header className="bg-indigo-600 text-white px-6 py-4 shadow-md flex justify-between items-center sticky top-0 z-25">
+      <header className="bg-indigo-600 text-white px-6 py-4 shadow-md flex justify-between items-center sticky top-0 z-20">
         <div className="flex items-center gap-3">
           <div className="bg-white/20 p-2 rounded-xl text-xl flex items-center justify-center">
             <Utensils size={22} />
@@ -690,8 +688,8 @@ export default function App() {
               <div>
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Instructions de préparation</label>
                 <textarea
-                  rows={3}
-                  placeholder="Étapes..."
+                  rows={4}
+                  placeholder="1. Éplucher les légumes...&#10;2. Faire revenir dans la poêle..."
                   value={formInstructions}
                   onChange={(e) => setFormInstructions(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
@@ -700,9 +698,9 @@ export default function App() {
 
               <button
                 type="submit"
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl transition-colors shadow-sm text-sm"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2"
               >
-                Enregistrer dans la base de données
+                <Plus size={20} /> Enregistrer la recette
               </button>
             </form>
           </div>
@@ -710,156 +708,117 @@ export default function App() {
 
         {/* ================= ONGLET PLACARD ================= */}
         {activeTab === 'placard' && (
-          <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm max-w-2xl mx-auto space-y-6">
-            <div>
-              <h2 className="text-xl font-bold text-slate-800">Mon Placard & Frigo Intelligent</h2>
-              <p className="text-xs text-slate-500">
-                Listez vos provisions et leur état actuel pour affiner la liste de courses.
-              </p>
+          <div className="space-y-6">
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2 mb-1">
+                <Archive className="text-indigo-600" size={24} /> Mon Placard & Frigo
+              </h2>
+              <p className="text-xs text-slate-500">Gérez votre stock pour ajuster intelligemment votre liste de courses.</p>
             </div>
 
-            <form onSubmit={handleAddPantryItem} className="flex flex-col md:flex-row gap-3">
-              <input
-                type="text"
-                placeholder="Ex: Riz, Pâtes, Lait..."
-                value={newItemName}
-                onChange={(e) => setNewItemName(e.target.value)}
-                className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
-              />
-              <select
-                value={newItemStatus}
-                onChange={(e) => setNewItemStatus(e.target.value)}
-                className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
-              >
-                <option>Plein</option>
-                <option>Entamé</option>
-                <option>Presque vide</option>
-              </select>
-              <button
-                type="submit"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors text-sm shadow-sm"
-              >
-                Ajouter
-              </button>
-            </form>
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+              <form onSubmit={handleAddPantryItem} className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Nouvel ingrédient (ex: Sel, Lait...)"
+                  value={newItemName}
+                  onChange={(e) => setNewItemName(e.target.value)}
+                  className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
+                />
+                <select
+                  value={newItemStatus}
+                  onChange={(e) => setNewItemStatus(e.target.value)}
+                  className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
+                >
+                  <option>Plein</option>
+                  <option>Entamé</option>
+                  <option>Presque vide</option>
+                </select>
+                <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 rounded-xl transition-colors">
+                  <Plus size={20} />
+                </button>
+              </form>
 
-            <div className="border border-slate-200 rounded-2xl overflow-hidden divide-y divide-slate-100">
-              {pantry.map(item => (
-                <div key={item.id} className="flex justify-between items-center p-4 hover:bg-slate-50/50 transition-colors">
-                  <span className="font-medium text-slate-700">{item.name}</span>
-                  <div className="flex items-center gap-3">
-                    <select
-                      value={item.status}
-                      onChange={(e) => handleUpdatePantryStatus(item.id, e.target.value)}
-                      className={`text-xs font-bold px-3 py-1.5 rounded-xl border focus:outline-none ${
-                        item.status === 'Plein' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                        item.status === 'Entamé' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                        'bg-rose-50 text-rose-700 border-rose-200'
-                      }`}
-                    >
-                      <option>Plein</option>
-                      <option>Entamé</option>
-                      <option>Presque vide</option>
-                    </select>
-                    <button 
-                      onClick={() => handleDeletePantryItem(item.id)}
-                      className="text-slate-400 hover:text-red-500 p-1.5 transition-colors"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </div>
-              ))}
+              <div className="space-y-2 mt-4">
+                {pantry.length === 0 ? (
+                  <p className="text-center text-slate-400 text-sm py-4">Votre placard est vide.</p>
+                ) : (
+                  pantry.map(item => (
+                    <div key={item.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
+                      <span className="font-medium text-sm text-slate-700">{item.name}</span>
+                      <div className="flex items-center gap-3">
+                        <select
+                          value={item.status}
+                          onChange={(e) => handleUpdatePantryStatus(item.id, e.target.value)}
+                          className={`text-xs font-bold rounded-lg px-2 py-1 border-0 focus:ring-0 cursor-pointer outline-none ${
+                            item.status === 'Plein' ? 'bg-green-100 text-green-700' :
+                            item.status === 'Entamé' ? 'bg-orange-100 text-orange-700' :
+                            'bg-red-100 text-red-700'
+                          }`}
+                        >
+                          <option>Plein</option>
+                          <option>Entamé</option>
+                          <option>Presque vide</option>
+                        </select>
+                        <button onClick={() => handleDeletePantryItem(item.id)} className="text-slate-400 hover:text-red-500 p-1">
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
         )}
 
         {/* ================= ONGLET COURSES ================= */}
         {activeTab === 'courses' && (
-          <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm max-w-2xl mx-auto space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="text-indigo-600">
-                <ShoppingBag size={24} />
-              </div>
-              <div>
-                <h2 className="text-lg font-bold text-slate-900">Liste de Courses Intelligente</h2>
-                <p className="text-xs text-slate-500">
-                  Générée automatiquement en fonction des menus et des gâteaux choisis/générés de la semaine.
-                </p>
-              </div>
+          <div className="space-y-6">
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2 mb-1">
+                <ShoppingBag className="text-indigo-600" size={24} /> Liste de Courses
+              </h2>
+              <p className="text-xs text-slate-500">Générée automatiquement selon les menus planifiés et l'état de vos placards.</p>
             </div>
 
             {!hasPlannedItems ? (
-              <div className="border-2 border-dashed border-indigo-200 bg-indigo-50/30 rounded-2xl p-10 text-center space-y-4">
-                <p className="text-sm font-medium text-slate-600">
-                  Aucun menu ou gâteau planifié pour l'instant. Choisissez vos recettes dans l'onglet <strong>Menus</strong> ou utilisez le générateur automatique !
-                </p>
-                <button
-                  onClick={() => { setActiveTab('menus'); setMenuSubTab('semaine'); }}
-                  className="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-semibold px-5 py-2.5 rounded-xl text-xs transition-colors shadow-sm inline-flex items-center gap-2"
-                >
-                  Aller planifier le menu
-                </button>
+              <div className="bg-indigo-50 border border-indigo-100 p-8 rounded-2xl text-center">
+                <ShoppingBag className="mx-auto text-indigo-300 mb-3" size={40} />
+                <p className="text-indigo-800 font-medium text-sm">Votre liste est vide.</p>
+                <p className="text-indigo-600 text-xs mt-1">Planifiez des repas dans "Menus" et "Gâteaux" pour générer la liste automatiquement.</p>
               </div>
             ) : (
-              <div className="border border-slate-200 rounded-2xl overflow-hidden divide-y divide-slate-100">
-                {shoppingList.map((item) => {
-                  const isChecked = !!checkedItems[item.id];
-                  const isAcheter = item.status === 'A acheter';
-                  const isPlein = item.status === 'En stock (Plein)';
-                  const isEntame = item.status === 'En stock (Entamé - Attention quantité)';
-                  const isPresqueVide = item.status === 'En stock (Presque vide)';
-
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                {shoppingList.map((item, index) => {
+                  const isChecked = checkedItems[item.id] || false;
+                  
                   return (
                     <div 
                       key={item.id} 
-                      className={`flex items-center justify-between p-4 transition-colors ${
-                        isChecked ? 'bg-slate-100/80 opacity-60' : 'hover:bg-slate-50/50'
-                      }`}
+                      onClick={() => toggleCheckItem(item.id)}
+                      className={`flex items-center justify-between p-4 border-b border-slate-100 cursor-pointer hover:bg-slate-50 transition-colors ${
+                        isChecked ? 'opacity-50 bg-slate-50' : ''
+                      } ${index === shoppingList.length - 1 ? 'border-b-0' : ''}`}
                     >
                       <div className="flex items-center gap-3">
-                        <input 
-                          type="checkbox" 
-                          checked={isChecked}
-                          onChange={() => toggleCheckItem(item.id)}
-                          className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" 
-                        />
-                        <span className={`font-medium text-sm transition-all ${
-                          isChecked ? 'line-through text-slate-400' : 'text-slate-800'
+                        <div className={`w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 ${
+                          isChecked ? 'bg-indigo-600 border-indigo-600' : 'border-slate-300'
                         }`}>
+                          {isChecked && <span className="text-white text-xs">✓</span>}
+                        </div>
+                        <span className={`font-medium text-sm ${isChecked ? 'line-through text-slate-500' : 'text-slate-700'}`}>
                           {item.name}
                         </span>
                       </div>
-                      <div>
-                        {isAcheter && (
-                          <span className={`border text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm transition-all ${
-                            isChecked ? 'bg-slate-200 text-slate-500 border-slate-300 line-through' : 'bg-blue-50 text-blue-600 border-blue-200'
-                          }`}>
-                            A acheter
-                          </span>
-                        )}
-                        {isPlein && (
-                          <span className={`border text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm transition-all ${
-                            isChecked ? 'bg-slate-200 text-slate-500 border-slate-300 line-through' : 'bg-emerald-50 text-emerald-600 border-emerald-200'
-                          }`}>
-                            En stock (Plein)
-                          </span>
-                        )}
-                        {isEntame && (
-                          <span className={`border text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm transition-all ${
-                            isChecked ? 'bg-slate-200 text-slate-500 border-slate-300 line-through' : 'bg-amber-50 text-amber-700 border-amber-200'
-                          }`}>
-                            En stock (Entamé - Attention quantité)
-                          </span>
-                        )}
-                        {isPresqueVide && (
-                          <span className={`border text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm transition-all ${
-                            isChecked ? 'bg-slate-200 text-slate-500 border-slate-300 line-through' : 'bg-rose-50 text-rose-700 border-rose-200'
-                          }`}>
-                            En stock (Presque vide)
-                          </span>
-                        )}
-                      </div>
+                      
+                      <span className={`text-[10px] font-bold px-2 py-1 rounded-md text-right ml-2 flex-shrink-0 ${
+                        item.status.includes('A acheter') ? 'bg-red-50 text-red-600' : 
+                        item.status.includes('Plein') ? 'bg-green-50 text-green-600' : 
+                        'bg-orange-50 text-orange-600'
+                      }`}>
+                        {item.status}
+                      </span>
                     </div>
                   );
                 })}
@@ -867,100 +826,97 @@ export default function App() {
             )}
           </div>
         )}
+
       </main>
 
-      {/* MODALE FICHE RECETTE */}
+      {/* MODAL RECETTE */}
       {selectedRecipe && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-start border-b border-slate-100 pb-4">
-              <div>
-                <span className="text-xs bg-indigo-50 text-indigo-700 font-bold px-2.5 py-1 rounded-full">{selectedRecipe.category}</span>
-                <h2 className="text-xl font-bold text-slate-800 mt-2">{selectedRecipe.title}</h2>
-              </div>
-              <button 
-                onClick={() => setSelectedRecipe(null)}
-                className="bg-slate-100 hover:bg-slate-200 text-slate-500 p-2 rounded-full transition-colors"
-              >
-                <X size={18} />
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden transform transition-all">
+            <div className="bg-white border-b border-slate-100 p-5 flex justify-between items-center">
+              <h2 className="font-bold text-lg text-slate-800 pr-4">{selectedRecipe.title}</h2>
+              <button onClick={() => setSelectedRecipe(null)} className="p-2 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-600 transition-colors flex-shrink-0">
+                <X size={20} />
               </button>
             </div>
+            
+            <div className="p-6 overflow-y-auto flex-1 space-y-6">
+              <div className="flex flex-wrap gap-2">
+                <span className="bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-lg text-xs font-bold">{selectedRecipe.category}</span>
+                <span className="bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-semibold">⚙️ {selectedRecipe.appliance}</span>
+                <span className="bg-amber-50 text-amber-700 px-3 py-1.5 rounded-lg text-xs font-semibold">☀️ {selectedRecipe.season}</span>
+              </div>
+              
+              <div>
+                <h3 className="font-bold text-slate-800 flex items-center gap-2 mb-3">
+                  <ShoppingBag size={18} className="text-indigo-600" /> Ingrédients
+                </h3>
+                <ul className="space-y-2 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                  {selectedRecipe.ingredients.map((ing, i) => (
+                    <li key={i} className="flex items-center gap-3 text-sm text-slate-700 font-medium">
+                      <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span> {ing}
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-            <div className="flex gap-3 text-xs">
-              <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-lg font-medium">⚙️ {selectedRecipe.appliance}</span>
-              <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-lg font-medium">☀️ {selectedRecipe.season}</span>
+              <div>
+                <h3 className="font-bold text-slate-800 flex items-center gap-2 mb-3">
+                  <Utensils size={18} className="text-indigo-600" /> Instructions
+                </h3>
+                <div className="bg-slate-50 p-4 rounded-xl text-sm text-slate-700 whitespace-pre-line border border-slate-100 leading-relaxed">
+                  {selectedRecipe.instructions || "Aucune instruction d'étape fournie."}
+                </div>
+              </div>
             </div>
-
-            <div className="space-y-2">
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Ingrédients</h4>
-              <ul className="list-disc list-inside text-sm text-slate-700 space-y-1 bg-slate-50 p-3 rounded-xl">
-                {selectedRecipe.ingredients.map((ing, idx) => (
-                  <li key={idx}>{ing}</li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="space-y-2">
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Préparation</h4>
-              <p className="text-sm text-slate-700 whitespace-pre-line bg-slate-50 p-3 rounded-xl leading-relaxed">
-                {selectedRecipe.instructions}
-              </p>
-            </div>
-
-            <button
-              onClick={() => setSelectedRecipe(null)}
-              className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 rounded-xl transition-colors text-sm"
-            >
-              Fermer la fiche
-            </button>
           </div>
         </div>
       )}
 
-      {/* NAVIGATION DU BAS */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-lg px-6 py-3 z-30 flex justify-around items-center max-w-lg mx-auto md:rounded-t-2xl">
-        <button
-          onClick={() => setActiveTab('menus')}
-          className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'menus' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
-        >
-          <Calendar size={20} />
-          <span className="text-[10px] font-bold">Menus</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('gateaux')}
-          className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'gateaux' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
-        >
-          <Cake size={20} />
-          <span className="text-[10px] font-bold">Gâteaux</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('ajouter')}
-          className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'ajouter' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
-        >
-          <div className="bg-indigo-600 text-white p-2 rounded-full shadow-md -mt-5 hover:bg-indigo-700 transition-colors">
-            <Plus size={22} />
-          </div>
-          <span className="text-[10px] font-bold -mt-1">Ajouter</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('placard')}
-          className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'placard' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
-        >
-          <Archive size={20} />
-          <span className="text-[10px] font-bold">Placard</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('courses')}
-          className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'courses' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
-        >
-          <ShoppingBag size={20} />
-          <span className="text-[10px] font-bold">Courses</span>
-        </button>
+      {/* BOTTOM NAVIGATION */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-[0_-10px_15px_-3px_rgb(0,0,0,0.05)] z-40 px-6 py-2 pb-safe">
+        <div className="max-w-md mx-auto flex justify-between items-center">
+          <button 
+            onClick={() => setActiveTab('courses')} 
+            className={`flex flex-col items-center p-2 rounded-xl transition-colors ${activeTab === 'courses' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+          >
+            <ShoppingBag size={22} className="mb-1" />
+            <span className="text-[10px] font-bold">Courses</span>
+          </button>
+          
+          <button 
+            onClick={() => setActiveTab('menus')} 
+            className={`flex flex-col items-center p-2 rounded-xl transition-colors ${activeTab === 'menus' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+          >
+            <Calendar size={22} className="mb-1" />
+            <span className="text-[10px] font-bold">Menus</span>
+          </button>
+          
+          <button 
+            onClick={() => setActiveTab('ajouter')} 
+            className="bg-indigo-600 hover:bg-indigo-700 text-white p-3.5 rounded-2xl shadow-lg transform -translate-y-6 transition-transform hover:scale-105 border-4 border-slate-50"
+          >
+            <Plus size={24} />
+          </button>
+          
+          <button 
+            onClick={() => setActiveTab('gateaux')} 
+            className={`flex flex-col items-center p-2 rounded-xl transition-colors ${activeTab === 'gateaux' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+          >
+            <Cake size={22} className="mb-1" />
+            <span className="text-[10px] font-bold">Gâteaux</span>
+          </button>
+          
+          <button 
+            onClick={() => setActiveTab('placard')} 
+            className={`flex flex-col items-center p-2 rounded-xl transition-colors ${activeTab === 'placard' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+          >
+            <Archive size={22} className="mb-1" />
+            <span className="text-[10px] font-bold">Placard</span>
+          </button>
+        </div>
       </nav>
+      
     </div>
   );
 }
