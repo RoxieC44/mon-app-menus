@@ -428,16 +428,6 @@ export default function App() {
                                   {getAvailableRecipes().map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
                                 </select>
                               )}
-
-                              {foundMidiRecipe && (
-                                <button
-                                  onClick={() => setSelectedRecipe(foundMidiRecipe)}
-                                  title="Voir la fiche"
-                                  className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 p-2 rounded-lg transition-colors flex items-center justify-center flex-shrink-0"
-                                >
-                                  <Eye size={16} />
-                                </button>
-                              )}
                             </div>
 
                             <div className="flex justify-between items-center pt-1">
@@ -477,16 +467,6 @@ export default function App() {
                                   <option value="">-- Choisir --</option>
                                   {eveningRecipes.map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
                                 </select>
-                              )}
-
-                              {foundSoirRecipe && (
-                                <button
-                                  onClick={() => setSelectedRecipe(foundSoirRecipe)}
-                                  title="Voir la fiche"
-                                  className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 p-2 rounded-lg transition-colors flex items-center justify-center flex-shrink-0"
-                                >
-                                  <Eye size={16} />
-                                </button>
                               )}
                             </div>
 
@@ -631,21 +611,21 @@ export default function App() {
               <div className="space-y-4">
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
                   <div>
-                    <h2 className="text-lg font-bold text-slate-800">Pâtisseries</h2>
-                    <p className="text-xs text-slate-500">Planifiez vos choix de la semaine.</p>
+                    <h2 className="text-lg font-bold text-slate-800">Gâteaux & Goûters de la semaine</h2>
+                    <p className="text-xs text-slate-500">Sélectionnez ou générez vos pâtisseries de la semaine.</p>
                   </div>
                   <button 
                     onClick={handleGenerateBalancedCakes}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-xl text-sm transition-colors shadow-sm flex items-center gap-2 whitespace-nowrap"
                   >
-                    <RefreshCw size={16} /> Générer un menu équilibré
+                    <RefreshCw size={16} /> Générer les recettes
                   </button>
                 </div>
 
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                  <div>
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">choix n° 1</label>
-                    <div className="flex items-center gap-2">
+                <div className="space-y-4">
+                  <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">choix n° 1</label>
+                    <div className="flex items-center gap-3">
                       <select 
                         value={weeklyCakes.choix1}
                         onChange={(e) => setWeeklyCakes({...weeklyCakes, choix1: e.target.value})}
@@ -654,21 +634,28 @@ export default function App() {
                         <option value="">-- Choisir --</option>
                         {cakes.map(c => <option key={c.id} value={c.title}>{c.title}</option>)}
                       </select>
+                    </div>
+                    <div className="flex justify-between items-center pt-1">
+                      {cakes.find(c => c.title === weeklyCakes.choix1)?.appliance ? (
+                        <span className="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                          <Settings size={10} className="text-black stroke-[2.2]" /> {cakes.find(c => c.title === weeklyCakes.choix1).appliance}
+                        </span>
+                      ) : <span></span>}
+
                       {cakes.find(c => c.title === weeklyCakes.choix1) && (
                         <button
                           onClick={() => setSelectedRecipe(cakes.find(c => c.title === weeklyCakes.choix1))}
-                          title="Voir la fiche"
-                          className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 p-3 rounded-xl transition-colors flex items-center justify-center flex-shrink-0"
+                          className="text-indigo-600 hover:text-indigo-700 text-xs font-semibold flex items-center gap-1"
                         >
-                          <Eye size={18} />
+                          Voir la fiche <Eye size={12} />
                         </button>
                       )}
                     </div>
                   </div>
 
-                  <div>
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">choix n° 2</label>
-                    <div className="flex items-center gap-2">
+                  <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">choix n° 2</label>
+                    <div className="flex items-center gap-3">
                       <select 
                         value={weeklyCakes.choix2}
                         onChange={(e) => setWeeklyCakes({...weeklyCakes, choix2: e.target.value})}
@@ -677,13 +664,20 @@ export default function App() {
                         <option value="">-- Choisir --</option>
                         {cakes.map(c => <option key={c.id} value={c.title}>{c.title}</option>)}
                       </select>
+                    </div>
+                    <div className="flex justify-between items-center pt-1">
+                      {cakes.find(c => c.title === weeklyCakes.choix2)?.appliance ? (
+                        <span className="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                          <Settings size={10} className="text-black stroke-[2.2]" /> {cakes.find(c => c.title === weeklyCakes.choix2).appliance}
+                        </span>
+                      ) : <span></span>}
+
                       {cakes.find(c => c.title === weeklyCakes.choix2) && (
                         <button
                           onClick={() => setSelectedRecipe(cakes.find(c => c.title === weeklyCakes.choix2))}
-                          title="Voir la fiche"
-                          className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 p-3 rounded-xl transition-colors flex items-center justify-center flex-shrink-0"
+                          className="text-indigo-600 hover:text-indigo-700 text-xs font-semibold flex items-center gap-1"
                         >
-                          <Eye size={18} />
+                          Voir la fiche <Eye size={12} />
                         </button>
                       )}
                     </div>
