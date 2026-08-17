@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Cake, Plus, Archive, ShoppingBag, X, Trash2, Sparkles, Utensils, List, RefreshCw, Sun, Settings } from 'lucide-react';
+import { Calendar, Cake, Plus, Archive, ShoppingBag, X, Trash2, Sparkles, Utensils, List, RefreshCw, Sun, Settings, Eye } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('menus');
@@ -282,7 +282,6 @@ export default function App() {
     return found ? found.appliance : null;
   };
 
-  // Calcul du récapitulatif des appareils utilisés dans la semaine
   const getWeeklyAppliancesSummary = () => {
     const counts = {};
     Object.values(weeklyMenu).forEach(meals => {
@@ -360,7 +359,7 @@ export default function App() {
                   </button>
                 </div>
 
-                {/* Récapitulatif des appareils utilisés (généré au début des recettes/planning de la semaine) */}
+                {/* Récapitulatif des appareils utilisés */}
                 <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center gap-3">
                   <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
                     <Settings size={14} className="text-black stroke-[2.2]" /> Récapitulatif des appareils de la semaine :
@@ -387,10 +386,13 @@ export default function App() {
                     const midiAppliance = getApplianceForMeal(meals.midi);
                     const soirAppliance = getApplianceForMeal(meals.soir);
 
+                    const foundMidiRecipe = dishes.find(d => d.title === meals.midi);
+                    const foundSoirRecipe = dishes.find(d => d.title === meals.soir);
+
                     return (
                       <div key={day} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col relative">
                         <div className="flex justify-between items-center border-b border-slate-100 pb-3 mb-3">
-                          <h3 className="font-extrabold text-slate-900 text-base flex items-center gap-2">
+                          <h3 className="font-extrabold text-slate-900 text-lg flex items-center gap-2">
                             <Calendar size={20} className="text-indigo-600" /> {day}
                           </h3>
                           {badgeText && (
@@ -402,8 +404,8 @@ export default function App() {
 
                         <div className="flex flex-col gap-3 flex-1">
                           {/* Bloc Midi */}
-                          <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                            <div className="flex justify-between items-center mb-1">
+                          <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-2">
+                            <div className="flex justify-between items-center">
                               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Midi</span>
                               {midiAppliance && (
                                 <span className="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
@@ -412,31 +414,43 @@ export default function App() {
                               )}
                             </div>
                             
-                            {isMidiRestDays ? (
-                              <select 
-                                value={meals.midi}
-                                onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, midi: e.target.value }})}
-                                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                              >
-                                <option value="Restes de la veille">🔄 Restes de la veille</option>
-                                {getAvailableRecipes().map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
-                              </select>
-                            ) : (
-                              <select 
-                                value={meals.midi}
-                                onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, midi: e.target.value }})}
-                                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                              >
-                                <option value="">-- Choisir --</option>
-                                <option value="Restes de la veille">🔄 Restes de la veille</option>
-                                {getAvailableRecipes().map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
-                              </select>
-                            )}
+                            <div className="flex items-center gap-2">
+                              {isMidiRestDays ? (
+                                <select 
+                                  value={meals.midi}
+                                  onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, midi: e.target.value }})}
+                                  className="flex-1 bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                >
+                                  <option value="Restes de la veille">🔄 Restes de la veille</option>
+                                  {getAvailableRecipes().map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
+                                </select>
+                              ) : (
+                                <select 
+                                  value={meals.midi}
+                                  onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, midi: e.target.value }})}
+                                  className="flex-1 bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                >
+                                  <option value="">-- Choisir --</option>
+                                  <option value="Restes de la veille">🔄 Restes de la veille</option>
+                                  {getAvailableRecipes().map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
+                                </select>
+                              )}
+
+                              {foundMidiRecipe && (
+                                <button
+                                  onClick={() => setSelectedRecipe(foundMidiRecipe)}
+                                  title="Voir la fiche"
+                                  className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 p-2 rounded-lg transition-colors flex items-center justify-center flex-shrink-0"
+                                >
+                                  <Eye size={16} />
+                                </button>
+                              )}
+                            </div>
                           </div>
 
                           {/* Bloc Soir */}
-                          <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                            <div className="flex justify-between items-center mb-1">
+                          <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-2">
+                            <div className="flex justify-between items-center">
                               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Soir</span>
                               {soirAppliance && (
                                 <span className="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
@@ -445,21 +459,33 @@ export default function App() {
                               )}
                             </div>
 
-                            {isWednesday ? (
-                              <div className="w-full bg-slate-100 border border-slate-200 rounded-lg p-2 text-sm text-slate-700 font-medium cursor-not-allowed flex items-center justify-between">
-                                <span>Cordon bleu et Pomme de terre</span>
-                                <span className="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded">Fixe</span>
-                              </div>
-                            ) : (
-                              <select 
-                                value={meals.soir}
-                                onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, soir: e.target.value }})}
-                                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                              >
-                                <option value="">-- Choisir --</option>
-                                {eveningRecipes.map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
-                              </select>
-                            )}
+                            <div className="flex items-center gap-2">
+                              {isWednesday ? (
+                                <div className="flex-1 bg-slate-100 border border-slate-200 rounded-lg p-2 text-sm text-slate-700 font-medium cursor-not-allowed flex items-center justify-between">
+                                  <span>Cordon bleu et Pomme de terre</span>
+                                  <span className="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded">Fixe</span>
+                                </div>
+                              ) : (
+                                <select 
+                                  value={meals.soir}
+                                  onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, soir: e.target.value }})}
+                                  className="flex-1 bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                >
+                                  <option value="">-- Choisir --</option>
+                                  {eveningRecipes.map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
+                                </select>
+                              )}
+
+                              {foundSoirRecipe && (
+                                <button
+                                  onClick={() => setSelectedRecipe(foundSoirRecipe)}
+                                  title="Voir la fiche"
+                                  className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 p-2 rounded-lg transition-colors flex items-center justify-center flex-shrink-0"
+                                >
+                                  <Eye size={16} />
+                                </button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -536,9 +562,9 @@ export default function App() {
                               <div className="flex justify-between items-center pt-2 border-t border-slate-100">
                                 <button
                                   onClick={() => setSelectedRecipe(recipe)}
-                                  className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors"
+                                  className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5"
                                 >
-                                  Voir la fiche
+                                  <Eye size={14} /> Voir la fiche
                                 </button>
                                 <button 
                                   onClick={() => handleDeleteRecipe(recipe.id, 'plat')}
@@ -599,26 +625,48 @@ export default function App() {
                 <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                   <div>
                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">choix n° 1</label>
-                    <select 
-                      value={weeklyCakes.choix1}
-                      onChange={(e) => setWeeklyCakes({...weeklyCakes, choix1: e.target.value})}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
-                    >
-                      <option value="">-- Choisir --</option>
-                      {cakes.map(c => <option key={c.id} value={c.title}>{c.title}</option>)}
-                    </select>
+                    <div className="flex items-center gap-2">
+                      <select 
+                        value={weeklyCakes.choix1}
+                        onChange={(e) => setWeeklyCakes({...weeklyCakes, choix1: e.target.value})}
+                        className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
+                      >
+                        <option value="">-- Choisir --</option>
+                        {cakes.map(c => <option key={c.id} value={c.title}>{c.title}</option>)}
+                      </select>
+                      {cakes.find(c => c.title === weeklyCakes.choix1) && (
+                        <button
+                          onClick={() => setSelectedRecipe(cakes.find(c => c.title === weeklyCakes.choix1))}
+                          title="Voir la fiche"
+                          className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 p-3 rounded-xl transition-colors flex items-center justify-center flex-shrink-0"
+                        >
+                          <Eye size={18} />
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   <div>
                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">choix n° 2</label>
-                    <select 
-                      value={weeklyCakes.choix2}
-                      onChange={(e) => setWeeklyCakes({...weeklyCakes, choix2: e.target.value})}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
-                    >
-                      <option value="">-- Choisir --</option>
-                      {cakes.map(c => <option key={c.id} value={c.title}>{c.title}</option>)}
-                    </select>
+                    <div className="flex items-center gap-2">
+                      <select 
+                        value={weeklyCakes.choix2}
+                        onChange={(e) => setWeeklyCakes({...weeklyCakes, choix2: e.target.value})}
+                        className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none"
+                      >
+                        <option value="">-- Choisir --</option>
+                        {cakes.map(c => <option key={c.id} value={c.title}>{c.title}</option>)}
+                      </select>
+                      {cakes.find(c => c.title === weeklyCakes.choix2) && (
+                        <button
+                          onClick={() => setSelectedRecipe(cakes.find(c => c.title === weeklyCakes.choix2))}
+                          title="Voir la fiche"
+                          className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 p-3 rounded-xl transition-colors flex items-center justify-center flex-shrink-0"
+                        >
+                          <Eye size={18} />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -640,9 +688,9 @@ export default function App() {
                     <div className="flex justify-between items-center pt-2 border-t border-slate-100">
                       <button
                         onClick={() => setSelectedRecipe(cake)}
-                        className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-3.5 py-2 rounded-xl text-xs font-semibold"
+                        className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5"
                       >
-                        Voir la fiche
+                        <Eye size={14} /> Voir la fiche
                       </button>
                       <button onClick={() => handleDeleteRecipe(cake.id, 'gateau')} className="text-slate-400 hover:text-red-500 p-2">
                         <Trash2 size={16} />
