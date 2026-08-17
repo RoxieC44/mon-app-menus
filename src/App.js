@@ -22,7 +22,7 @@ export default function App() {
 
   // Planning de la semaine (Midi et Soir modifiables / avec listes déroulantes)
   const [weeklyMenu, setWeeklyMenu] = useState({
-    Lundi: { midi: 'Restes de la veille', soir: 'Bléotto aux courgettes (Été)' },
+    Lundi: { midi: 'Restes de la veille', soir: 'Bléotto aux courgettes' },
     Mardi: { midi: 'Restes de la veille', soir: 'Poulet coco et semoule' },
     Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et patate sautée' },
     Jeudi: { midi: 'Restes de la veille', soir: 'Poulet coco et riz' },
@@ -61,7 +61,7 @@ export default function App() {
     },
     {
       id: 3,
-      title: 'Bléotto aux courgettes (Été)',
+      title: 'Bléotto aux courgettes',
       category: 'Blé',
       appliance: 'Thermomix',
       season: 'Été',
@@ -160,9 +160,14 @@ export default function App() {
   const [formIngredients, setFormIngredients] = useState('');
   const [formInstructions, setFormInstructions] = useState('');
 
+  // Fonction de filtrage intelligent pour les menus (Saison actuelle ou 'Toutes')
+  const getAvailableRecipes = () => {
+    return dishes.filter(d => d.season === currentSeason || d.season === 'Toutes');
+  };
+
   // Fonction de génération automatique de menus basée sur la saison
   const handleGenerateBalancedMenu = () => {
-    const seasonalDishes = dishes.filter(d => d.season === currentSeason || d.season === 'Toutes');
+    const seasonalDishes = getAvailableRecipes();
     if (seasonalDishes.length === 0) {
       alert(`Aucune recette spécifique trouvée pour la saison ${currentSeason}.`);
       return;
@@ -250,7 +255,7 @@ export default function App() {
     setFormInstructions('');
   };
 
-  // Filtrage des recettes
+  // Filtrage des recettes pour le catalogue
   const filterRecipes = (list) => {
     return list.filter(item => {
       const matchSeason = seasonFilter === 'Toutes les saisons' || item.season === seasonFilter || item.season === 'Toutes';
@@ -338,11 +343,11 @@ export default function App() {
                           className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         >
                           <option value="Restes de la veille">Restes de la veille</option>
-                          {dishes.map(d => <option key={d.id} value={d.title}>{d.title} ({d.category})</option>)}
+                          {getAvailableRecipes().map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
                         </select>
                       </div>
 
-                      {/* Soir : Déroulant de recettes */}
+                      {/* Soir : Déroulant de recettes filtrées */}
                       <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                         <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Soir</span>
                         <select 
@@ -351,7 +356,7 @@ export default function App() {
                           className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         >
                           <option value={meals.soir}>{meals.soir}</option>
-                          {dishes.map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
+                          {getAvailableRecipes().map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
                         </select>
                       </div>
                     </div>
@@ -361,7 +366,7 @@ export default function App() {
             )}
 
             {menuSubTab === 'catalogue' && (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
                   <h2 className="font-bold text-slate-800 text-sm">Catalogue des recettes ({dishes.length})</h2>
                   <div className="flex items-center gap-2 w-full md:w-auto">
@@ -393,39 +398,54 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {filterRecipes(dishes).map(recipe => (
-                    <div key={recipe.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-start">
-                          <h3 className="font-bold text-slate-800 text-base">{recipe.title}</h3>
-                          <span className="text-xs bg-indigo-50 text-indigo-700 font-bold px-2.5 py-1 rounded-full">{recipe.category}</span>
-                        </div>
-                        <div className="flex gap-2 text-xs">
-                          <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-medium">⚙️ {recipe.appliance}</span>
-                          <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-medium">☀️ {recipe.season}</span>
-                        </div>
-                        <p className="text-xs text-slate-600 line-clamp-2">
-                          <strong className="text-slate-700">Ingrédients :</strong> {recipe.ingredients.join(', ')}
-                        </p>
-                      </div>
+                {/* Tri par Féculents */}
+                <div className="space-y-6">
+                  {['Pâtes', 'Pommes de terre', 'Semoule', 'Riz', 'Blé', 'Plaisir'].map(category => {
+                    const filtered = filterRecipes(dishes).filter(d => d.category === category);
+                    if (filtered.length === 0) return null;
+                    
+                    return (
+                      <div key={category} className="space-y-3">
+                        <h3 className="font-bold text-slate-700 flex items-center gap-2 text-sm">
+                          <span className="w-2 h-5 bg-indigo-600 rounded-full"></span> {category}
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {filtered.map(recipe => (
+                            <div key={recipe.id} className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-3">
+                              <div className="space-y-2">
+                                <div className="flex justify-between items-start">
+                                  <h4 className="font-bold text-slate-800 text-sm">{recipe.title}</h4>
+                                  <span className="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2.5 py-0.5 rounded-full">{recipe.category}</span>
+                                </div>
+                                <div className="flex gap-2 text-[10px]">
+                                  <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-medium">⚙️ {recipe.appliance}</span>
+                                  <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-medium">☀️ {recipe.season}</span>
+                                </div>
+                                <p className="text-xs text-slate-600 line-clamp-2">
+                                  <strong className="text-slate-700">Ingrédients :</strong> {recipe.ingredients.join(', ')}
+                                </p>
+                              </div>
 
-                      <div className="flex justify-between items-center pt-2 border-t border-slate-100">
-                        <button
-                          onClick={() => setSelectedRecipe(recipe)}
-                          className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-3.5 py-2 rounded-xl text-xs font-semibold transition-colors"
-                        >
-                          Voir la fiche complète
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteRecipe(recipe.id, 'plat')}
-                          className="text-slate-400 hover:text-red-500 p-2 transition-colors"
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                              <div className="flex justify-between items-center pt-2 border-t border-slate-100">
+                                <button
+                                  onClick={() => setSelectedRecipe(recipe)}
+                                  className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors"
+                                >
+                                  Voir la fiche
+                                </button>
+                                <button 
+                                  onClick={() => handleDeleteRecipe(recipe.id, 'plat')}
+                                  className="text-slate-400 hover:text-red-500 p-1.5 transition-colors"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
