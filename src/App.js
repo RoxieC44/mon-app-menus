@@ -24,7 +24,7 @@ export default function App() {
   const [weeklyMenu, setWeeklyMenu] = useState({
     Lundi: { midi: 'Restes de la veille', soir: 'Bléotto aux courgettes' },
     Mardi: { midi: 'Restes de la veille', soir: 'Poulet coco et semoule' },
-    Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et patate sautée' }, // Fixé et inchangé
+    Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et Pomme de terre' }, // Fixé et inchangé
     Jeudi: { midi: 'Restes de la veille', soir: 'Poulet coco et riz' },
     Vendredi: { midi: 'Restes de la veille', soir: 'Poêlée de pommes de terre et lardons' },
     Samedi: { midi: 'Restes de la veille', soir: 'Pizza maison rapide' }, // Repas plaisir
@@ -41,7 +41,7 @@ export default function App() {
   const [dishes, setDishes] = useState([
     {
       id: 1,
-      title: 'Cordon bleu et patate sautée',
+      title: 'Cordon bleu et Pomme de terre',
       category: 'Pommes de terre',
       appliance: 'Poêle',
       season: 'Toutes',
@@ -184,7 +184,7 @@ export default function App() {
     setWeeklyMenu({
       Lundi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Blé') },
       Mardi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Semoule') },
-      Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et patate sautée' }, // Fixé (ne bouge pas)
+      Mercredi: { midi: 'Restes de la veille', soir: 'Cordon bleu et Pomme de terre' }, // Fixé (ne bouge pas)
       Jeudi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Riz') },
       Vendredi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Pommes de terre') },
       Samedi: { midi: 'Restes de la veille', soir: getRandomDishByCat('Plaisir') }, // Repas plaisir
@@ -266,7 +266,7 @@ export default function App() {
     });
   };
 
-  // Correspondance des badges par jour
+  // Étiquette affichée en haut à droite pour chaque jour
   const dayBadges = {
     Lundi: 'Blé',
     Mardi: 'Semoule',
@@ -367,7 +367,7 @@ export default function App() {
                           <select 
                             value={meals.midi}
                             onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, midi: e.target.value }})}
-                            className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
                           >
                             <option value="Restes de la veille">Restes de la veille</option>
                             {getAvailableRecipes().map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
@@ -388,7 +388,7 @@ export default function App() {
                             <select 
                               value={meals.soir}
                               onChange={(e) => setWeeklyMenu({...weeklyMenu, [day]: { ...meals, soir: e.target.value }})}
-                              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
                             >
                               <option value={meals.soir}>{meals.soir}</option>
                               {getAvailableRecipes().map(d => <option key={d.id} value={d.title}>{d.title}</option>)}
