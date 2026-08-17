@@ -405,14 +405,7 @@ export default function App() {
                         <div className="flex flex-col gap-3 flex-1">
                           {/* Bloc Midi */}
                           <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-2">
-                            <div className="flex justify-between items-center">
-                              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Midi</span>
-                              {midiAppliance && (
-                                <span className="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
-                                  <Settings size={10} className="text-black stroke-[2.2]" /> {midiAppliance}
-                                </span>
-                              )}
-                            </div>
+                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Midi</span>
                             
                             <div className="flex items-center gap-2">
                               {isMidiRestDays ? (
@@ -446,18 +439,28 @@ export default function App() {
                                 </button>
                               )}
                             </div>
+
+                            <div className="flex justify-between items-center pt-1">
+                              {midiAppliance ? (
+                                <span className="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                                  <Settings size={10} className="text-black stroke-[2.2]" /> {midiAppliance}
+                                </span>
+                              ) : <span></span>}
+
+                              {foundMidiRecipe && (
+                                <button
+                                  onClick={() => setSelectedRecipe(foundMidiRecipe)}
+                                  className="text-indigo-600 hover:text-indigo-700 text-xs font-semibold flex items-center gap-1"
+                                >
+                                  Voir la fiche <Eye size={12} />
+                                </button>
+                              )}
+                            </div>
                           </div>
 
                           {/* Bloc Soir */}
                           <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-2">
-                            <div className="flex justify-between items-center">
-                              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Soir</span>
-                              {soirAppliance && (
-                                <span className="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
-                                  <Settings size={10} className="text-black stroke-[2.2]" /> {soirAppliance}
-                                </span>
-                              )}
-                            </div>
+                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Soir</span>
 
                             <div className="flex items-center gap-2">
                               {isWednesday ? (
@@ -483,6 +486,23 @@ export default function App() {
                                   className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 p-2 rounded-lg transition-colors flex items-center justify-center flex-shrink-0"
                                 >
                                   <Eye size={16} />
+                                </button>
+                              )}
+                            </div>
+
+                            <div className="flex justify-between items-center pt-1">
+                              {soirAppliance ? (
+                                <span className="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                                  <Settings size={10} className="text-black stroke-[2.2]" /> {soirAppliance}
+                                </span>
+                              ) : <span></span>}
+
+                              {foundSoirRecipe && (
+                                <button
+                                  onClick={() => setSelectedRecipe(foundSoirRecipe)}
+                                  className="text-indigo-600 hover:text-indigo-700 text-xs font-semibold flex items-center gap-1"
+                                >
+                                  Voir la fiche <Eye size={12} />
                                 </button>
                               )}
                             </div>
