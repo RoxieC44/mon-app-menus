@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, List, Calendar, Trash2, Utensils, Info, Tag, Sun, Settings, Link as LinkIcon, Camera, RefreshCw, AlertTriangle, Eye, X, Image as ImageIcon, ShoppingBag, Package, Check, Copy, Sparkles, Filter, Cake } from 'lucide-react';
+import { supabase } from './supabaseClient'; // Import du client Supabase configuré
 
 const DEFAULT_RECIPES = [
   { id: '1', name: 'Poêlée de blé façon risotto aux champignons', carb: 'Blé', equipment: 'Poêle', season: 'Toutes', type: 'text', instructions: 'Faire revenir les champignons. Ajouter le blé, puis le bouillon louche par louche jusqu\'à absorption.', ingredients: ['250g de blé', '500g de champignons', '1 oignon', 'Bouillon de volaille', 'Crème liquide'], category: 'repas' },
@@ -21,6 +22,76 @@ const DEFAULT_RECIPES = [
 const EQUIPMENTS = ['Thermomix', 'Cookeo', 'Poêle', 'Four', 'Casserole', 'Airfryer', 'Sans Cuisson'];
 const CARBS = ['Pâtes', 'Pommes de terre', 'Semoule', 'Riz', 'Blé', 'Plaisir'];
 const SEASONS = ['Toutes', 'Printemps', 'Été', 'Automne', 'Hiver'];
+
+export default function App() {
+  // États de l'application (sans localStorage)
+  const [recipes, setRecipes] = useState(DEFAULT_RECIPES);
+  const [menu, setMenu] = useState({
+    mondayDinner: '', tuesdayDinner: '', wednesdayDinner: '', thursdayDinner: '', fridayDinner: '', saturdayDinner: '', sundayDinner: '',
+    mondayLunch: 'restes', tuesdayLunch: 'restes', wednesdayLunch: '', thursdayLunch: 'restes', fridayLunch: 'restes', saturdayLunch: '', sundayLunch: ''
+  });
+  const [inventory, setInventory] = useState([]);
+  const [bakingItems, setBakingItems] = useState(['', '']);
+  const [shoppingChecks, setShoppingChecks] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  // 1. CHARGEMENT DEPUIS SUPABASE AU DÉMARRAGE
+  useEffect(() => {
+    async function loadData() {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('Stockage données')
+        .select('data')
+        .eq('user_key', 'ma_famille')
+        .maybeSingle();
+
+      if (data && data.data) {
+        const saved = data.data;
+        if (saved.recipes) setRecipes(saved.recipes);
+        if (saved.menu) setMenu(saved.menu);
+        if (saved.inventory) setInventory(saved.inventory);
+        if (saved.bakingItems) setBakingItems(saved.bakingItems);
+        if (saved.shoppingChecks) setShoppingChecks(saved.shoppingChecks);
+      }
+      setLoading(false);
+    }
+    loadData();
+  }, []);
+
+  // 2. SAUVEGARDE AUTOMATIQUE SUR SUPABASE À CHAQUE MODIFICATION
+  useEffect(() => {
+    if (loading) return; // Ne pas sauvegarder pendant le chargement initial
+
+    async function saveData() {
+      const payload = {
+        user_key: 'ma_famille',
+        data: { recipes, menu, inventory, bakingItems, shoppingChecks }
+      };
+
+      await supabase
+        .from('Stockage données')
+        .upsert({ id: 1, ...payload });
+    }
+
+    const timer = setTimeout(saveData, 1000); // Enregistre 1 seconde après la dernière modification
+    return () => clearTimeout(timer);
+  }, [recipes, menu, inventory, bakingItems, shoppingChecks]);
+
+  return (
+    <div className="min-h-screen bg-slate-50 p-4 pb-20">
+      <div className="max-w-md mx-auto bg-white rounded-2xl shadow-sm p-6">
+        <h1 className="text-xl font-bold text-slate-800 mb-2 flex items-center gap-2">
+          <Utensils className="text-orange-500" /> Gestionnaire Maison & Cuisine
+        </h1>
+        {loading ? (
+          <p className="text-slate-400 text-sm">Chargement des données depuis le cloud...</p>
+        ) : (
+          <p className="text-emerald-600 text-sm font-medium">Synchronisé avec Supabase !</p>
+        )}
+      </div>
+    </div>
+  );
+}
 
 const getCurrentSeason = () => {
   const month = new Date().getMonth();
