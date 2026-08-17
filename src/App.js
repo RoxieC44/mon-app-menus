@@ -160,7 +160,9 @@ export default function App() {
   const [formIngredients, setFormIngredients] = useState('');
   const [formInstructions, setFormInstructions] = useState('');
 
-  // Fonction de filtrage intelligent pour les menus
+  // Vérifier si des menus ou gâteaux sont planifiés
+  const hasPlannedItems = Object.values(weeklyMenu).some(meals => meals.midi !== '' || meals.soir !== '') || weeklyCakes.choix1 !== '' || weeklyCakes.choix2 !== '';
+
   const getAvailableRecipes = () => {
     return dishes.filter(d => d.season === currentSeason || d.season === 'Toutes');
   };
@@ -778,36 +780,53 @@ export default function App() {
           </div>
         )}
 
-        {/* ================= ONGLET COURSES ================= */}
+        {/* ================= ONGLET COURSES (STYLE IDENTIQUE À VOTRE CAPTURE) ================= */}
         {activeTab === 'courses' && (
           <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm max-w-2xl mx-auto space-y-6">
-            <div>
-              <h2 className="text-xl font-bold text-slate-800">Liste de Courses Intelligente</h2>
-              <p className="text-xs text-slate-500">
-                Basée sur les menus et les gâteaux de la semaine.
-              </p>
+            <div className="flex items-center gap-3">
+              <div className="text-indigo-600">
+                <ShoppingBag size={24} />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-slate-900">Liste de Courses Intelligente</h2>
+                <p className="text-xs text-slate-500">
+                  Basée sur les menus et les gâteaux de la semaine.
+                </p>
+              </div>
             </div>
 
-            <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">À acheter en priorité :</h3>
-              <ul className="space-y-2 text-sm text-slate-700">
-                <li className="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
-                  <span className="font-medium">📦 Paquet de Semoule (car état : Presque vide)</span>
-                  <span className="text-xs bg-rose-50 text-rose-600 font-bold px-2 py-1 rounded-md">Urgent</span>
-                </li>
-                <li className="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
-                  <span className="font-medium">🧀 Ingrédients des menus et gâteaux</span>
-                  <span className="text-xs bg-indigo-50 text-indigo-600 font-bold px-2 py-1 rounded-md">Semaine</span>
-                </li>
-              </ul>
-            </div>
+            {!hasPlannedItems ? (
+              <div className="border-2 border-dashed border-indigo-200 bg-indigo-50/30 rounded-2xl p-10 text-center space-y-4">
+                <p className="text-sm font-medium text-slate-600">
+                  Aucun menu ou gâteau planifié pour l'instant.
+                </p>
+                <button
+                  onClick={() => { setActiveTab('menus'); setMenuSubTab('semaine'); }}
+                  className="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-semibold px-5 py-2.5 rounded-xl text-xs transition-colors shadow-sm inline-flex items-center gap-2"
+                >
+                  Aller planifier le menu
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="space-y-2 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Articles à acheter :</h3>
+                  {/* Affichage dynamique si des éléments sont planifiés */}
+                  <ul className="space-y-2 text-sm text-slate-700">
+                    <li className="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                      <span className="font-medium">🛒 Ingrédients issus de vos menus et gâteaux planifiés</span>
+                    </li>
+                  </ul>
+                </div>
 
-            <button
-              onClick={() => {}}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl transition-colors shadow-sm text-sm flex items-center justify-center gap-2"
-            >
-              <Check size={18} /> Exporter / Copier la liste de courses
-            </button>
+                <button
+                  onClick={() => {}}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl transition-colors shadow-sm text-sm flex items-center justify-center gap-2"
+                >
+                  <Check size={18} /> Copier ou exporter la liste de courses
+                </button>
+              </div>
+            )}
           </div>
         )}
       </main>
