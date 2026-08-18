@@ -133,25 +133,25 @@ export default function App() {
   const bakingRecipes = recipes.filter(r => r.category === 'gateau');
   
 return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-24 md:pb-0 relative">
-      <header className="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          <h1 className="text-xl font-bold flex items-center gap-2">
-            <Utensils className="w-6 h-6" />
-            Mon Menu Organisé
-          </h1>
-          
-          <div className="flex items-center gap-2">
-            <div className="text-xs bg-amber-400 text-slate-900 font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
-              <Sun className="w-3.5 h-3.5" />
-              Saison actuelle : {currentSeason}
-            </div>
-            <div className="text-xs bg-indigo-700 py-1.5 px-3 rounded-full opacity-90 hidden md:flex items-center gap-1">
-               <Info className="w-3.5 h-3.5" /> {recipes.length} recettes
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-24 md:pb-0 relative">
+      <header className="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+          <h1 className="text-xl font-bold flex items-center gap-2">
+            <Utensils className="w-6 h-6" />
+            Mon Menu Organisé
+          </h1>
+          
+          <div className="flex items-center gap-2">
+            <div className="text-xs bg-amber-400 text-slate-900 font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
+              <Sun className="w-3.5 h-3.5" />
+              Saison actuelle : {currentSeason}
+            </div>
+            <div className="text-xs bg-indigo-700 py-1.5 px-3 rounded-full opacity-90 hidden md:flex items-center gap-1">
+               <Info className="w-3.5 h-3.5" /> {recipes.length} recettes
+            </div>
+          </div>
+        </div>
+      </header>
 
       <main className="max-w-4xl mx-auto p-4 mt-2">
         {activeTab === 'menu' && (
