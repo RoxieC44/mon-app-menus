@@ -187,7 +187,7 @@ export default function App() {
       )}
 
       {/* BOTTOM NAVIGATION FIXED WITH CENTRAL FLOATING ADD BUTTON */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-40 px-4 py-2 shadow-[0_-10px_15px_-3px_rgb(0,0,0,0.05)] md:relative md:border-t-0 md:bg-transparent md:max-w-4xl md:mx-auto md:p-0 md:mb-6 md:shadow-none">
+      <nav className="sticky bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-40 px-4 py-2 shadow-[0_-10px_15px_-3px_rgb(0,0,0,0.05)] md:relative md:border-t-0 md:bg-transparent md:max-w-4xl md:mx-auto md:p-0 md:mb-6 md:shadow-none">
         <div className="max-w-md mx-auto flex justify-between items-center relative">
           <NavButton active={activeTab === 'menu'} onClick={() => setActiveTab('menu')} icon={<Calendar />} label="Menus" />
           <NavButton active={activeTab === 'baking'} onClick={() => setActiveTab('baking')} icon={<Cake />} label="Gâteaux" />
