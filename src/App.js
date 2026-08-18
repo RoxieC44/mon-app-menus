@@ -874,18 +874,26 @@ function AddRecipeForm({ addRecipe }) {
           </div>
         </div>
 
-        {image && (
-          <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-slate-200">
-            <img src={image} alt="Aperçu" className="w-full h-full object-cover" />
-            <button 
-              type="button" 
-              onClick={() => setImage('')}
-              className="absolute top-1 right-1 bg-slate-900/70 text-white rounded-full p-1 text-xs"
-            >
-              <X className="w-3 h-3" />
-            </button>
-          </div>
-        )}
+        {images && images.length > 0 && (
+  <div className="flex flex-wrap gap-2 mt-2">
+    {images.map((img, index) => (
+      <div key={index} className="relative w-24 h-24 rounded-lg overflow-hidden border border-slate-200">
+        <img src={img} alt={`Aperçu ${index + 1}`} className="w-full h-full object-cover" />
+        <button 
+          type="button" 
+          onClick={() => {
+            // Supprime uniquement cette photo de la liste
+            const newImages = images.filter((_, i) => i !== index);
+            setImages(newImages);
+          }}
+          className="absolute top-1 right-1 bg-slate-900/70 text-white rounded-full p-1 text-xs"
+        >
+          <X className="w-3 h-3" />
+        </button>
+      </div>
+    ))}
+  </div>
+)}
 
         <div>
           <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Ingrédients (1 par ligne)</label>
