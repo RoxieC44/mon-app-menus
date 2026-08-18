@@ -155,33 +155,6 @@ return (
       </div>
     </header>
 
-    {/* ZONE DE CONTENU QUI DÉFILE (Placard, Menus, etc.) */}
-    <main className="flex-1 overflow-y-auto pb-24">
-      {/* C'est ici que s'affiche le reste de ton code (tes onglets / pages) */}
-      {/* ... ton contenu actuel ... */}
-    </main>
-
-    {/* BOTTOM NAVIGATION FIXED */}
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-40 px-4 py-2 shadow-[0_-10px_15px_-3px_rgb(0,0,0,0.05)] md:relative md:border-t-0 md:bg-transparent md:max-w-4xl md:mx-auto md:p-0 md:mb-6 md:shadow-none flex-shrink-0">
-      <div className="max-w-md mx-auto flex justify-between items-center relative">
-        <NavButton active={activeTab === 'menu'} onClick={() => setActiveTab('menu')} icon={<Calendar />} label="Menus" />
-        <NavButton active={activeTab === 'baking'} onClick={() => setActiveTab('baking')} icon={<Cake />} label="Gâteaux" />
-        
-        {/* GROS BOUTON "+" DU MILIEU EN RELIEF */}
-        <button
-          onClick={() => setActiveTab('add')}
-          className={`bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-lg transform -translate-y-4 transition-transform hover:scale-105 border-4 border-white flex items-center justify-center flex-shrink-0 ${activeTab === 'add' ? 'ring-2 ring-indigo-400 scale-105' : ''}`}
-        >
-          <Plus size={26} />
-        </button>
-
-        <NavButton active={activeTab === 'inventory'} onClick={() => setActiveTab('inventory')} icon={<Package />} label="Placard" />
-        <NavButton active={activeTab === 'shopping'} onClick={() => setActiveTab('shopping')} icon={<ShoppingBag />} label="Courses" />
-      </div>
-    </nav>
-  </div>
-);
-
       <main className="max-w-4xl mx-auto p-4 mt-2">
         {activeTab === 'menu' && (
           <MenuContainer 
