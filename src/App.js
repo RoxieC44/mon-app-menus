@@ -131,10 +131,7 @@ export default function App() {
 
   const mealRecipes = recipes.filter(r => r.category !== 'gateau');
   const bakingRecipes = recipes.filter(r => r.category === 'gateau');
-
-return (
-  <div className="h-screen flex flex-col bg-slate-50 text-slate-900 font-sans relative overflow-hidden">
-    
+  
 return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-24 md:pb-0 relative">
       <header className="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-10">
