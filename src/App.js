@@ -827,14 +827,6 @@ const handleSubmit = (e) => {
       ingredients
     };
 
-    if (editingRecipe) {
-      // Si on édite, on garde l'id d'origine
-      addRecipe({ ...recipeData, id: editingRecipe.id });
-      setEditingRecipe(null);
-    } else {
-      addRecipe(recipeData);
-    }
-
     // Retour à l'onglet correspondant
     if (editingRecipe) {
       // Si on édite, on garde l'id d'origine
