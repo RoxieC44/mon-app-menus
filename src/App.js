@@ -44,7 +44,7 @@ export default function App() {
     mondayDinner: '', tuesdayDinner: '', wednesdayDinner: '', thursdayDinner: '', fridayDinner: '', saturdayDinner: '', sundayDinner: '',
     mondayLunch: 'restes', tuesdayLunch: 'restes', wednesdayLunch: '', thursdayLunch: 'restes', fridayLunch: 'restes', saturdayLunch: '', sundayLunch: ''
   });
-  const [inventory, setInventory] = useState([
+  const [, setInventory] = useState([
     { name: 'Sel', status: 'Plein' },
     { name: 'Poivre', status: 'Plein' },
     { name: "Huile d'olive", status: 'Plein' },
@@ -560,14 +560,33 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
             <Filter className="w-3.5 h-3.5" /> Filtres :
           </span>
 
-          <select 
-            value={filterSeason} 
-            onChange={(e) => setFilterSeason(e.target.value)}
-            className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800"
+         <div className="flex flex-wrap gap-1 items-center">
+        <button
+          type="button"
+          onClick={() => setFilterSeason("Tous")}
+          className={`text-xs px-2.5 py-1.5 rounded-lg font-medium border transition-colors ${
+            filterSeason === "Tous"
+              ? "bg-indigo-600 text-white border-indigo-600"
+              : "bg-slate-50 text-slate-600 border-slate-300 hover:bg-slate-100"
+          }`}
+        >
+          Toutes
+        </button>
+        {SEASONS.map((s) => (
+          <button
+            key={s}
+            type="button"
+            onClick={() => setFilterSeason(s)}
+            className={`text-xs px-2.5 py-1.5 rounded-lg font-medium border transition-colors ${
+              filterSeason === s
+                ? "bg-indigo-600 text-white border-indigo-600"
+                : "bg-slate-50 text-slate-600 border-slate-300 hover:bg-slate-100"
+            }`}
           >
-            <option value="Tous">Toutes les saisons</option>
-            {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
+            {s}
+          </button>
+        ))}
+      </div>
 
           <select 
             value={filterEquip} 
