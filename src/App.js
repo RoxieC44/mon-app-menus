@@ -1002,6 +1002,7 @@ function InventoryManager({ inventory, setInventory }) {
   };
 
   const removeItem = (index) => {
+    if (window.confirm("Supprimer cet élément du placard ?")) {
     setInventory(inventory.filter((_, i) => i !== index));
   };
 
