@@ -560,7 +560,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
             <Filter className="w-3.5 h-3.5" /> Filtres :
           </span>
 
-         <div className="flex flex-wrap gap-1 items-center">
+      <div className="flex flex-wrap gap-1 items-center">
         <button
           type="button"
           onClick={() => setFilterSeason("Tous")}
