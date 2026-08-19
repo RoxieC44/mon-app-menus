@@ -1002,8 +1002,9 @@ function InventoryManager({ inventory, setInventory }) {
   };
 
   const removeItem = (index) => {
-    setInventory(inventory.filter((_, i) => i !== index));
-  };
+    if (window.confirm("Supprimer cet élément du placard ?")) {
+  setInventory(inventory.filter((_, i) => i !== index));
+}
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 max-w-2xl mx-auto space-y-6">
