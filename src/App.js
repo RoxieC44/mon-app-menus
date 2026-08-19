@@ -983,17 +983,6 @@ const handleSubmit = (e) => {
     </div>
   );
 
-if (editingRecipe) {
-      addRecipe({ ...recipeData, id: editingRecipe.id });
-      setEditingRecipe(null);
-    } else {
-      addRecipe(recipeData);
-    }
-
-    // AJOUTE CETTE LIGNE ICI :
-    setActiveTab(category === 'gateau' ? 'baking' : 'menu');
-  }; // Fin de handleSubmit
-
 function InventoryManager({ inventory, setInventory }) {
   const [newItemName, setNewItemName] = useState('');
   const [newItemStatus, setNewItemStatus] = useState('Plein');
