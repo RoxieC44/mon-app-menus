@@ -179,6 +179,7 @@ return (
         )}
         {activeTab === 'baking' && (
           <BakingPlanner 
+            menu={menu} 
             bakingItems={bakingItems} 
             setBakingItems={setBakingItems} 
             bakingRecipes={bakingRecipes} 
