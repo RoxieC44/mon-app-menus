@@ -1004,13 +1004,6 @@ function InventoryManager({ inventory, setInventory }) {
   const removeItem = (index) => {
     setInventory(inventory.filter((_, i) => i !== index));
   };
-  <button 
-  onClick={() => { if (window.confirm("Supprimer cet élément du placard ?")) removeItem(index); }}
-  className="text-slate-400 hover:text-red-600 p-1"
-  title="Supprimer"
->
-  <Trash2 className="w-4 h-4" />
-</button>
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 max-w-2xl mx-auto space-y-6">
