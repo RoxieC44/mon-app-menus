@@ -749,7 +749,7 @@ function BakingPlanner({ bakingItems, setBakingItems, bakingRecipes, recipes, de
   );
 }
 
-function AddRecipeForm({ addRecipe }) {
+function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTab }) {
   const [name, setName] = useState('');
   const [carb, setCarb] = useState('Plaisir');
   const [equipment, setEquipment] = useState('Four');
@@ -759,7 +759,21 @@ function AddRecipeForm({ addRecipe }) {
   const [image, setImage] = useState('');
   const [instructions, setInstructions] = useState('');
   const [ingredientsText, setIngredientsText] = useState('');
-
+  
+React.useEffect(() => {
+    if (editingRecipe) {
+      setName(editingRecipe.name || '');
+      setCarb(editingRecipe.carb || 'Plaisir');
+      setEquipment(editingRecipe.equipment || 'Four');
+      setSeason(editingRecipe.season || 'Toutes');
+      setCategory(editingRecipe.category || 'repas');
+      setUrl(editingRecipe.url || '');
+      setImage(editingRecipe.image || '');
+      setInstructions(editingRecipe.instructions || '');
+      setIngredientsText(editingRecipe.ingredients ? editingRecipe.ingredients.join('\n') : '');
+    }
+  }, [editingRecipe]);
+  
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
