@@ -273,6 +273,7 @@ function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, delete
       ) : (
         <RecipeList 
           recipes={mealRecipes} 
+          menu={menu} 
           deleteRecipe={deleteRecipe} 
           setViewingRecipe={setViewingRecipe} 
           setEditingRecipe={setEditingRecipe}
@@ -285,7 +286,7 @@ function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, delete
   );
 }
 
-function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, currentSeason }) {
+function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason }) {
   const daysConfig = [
     { key: 'monday', label: 'Lundi', reqCarb: 'Blé' },
     { key: 'tuesday', label: 'Mardi', reqCarb: 'Semoule' },
