@@ -596,7 +596,6 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
             <option value="Tous">Tous les appareils</option>
             {EQUIPMENTS.map(eq => <option key={eq} value={eq}>{eq}</option>)}
           </select>
-        </div>
 
         <div className="text-xs text-slate-500 font-medium">
           {filteredRecipes.length} affichée(s)
