@@ -982,7 +982,6 @@ const handleSubmit = (e) => {
       </form>
     </div>
   );
-}
 
 if (editingRecipe) {
       addRecipe({ ...recipeData, id: editingRecipe.id });
