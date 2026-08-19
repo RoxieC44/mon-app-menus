@@ -966,7 +966,6 @@ const handleSubmit = (e) => {
             onChange={(e) => setInstructions(e.target.value)}
             placeholder="Mélanger tous les ingrédients..."
             className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
-            required
           />
         </div>
 
