@@ -180,7 +180,7 @@ return (
             currentSeason={currentSeason}
           />
         )}
-        {activeTab === 'add' && <AddRecipeForm addRecipe={addRecipe} />}
+        {activeTab === 'add' && <AddRecipeForm addRecipe={addRecipe} editingRecipe={editingRecipe} setEditingRecipe={setEditingRecipe} setActiveTab={setActiveTab} />}
         {activeTab === 'inventory' && <InventoryManager inventory={inventory} setInventory={setInventory} />}
         {activeTab === 'shopping' && <ShoppingListView menu={menu} recipes={recipes} inventory={inventory} bakingItems={bakingItems} shoppingChecks={shoppingChecks} setShoppingChecks={setShoppingChecks} setActiveTab={setActiveTab} />}
       </main>
