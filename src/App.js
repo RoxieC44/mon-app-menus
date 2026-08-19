@@ -982,6 +982,7 @@ const handleSubmit = (e) => {
       </form>
     </div>
   );
+}
 
 function InventoryManager({ inventory, setInventory }) {
   const [newItemName, setNewItemName] = useState('');
@@ -1257,3 +1258,6 @@ function RecipeModal({ recipe, onClose }) {
     </div>
   );
 }
+
+
+
