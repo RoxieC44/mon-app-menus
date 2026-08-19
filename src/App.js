@@ -122,7 +122,7 @@ const addRecipe = (newRecipe) => {
       // Sinon, c'est une création, on lui met un nouvel id
       return [...prev, { ...newRecipe, id: Date.now().toString() }];
     });
-    setActiveTab(newRecipe.category === 'gateau' ? 'baking' : 'menu');
+    // setActiveTab(newRecipe.category === 'gateau' ? 'baking' : 'menu');
   };
 
       const deleteRecipe = (id) => {
