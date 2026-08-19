@@ -112,8 +112,16 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [recipes, menu, inventory, bakingItems, shoppingChecks]);
 
-  const addRecipe = (newRecipe) => {
-    setRecipes(prev => [...prev, { ...newRecipe, id: Date.now().toString() }]);
+const addRecipe = (newRecipe) => {
+    setRecipes(prev => {
+      // Si la recette a déjà un id qui existe, on la met à jour
+      const exists = prev.some(r => r.id === newRecipe.id);
+      if (exists) {
+        return prev.map(r => r.id === newRecipe.id ? newRecipe : r);
+      }
+      // Sinon, c'est une création, on lui met un nouvel id
+      return [...prev, { ...newRecipe, id: Date.now().toString() }];
+    });
     setActiveTab(newRecipe.category === 'gateau' ? 'baking' : 'menu');
   };
 
