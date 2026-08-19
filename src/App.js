@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, List, Calendar, Trash2, Utensils, Info, Tag, Sun, Settings, Link as LinkIcon, Camera, RefreshCw, AlertTriangle, Eye, X, Image as ImageIcon, ShoppingBag, Package, Check, Copy, Sparkles, Filter, Cake } from 'lucide-react';
+import { Plus, List, Calendar, Trash2, Utensils, Info, Tag, Sun, Settings, Link as LinkIcon, Pencil, Camera, RefreshCw, AlertTriangle, Eye, X, Image as ImageIcon, ShoppingBag, Package, Check, Copy, Sparkles, Filter, Cake } from 'lucide-react';
 import { supabase } from './supabaseClient';
 
 const DEFAULT_RECIPES = [
@@ -34,6 +34,7 @@ const getCurrentSeason = () => {
 export default function App() {
   const [activeTab, setActiveTab] = useState('menu');
   const [viewingRecipe, setViewingRecipe] = useState(null);
+  const [editingRecipe, setEditingRecipe] = useState(null);
   const currentSeason = getCurrentSeason();
 
   const [loading, setLoading] = useState(true);
@@ -163,6 +164,7 @@ return (
             setMenu={setMenu} 
             deleteRecipe={deleteRecipe}
             setViewingRecipe={setViewingRecipe} 
+            setEditingRecipe={setEditingRecipe}
             currentSeason={currentSeason} 
           />
         )}
@@ -174,6 +176,7 @@ return (
             recipes={recipes}
             deleteRecipe={deleteRecipe}
             setViewingRecipe={setViewingRecipe} 
+            setEditingRecipe={setEditingRecipe}
             currentSeason={currentSeason}
           />
         )}
@@ -606,13 +609,27 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, currentSeason, ti
               >
                 <Eye className="w-3.5 h-3.5" /> Voir la fiche
               </button>
-                           <button 
-                onClick={() => { if (window.confirm("Supprimer cette recette ?")) deleteRecipe(recipe.id); }}
-                className="text-slate-400 hover:text-red-600 p-1.5 rounded transition-colors"
-                title="Supprimer la recette"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => {
+                          setEditingRecipe(recipe);
+                          setActiveTab('add');
+                        }}
+                          className="text-slate-400 hover:text-indigo-600 p-1.5 rounded transition-colors"
+                          title="Modifier la recette"
+                          >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+
+                        {/* Ton bouton poubelle existant */}
+                        <button
+    onClick={() => { if (window.confirm("Supprimer cette recette ?")) deleteRecipe(recipe.id) }}
+    className="text-slate-400 hover:text-red-600 p-1.5 rounded transition-colors"
+    title="Supprimer la recette"
+  >
+    <Trash2 className="w-4 h-4" />
+  </button>
+</div>
             </div>
           </div>
         ))}
