@@ -117,12 +117,15 @@ export default function App() {
   };
 
     const deleteRecipe = (id) => {
-    setRecipes(recipes.filter(r => r.id !== id));
-    const newMenu = { ...menu };
-    Object.keys(newMenu).forEach(day => {
-      if (newMenu[day] === id) newMenu[day] = '';
-    });
-    setMenu(newMenu);
+    // On demande une confirmation avant de supprimer
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer cette recette ?")) {
+      setRecipes(recipes.filter(r => r.id !== id));
+      const newMenu = { ...menu };
+      Object.keys(newMenu).forEach(day => {
+        if (newMenu[day] === id) newMenu[day] = '';
+      });
+      setMenu(newMenu);
+    }
   };
 
   const updateMenu = (key, value) => {
