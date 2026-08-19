@@ -602,34 +602,31 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, currentSeason, ti
               )}
             </div>
 
-            <div className="flex justify-between items-center pt-3 border-t border-slate-100 mt-2">
+          <div className="flex justify-between items-center pt-3 border-t border-slate-100 mt-2">
               <button 
                 onClick={() => setViewingRecipe(recipe)}
                 className="text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-md transition-colors flex items-center gap-1"
               >
                 <Eye className="w-3.5 h-3.5" /> Voir la fiche
               </button>
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => {
-                          setEditingRecipe(recipe);
-                          setActiveTab('add');
-                        }}
-                          className="text-slate-400 hover:text-indigo-600 p-1.5 rounded transition-colors"
-                          title="Modifier la recette"
-                          >
-                          <Pencil className="w-4 h-4" />
-                        </button>
-
-                        {/* Ton bouton poubelle existant */}
-                        <button
-    onClick={() => { if (window.confirm("Supprimer cette recette ?")) deleteRecipe(recipe.id) }}
-    className="text-slate-400 hover:text-red-600 p-1.5 rounded transition-colors"
-    title="Supprimer la recette"
+                  <div className="flex items-center gap-1">
+  <button
+    onClick={() => {
+      setEditingRecipe(recipe);
+      setActiveTab('add');
+    }}
+    className="text-slate-400 hover:text-indigo-600 p-1.5 rounded transition-colors"
+    title="Modifier la recette"
   >
-    <Trash2 className="w-4 h-4" />
+    <Pencil className="w-4 h-4" />
   </button>
-</div>
+                           <button 
+                onClick={() => { if (window.confirm("Supprimer cette recette ?")) deleteRecipe(recipe.id); }}
+                className="text-slate-400 hover:text-red-600 p-1.5 rounded transition-colors"
+                title="Supprimer la recette"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
             </div>
           </div>
         ))}
