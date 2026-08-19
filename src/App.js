@@ -1258,3 +1258,7 @@ function RecipeModal({ recipe, onClose }) {
       </div>
     </div>
   );
+}
+}
+
+
