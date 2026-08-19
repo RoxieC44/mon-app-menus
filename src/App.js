@@ -785,7 +785,7 @@ React.useEffect(() => {
     }
   };
 
-  const handleSubmit = (e) => {
+const handleSubmit = (e) => {
     e.preventDefault();
     if (!name.trim()) return;
 
@@ -794,7 +794,7 @@ React.useEffect(() => {
       .map(i => i.trim().replace(/^[-*•]\s*/, ''))
       .filter(i => i.length > 0);
 
-    addRecipe({
+    const recipeData = {
       name,
       carb,
       equipment,
@@ -804,7 +804,18 @@ React.useEffect(() => {
       image,
       instructions,
       ingredients
-    });
+    };
+
+    if (editingRecipe) {
+      // Si on édite, on garde l'id d'origine
+      addRecipe({ ...recipeData, id: editingRecipe.id });
+      setEditingRecipe(null);
+    } else {
+      addRecipe(recipeData);
+    }
+
+    // Retour à l'onglet correspondant
+    setActiveTab(category === 'gateau' ? 'baking' : 'menu');
   };
 
   return (
