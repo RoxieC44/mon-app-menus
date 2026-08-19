@@ -1005,17 +1005,6 @@ function InventoryManager({ inventory, setInventory }) {
     setInventory(inventory.filter((_, i) => i !== index));
   };
 
-                <button 
-                  onClick={() => { if (window.confirm("Supprimer cette recette ?")) deleteRecipe(recipe.id); }}
-                  className="text-slate-400 hover:text-red-600 p-1.5 rounded transition-colors"
-                  title="Supprimer la recette"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 max-w-2xl mx-auto space-y-6">
       <div>
