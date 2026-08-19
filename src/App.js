@@ -265,6 +265,8 @@ function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, delete
           updateMenu={updateMenu} 
           recipes={mealRecipes} 
           setMenu={setMenu} 
+          setEditingRecipe={setEditingRecipe}
+          setActiveTab={setActiveTab}
           setViewingRecipe={setViewingRecipe} 
           currentSeason={currentSeason} 
         />
