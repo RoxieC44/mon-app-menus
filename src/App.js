@@ -656,7 +656,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
   );
 }
 
-function BakingPlanner({ bakingItems, setBakingItems, bakingRecipes, recipes, deleteRecipe, setViewingRecipe, currentSeason }) {
+function BakingPlanner({ menu, bakingItems, setBakingItems, bakingRecipes, recipes, deleteRecipe, setViewingRecipe, currentSeason }) {
   const [subTab, setSubTab] = useState('planning');
 
   const updateBakingItem = (index, recipeId) => {
