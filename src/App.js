@@ -795,6 +795,7 @@ React.useEffect(() => {
 
 const handleSubmit = (e) => {
     e.preventDefault();
+    console.log("Clic sur enregistrer ! Nom:", name, "Editing:", editingRecipe);
     if (!name.trim()) return;
 
     const ingredients = ingredientsText
