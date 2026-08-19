@@ -122,7 +122,7 @@ const addRecipe = (newRecipe) => {
       // Sinon, c'est une création, on lui met un nouvel id
       return [...prev, { ...newRecipe, id: Date.now().toString() }];
     });
-    // setActiveTab(newRecipe.category === 'gateau' ? 'baking' : 'menu');
+    setActiveTab(newRecipe.category === 'gateau' ? 'baking' : 'menu');
   };
 
       const deleteRecipe = (id) => {
@@ -584,22 +584,22 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        {filteredRecipes.map(recipe => (
-          <div key={recipe.id} className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col justify-between hover:shadow-md transition-shadow">
-            <div>
-              <div className="flex justify-between items-start gap-2 mb-2">
-                <h3 className="font-bold text-slate-800 text-sm leading-tight">{recipe.name}</h3>
-                <span className="text-xs bg-indigo-50 text-indigo-700 font-semibold px-2 py-0.5 rounded flex-shrink-0 border border-indigo-100">
-                  {recipe.carb}
-                </span>
-              </div>
-              
-              {recipe.image && (
-                <div className="mb-2 h-32 w-full overflow-hidden rounded-lg border border-slate-200">
-                  <img src={recipe.image} alt={recipe.name} className="w-full h-full object-cover" />
-                </div>
-              )}
+      <div className="grid gap-3 sm:grid-cols-2">
+        {filteredRecipes.map(recipe => (
+          <div key={recipe.id} className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div>
+              <div className="flex justify-between items-start gap-2 mb-2">
+                <h3 className="font-bold text-slate-800 text-sm leading-tight">{recipe.name}</h3>
+                <span className="text-xs bg-indigo-50 text-indigo-700 font-semibold px-2 py-0.5 rounded flex-shrink-0 border border-indigo-100">
+                  {recipe.carb}
+                </span>
+              </div>
+              
+              {recipe.image && (
+                <div className="mb-2 h-32 w-full overflow-hidden rounded-lg border border-slate-200">
+                  <img src={recipe.image} alt={recipe.name} className="w-full h-full object-cover" />
+                </div>
+              )}
 
               <div className="flex flex-wrap gap-1.5 mb-3">
                 <span className="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded flex items-center gap-1 font-medium">
@@ -827,7 +827,6 @@ const handleSubmit = (e) => {
       ingredients
     };
 
-    // Retour à l'onglet correspondant
     if (editingRecipe) {
       // Si on édite, on garde l'id d'origine
       addRecipe({ ...recipeData, id: editingRecipe.id });
@@ -836,8 +835,8 @@ const handleSubmit = (e) => {
       addRecipe(recipeData);
     }
 
-    // SUPPRIME OU METS // DEVANT CETTE LIGNE :
-    // setActiveTab(category === 'gateau' ? 'baking' : 'menu');
+    // Retour à l'onglet correspondant
+    setActiveTab(category === 'gateau' ? 'baking' : 'menu');
   };
 
   return (
@@ -1259,4 +1258,3 @@ function RecipeModal({ recipe, onClose }) {
     </div>
   );
 }
-
