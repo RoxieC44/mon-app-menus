@@ -1056,11 +1056,15 @@ function InventoryManager({ inventory, setInventory }) {
                 <option value="Entamé">Entamé</option>
                 <option value="Presque vide">Presque vide</option>
               </select>
-              
+
               <button 
-                onClick={() => { if (window.confirm("Supprimer cet élément du placard ?")) removeItem(index); }}
-                className="text-slate-400 hover:text-red-600 p-1.5 rounded transition-colors"
-                title="Supprimer cet élément"
+                onClick={() => {
+                  if (window.confirm("Supprimer cet élément du placard ?")) {
+                    removeItem(index);
+                  }
+                 }}
+                className="text-slate-400 hover:text-red-600 p-1"
+                title="Supprimer"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
