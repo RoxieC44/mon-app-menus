@@ -606,17 +606,17 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, currentSeason, ti
               >
                 <Eye className="w-3.5 h-3.5" /> Voir la fiche
               </button>
-              <button
-              onClick={() => {
-              if (window.confirm("Êtes-vous sûr de vouloir supprimer cette recette ?")) {
-              deleteRecipe(recipe.id);
-              }
-              }}
-              className="text-slate-400 hover:text-red-600 p-1.5 rounded transition-colors"
-              title="Supprimer la recette"
-              >
-              <Trash className="w-4 h-4" />
-              </button>
+             <button
+  onClick={() => {
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer cette recette ?")) {
+      deleteRecipe(recipe.id);
+    }
+  }}
+  className="text-slate-400 hover:text-red-600 p-1.5 rounded transition-colors"
+  title="Supprimer la recette"
+>
+  <Trash className="w-4 h-4" />
+</button>
             </div>
           </div>
         ))}
