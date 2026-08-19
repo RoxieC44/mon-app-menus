@@ -404,6 +404,8 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
             updateMenu={updateMenu}
             recipes={recipes}
             currentSeason={currentSeason}
+            setEditingRecipe={setEditingRecipe}
+            setActiveTab={setActiveTab}
             setViewingRecipe={setViewingRecipe}
           />
         ))}
@@ -412,7 +414,7 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
   );
 }
 
-function FullDayCard({ day, menu, updateMenu, recipes, currentSeason, setViewingRecipe }) {
+function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActiveTab, currentSeason, setViewingRecipe }) {
   const lunchKey = `${day.key}Lunch`;
   const dinnerKey = `${day.key}Dinner`;
 
@@ -659,7 +661,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
   );
 }
 
-function BakingPlanner({ menu, bakingItems, setBakingItems, bakingRecipes, recipes, deleteRecipe, setViewingRecipe, currentSeason }) {
+function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, setActiveTab, bakingRecipes, recipes, deleteRecipe, setViewingRecipe, currentSeason }) {
   const [subTab, setSubTab] = useState('planning');
 
   const updateBakingItem = (index, recipeId) => {
@@ -758,6 +760,8 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, bakingRecipes, recip
           recipes={bakingRecipes} 
           deleteRecipe={deleteRecipe} 
           setViewingRecipe={setViewingRecipe} 
+          setEditingRecipe={setEditingRecipe}
+          setActiveTab={setActiveTab}
           currentSeason={currentSeason}
         />
       )}
