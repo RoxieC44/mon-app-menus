@@ -523,7 +523,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, currentSeason, setViewing
   );
 }
 
-function RecipeList({ recipes, deleteRecipe, setViewingRecipe, currentSeason, title }) {
+function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, title }) {
   const [filterSeason, setFilterSeason] = useState('Tous');
   const [filterEquip, setFilterEquip] = useState('Tous');
 
