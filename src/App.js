@@ -954,6 +954,7 @@ const handleSubmit = (e) => {
             onChange={(e) => setIngredientsText(e.target.value)}
             placeholder="250g de farine&#10;1 sachet de levure&#10;100g de sucre"
             className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
+            required
           />
         </div>
 
@@ -965,6 +966,7 @@ const handleSubmit = (e) => {
             onChange={(e) => setInstructions(e.target.value)}
             placeholder="Mélanger tous les ingrédients..."
             className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
+            required
           />
         </div>
 
