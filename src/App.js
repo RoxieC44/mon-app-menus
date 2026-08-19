@@ -116,14 +116,14 @@ export default function App() {
     setActiveTab(newRecipe.category === 'gateau' ? 'baking' : 'menu');
   };
 
-  const deleteRecipe = (id) => {
-    setRecipes(recipes.filter(r => r.id !== id));
-    const newMenu = { ...menu };
-    Object.keys(newMenu).forEach(day => {
-      if (newMenu[day] === id) newMenu[day] = '';
-    });
-    setMenu(newMenu);
-  };
+  const handleDelete = (id) => {
+  // Une fenêtre de confirmation s'ouvre
+  if (window.confirm("Êtes-vous sûr de vouloir supprimer cette recette ?")) {
+    // Si l'utilisateur clique sur "OK", on supprime
+    deleteRecipe(id); 
+  }
+  // Si l'utilisateur clique sur "Annuler", il ne se passe rien !
+};
 
   const updateMenu = (key, value) => {
     setMenu({ ...menu, [key]: value });
