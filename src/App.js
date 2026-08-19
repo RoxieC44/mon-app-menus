@@ -609,18 +609,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, currentSeason, ti
               >
                 <Eye className="w-3.5 h-3.5" /> Voir la fiche
               </button>
-                  <div className="flex items-center gap-1">
-  <button
-    onClick={() => {
-      setEditingRecipe(recipe);
-      setActiveTab('add');
-    }}
-    className="text-slate-400 hover:text-indigo-600 p-1.5 rounded transition-colors"
-    title="Modifier la recette"
-  >
-    <Pencil className="w-4 h-4" />
-  </button>
-                           <button 
+                   <button 
                 onClick={() => { if (window.confirm("Supprimer cette recette ?")) deleteRecipe(recipe.id); }}
                 className="text-slate-400 hover:text-red-600 p-1.5 rounded transition-colors"
                 title="Supprimer la recette"
