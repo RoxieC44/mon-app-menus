@@ -40,7 +40,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   const [recipes, setRecipes] = useState(DEFAULT_RECIPES);
-  const [menu, setMenu] = useState({
+  const [, setMenu] = useState({
     mondayDinner: '', tuesdayDinner: '', wednesdayDinner: '', thursdayDinner: '', fridayDinner: '', saturdayDinner: '', sundayDinner: '',
     mondayLunch: 'restes', tuesdayLunch: 'restes', wednesdayLunch: '', thursdayLunch: 'restes', fridayLunch: 'restes', saturdayLunch: '', sundayLunch: ''
   });
@@ -173,6 +173,7 @@ return (
             deleteRecipe={deleteRecipe}
             setViewingRecipe={setViewingRecipe} 
             setEditingRecipe={setEditingRecipe}
+            setActiveTab={setActiveTab}
             currentSeason={currentSeason} 
           />
         )}
@@ -185,6 +186,7 @@ return (
             deleteRecipe={deleteRecipe}
             setViewingRecipe={setViewingRecipe} 
             setEditingRecipe={setEditingRecipe}
+            setActiveTab={setActiveTab}
             currentSeason={currentSeason}
           />
         )}
