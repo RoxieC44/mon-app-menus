@@ -918,14 +918,16 @@ const handleSubmit = (e) => {
     Toutes
   </button>
   {SEASONS.map((s) => {
+    const isTousSelected = Array.isArray(season) && season.includes("Toutes");
     const isSelected = Array.isArray(season) && season.includes(s);
     return (
       <button
         key={s}
         type="button"
+        disabled={isTousSelected}
         onClick={() => {
+          if (isTousSelected) return;
           let currentSeasons = Array.isArray(season) ? [...season] : [];
-          // Si "Toutes" était sélectionné, on le retire quand on clique sur une saison spécifique
           currentSeasons = currentSeasons.filter(item => item !== "Toutes");
           
           if (isSelected) {
@@ -933,10 +935,12 @@ const handleSubmit = (e) => {
           } else {
             currentSeasons.push(s);
           }
-          setSeason(currentSeasons);
+          setSeason(currentSeasons.length > 0 ? currentSeasons : ["Toutes"]);
         }}
         className={`text-xs px-3 py-1.5 rounded-lg font-medium border transition-colors ${
-          isSelected
+          isTousSelected
+            ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-60"
+            : isSelected
             ? "bg-indigo-600 text-white border-indigo-600"
             : "bg-slate-50 text-slate-600 border-slate-300 hover:bg-slate-100"
         }`}
