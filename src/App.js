@@ -904,33 +904,47 @@ const handleSubmit = (e) => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="col-span-full">
-            <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Saison idéale</label>
+           <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Saison idéale</label>
 <div className="flex flex-wrap gap-2">
   <button
     type="button"
-    onClick={() => setSeason("Toutes")}
+    onClick={() => setSeason(season.includes("Toutes") ? [] : ["Toutes"])}
     className={`text-xs px-3 py-1.5 rounded-lg font-medium border transition-colors ${
-      season === "Toutes"
+      Array.isArray(season) && season.includes("Toutes")
         ? "bg-indigo-600 text-white border-indigo-600"
         : "bg-slate-50 text-slate-600 border-slate-300 hover:bg-slate-100"
     }`}
   >
     Toutes
   </button>
-  {SEASONS.map((s) => (
-    <button
-      key={s}
-      type="button"
-      onClick={() => setSeason(s)}
-      className={`text-xs px-3 py-1.5 rounded-lg font-medium border transition-colors ${
-        season === s
-          ? "bg-indigo-600 text-white border-indigo-600"
-          : "bg-slate-50 text-slate-600 border-slate-300 hover:bg-slate-100"
-      }`}
-    >
-      {s}
-    </button>
-  ))}
+  {SEASONS.map((s) => {
+    const isSelected = Array.isArray(season) && season.includes(s);
+    return (
+      <button
+        key={s}
+        type="button"
+        onClick={() => {
+          let currentSeasons = Array.isArray(season) ? [...season] : [];
+          // Si "Toutes" était sélectionné, on le retire quand on clique sur une saison spécifique
+          currentSeasons = currentSeasons.filter(item => item !== "Toutes");
+          
+          if (isSelected) {
+            currentSeasons = currentSeasons.filter(item => item !== s);
+          } else {
+            currentSeasons.push(s);
+          }
+          setSeason(currentSeasons);
+        }}
+        className={`text-xs px-3 py-1.5 rounded-lg font-medium border transition-colors ${
+          isSelected
+            ? "bg-indigo-600 text-white border-indigo-600"
+            : "bg-slate-50 text-slate-600 border-slate-300 hover:bg-slate-100"
+        }`}
+      >
+        {s}
+      </button>
+    );
+  })}
 </div>
           </div>
         </div>
