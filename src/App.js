@@ -560,14 +560,33 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
             <Filter className="w-3.5 h-3.5" /> Filtres :
           </span>
 
-          <select
-            value={season}
-            onChange={(e) => setSeason(e.target.value)}
-            className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800"
-          >
-            <option value="Tous">Toutes les saisons</option>
-            {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
+         <div className="flex flex-wrap gap-2">
+  {['Printemps', 'Été', 'Automne', 'Hiver'].map((s) => {
+    const isSelected = Array.isArray(season) && season.includes(s);
+    return (
+      <button
+        key={s}
+        type="button"
+        onClick={() => {
+          let next = Array.isArray(season) ? [...season] : [];
+          if (next.includes(s)) {
+            next = next.filter(i => i !== s);
+          } else {
+            next.push(s);
+          }
+          setSeason(next);
+        }}
+        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+          isSelected 
+            ? 'bg-indigo-600 text-white border-indigo-600' 
+            : 'bg-slate-50 text-slate-600 border-slate-300 hover:bg-slate-100'
+        }`}
+      >
+        {s}
+      </button>
+    );
+  })}
+</div>
 
           <select 
             value={filterEquip} 
