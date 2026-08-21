@@ -682,6 +682,40 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
   );
 }
 
+<div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap gap-3 items-center justify-between">
+        <div className="flex flex-wrap gap-2 items-center text-xs">
+          <span className="font-semibold text-slate-600 flex items-center gap-1">
+            <Filter className="w-3.5 h-3.5" /> Filtres :
+          </span>
+
+          <div className="flex flex-wrap gap-2">
+            {['Printemps', 'Été', 'Automne', 'Hiver'].map((s) => {
+              const isSelected = selectedSeasons.includes(s);
+              return (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => {
+                    let next = [...selectedSeasons];
+                    if (next.includes(s)) {
+                      next = next.filter(i => i !== s);
+                    } else {
+                      next.push(s);
+                    }
+                    setSelectedSeasons(next);
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                    isSelected 
+                      ? 'bg-indigo-600 text-white border-indigo-600' 
+                      : 'bg-slate-50 text-slate-600 border-slate-300 hover:bg-slate-100'
+                  }`}
+                >
+                  {s}
+                </button>
+              );
+            })}
+          </div>
+
           <select 
             value={filterEquip} 
             onChange={(e) => setFilterEquip(e.target.value)}
