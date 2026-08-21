@@ -301,7 +301,7 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
     return recipes.filter(r => {
       const matchCarb = reqCarb ? r.carb === reqCarb : true;
       if (!matchCarb) return false;
-      return r.season === 'Toutes' || r.season === currentSeason;
+    return currentSeason.length === 0 || currentSeason.includes('Toutes') || currentSeason.some(s => r.season.includes(s));
     });
   };
 
@@ -422,12 +422,12 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
     return recipes.filter(r => {
       const matchCarb = reqCarb ? r.carb === reqCarb : true;
       if (!matchCarb) return false;
-      return r.season === 'Toutes' || r.season === currentSeason;
+      return currentSeason.length === 0 || currentSeason.includes('Toutes') || currentSeason.some(s => r.season.includes(s));
     });
   };
 
   const dinnerRecipes = getAvailableRecipes(day.reqCarb);
-  const anyRecipes = recipes.filter(r => r.season === 'Toutes' || r.season === currentSeason);
+  const anyRecipes = recipes.filter(r => currentSeason.length === 0 || currentSeason.includes('Toutes') || currentSeason.some(s => r.season.includes(s)));
 
   const lunchVal = menu[lunchKey] || '';
   const dinnerVal = menu[dinnerKey] || '';
