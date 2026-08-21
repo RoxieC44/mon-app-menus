@@ -1068,8 +1068,6 @@ function InventoryManager({ inventory, setInventory, recipes }) {
         </div>
       </div>
     </div>
-  );
-}
 
       <form onSubmit={addItem} className="flex gap-2">
         <input 
