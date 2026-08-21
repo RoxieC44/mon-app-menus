@@ -902,56 +902,16 @@ const handleSubmit = (e) => {
           </div>
         </div>
 
-<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-  <div className="col-span-full">
-    <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Saison idéale</label>
-    <div className="flex flex-wrap gap-2">
-      <button
-        type="button"
-        onClick={() => setSeason(season.includes("Toutes") ? [] : ["Toutes"])}
-        className={`text-xs px-3 py-1.5 rounded-lg font-medium border transition-colors ${
-          Array.isArray(season) && season.includes("Toutes")
-            ? "bg-indigo-600 text-white border-indigo-600"
-            : "bg-slate-50 text-slate-600 border-slate-300 hover:bg-slate-100"
-        }`}
-      >
-        Toutes
-      </button>
-      {SEASONS.filter(s => s !== "Toutes").map((s) => {
-        const isTousSelected = Array.isArray(season) && season.includes("Toutes");
-        const isSelected = Array.isArray(season) && season.includes(s);
-        return (
-          <button
-            key={s}
-            type="button"
-            disabled={isTousSelected}
-            onClick={() => {
-              if (isTousSelected) return;
-              let currentSeasons = Array.isArray(season) ? [...season] : [];
-              currentSeasons = currentSeasons.filter(item => item !== "Toutes");
-              
-              if (isSelected) {
-                currentSeasons = currentSeasons.filter(item => item !== s);
-              } else {
-                currentSeasons.push(s);
-              }
-              setSeason(currentSeasons.length > 0 ? currentSeasons : ["Toutes"]);
-            }}
-            className={`text-xs px-3 py-1.5 rounded-lg font-medium border transition-colors ${
-              isTousSelected
-                ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-60"
-                : isSelected
-                ? "bg-indigo-600 text-white border-indigo-600"
-                : "bg-slate-50 text-slate-600 border-slate-300 hover:bg-slate-100"
-            }`}
-          >
-            {s}
-          </button>
-        );
-      })}
-    </div>
-  </div>
-</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="col-span-full">
+            <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Saison idéale</label>
+            <select 
+              value={season}
+              onChange={(e) => setSeason(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
+            >
+              {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
           </div>
         </div>
 
