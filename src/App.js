@@ -560,9 +560,9 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
             <Filter className="w-3.5 h-3.5" /> Filtres :
           </span>
 
-          <select 
-            value={filterSeason} 
-            onChange={(e) => setFilterSeason(e.target.value)}
+          <select
+            value={season}
+            onChange={(e) => setSeason(e.target.value)}
             className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800"
           >
             <option value="Tous">Toutes les saisons</option>
@@ -905,13 +905,28 @@ const handleSubmit = (e) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="col-span-full">
             <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Saison idéale</label>
-            <select 
-              value={season}
-              onChange={(e) => setSeason(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
-            >
-              {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+<div className="flex flex-wrap gap-2">
+  {['Printemps', 'Été', 'Automne', 'Hiver'].map((s) => {
+    const isSelected = Array.isArray(season) && season.includes(s);
+    return (
+      <button
+        key={s}
+        type="button"
+        onClick={() => {
+          let next = Array.isArray(season) ? [...season] : [];
+          if (next.includes(s)) next = next.filter(i => i !== s);
+          else next.push(s);
+          setSeason(next);
+        }}
+        className={`px-3 py-1.5 rounded-lg text-xs font-medium border ${
+          isSelected ? 'bg-indigo-600 text-white' : 'bg-slate-50 text-slate-600 border-slate-300'
+        }`}
+      >
+        {s}
+      </button>
+    );
+  })}
+</div>
           </div>
         </div>
 
@@ -984,7 +999,7 @@ const handleSubmit = (e) => {
   );
 }
 
-function InventoryManager({ inventory, setInventory, recipes }) {
+function InventoryManager({ inventory, setInventory }) {
   const [newItemName, setNewItemName] = useState('');
   const [newItemStatus, setNewItemStatus] = useState('Plein');
 
@@ -992,82 +1007,29 @@ function InventoryManager({ inventory, setInventory, recipes }) {
     e.preventDefault();
     if (!newItemName.trim()) return;
     setInventory([...inventory, { name: newItemName.trim(), status: newItemStatus }]);
-    NewItemName('');
+    setNewItemName('');
   };
 
   const updateStatus = (index, status) => {
-    Const updated = [...inventory];
-    Updated[index].status = status;
-    SetInventory(updated);
+    const updated = [...inventory];
+    updated[index].status = status;
+    setInventory(updated);
   };
 
   const removeItem = (index) => {
-    SetInventory(inventory.filter((_, i) => i !== index));
+    setInventory(inventory.filter((_, i) => i !== index));
   };
 
-  // Fonction de calcul souple pour trouver les recettes réalisables
-  const getMatchingRecipes = () => {
-    Const inventoryItems = (inventory || []).map(item => item.name.toLowerCase());
-    
-    Return (recipes || []).map(recipe => {
-      Const recipeIngredients = recipe.ingredients ? Recipe.ingredients.split('\n') : [];
-      Let missingCount = 0;
-
-      RecipeIngredients.forEach(ing => {
-        Const ingLower = ing.toLowerCase();
-        Const found = inventoryItems.some(p => ingLower.includes(p));
-        If (!found) {
-          MissingCount++;
-        }
-      });
-
-      Return {
-        ...recipe,
-        MissingCount,
-        IsFaisable: recipeIngredients.length > 0 && missingCount <= 2 // Tolérance de 2 ingrédients manquants max
-      };
-    }).filter(recipe => recipe.isFaisable);
-  };
-
-  Return (
+  return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 max-w-2xl mx-auto space-y-6">
       <div>
         <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2 mb-1">
           <Package className="w-5 h-5 text-indigo-600" /> Mon Placard & Frigo
         </h2>
         <p className="text-xs text-slate-500">
-          Listez vos provisions et leur état actuel pour affiner la liste de courses et voir vos idées repas.
+          Listez vos provisions et leur état actuel pour affiner la liste de courses.
         </p>
       </div>
-
-      {/* ICI SE TROUVE LE RESTE DE TON CODE EXISTANT POUR GÉRER LA LISTE DU PLACARD (Formulaire + Liste des items) */}
-      {/* ... (Garde ton code actuel pour l'ajout/suppression d'ingrédients ici) ... */}
-
-      {/* --- NOUVEAU : Bloc des recettes réalisables --- */}
-      <div className="mt-8 pt-6 border-t border-slate-100">
-        <h3 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
-          🍲 Recettes réalisables avec le placard
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {getMatchingRecipes().length > 0 ? (
-            getMatchingRecipes().map(recipe => (
-              <div key={recipe.id} className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center">
-                <div>
-                  <h4 className="font-semibold text-xs text-slate-900">{recipe.name}</h4>
-                  <span className="text-[11px] text-amber-600 font-medium">
-                    {recipe.missingCount === 0 ? "✨ Tout y est !" : `Manque ${recipe.missingCount} ingrédient(s)`}
-                  </span>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className="text-xs text-slate-400 italic col-span-full">
-              Aucune recette ne correspond pour l'instant avec les ingrédients renseignés.
-            </p>
-          )}
-        </div>
-      </div>
-    </div>
 
       <form onSubmit={addItem} className="flex gap-2">
         <input 
