@@ -298,12 +298,16 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
   ];
 
   const getEligibleRecipes = (reqCarb) => {
-    return recipes.filter(r => {
-      const matchCarb = reqCarb ? r.carb === reqCarb : true;
-      if (!matchCarb) return false;
-      return r.season === 'Toutes' || r.season === currentSeason;
-    });
-  };
+  return recipes.filter(r => {
+    const matchCarb = reqCarb ? r.carb === reqCarb : true;
+    if (!matchCarb) return false;
+    
+    // Gère le cas où la saison est un tableau ou une ancienne chaîne
+    const recipeSeasons = Array.isArray(r.season) ? r.season : [r.season];
+    
+    return recipeSeasons.includes('Toutes') || recipeSeasons.includes(currentSeason);
+  });
+};
 
   const equipmentCounts = {};
   Object.values(menu).forEach(val => {
@@ -534,18 +538,14 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
 }
 
 function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, title }) {
-  const [selectedSeasons, setSelectedSeasons] = useState([]);
+  const [filterSeason, setFilterSeason] = useState('Tous');
   const [filterEquip, setFilterEquip] = useState('Tous');
 
-const filteredRecipes = recipes.filter(r => {
-  if (selectedSeasons.length > 0) {
-    const recipeSeasons = Array.isArray(r.season) ? r.season : [r.season];
-    const matchSeason = selectedSeasons.some(s => recipeSeasons.includes(s));
-    if (!matchSeason) return false;
-  }
-  if (filterEquip !== 'Tous' && r.equipment !== filterEquip) return false;
-  return true;
-});
+  const filteredRecipes = recipes.filter(r => {
+    if (filterSeason !== 'Tous' && r.season !== filterSeason) return false;
+    if (filterEquip !== 'Tous' && r.equipment !== filterEquip) return false;
+    return true;
+  });
 
   return (
     <div className="space-y-4">
@@ -564,40 +564,14 @@ const filteredRecipes = recipes.filter(r => {
             <Filter className="w-3.5 h-3.5" /> Filtres :
           </span>
 
-<div className="flex flex-wrap gap-1.5">
-            {['Printemps', 'Été', 'Automne', 'Hiver'].map((s) => {
-              const isSelected = selectedSeasons.includes(s);
-              return (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => {
-                    if (isSelected) {
-                      setSelectedSeasons(selectedSeasons.filter(item => item !== s));
-                    } else {
-                      setSelectedSeasons([...selectedSeasons, s]);
-                    }
-                  }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                    isSelected 
-                      ? 'bg-indigo-600 text-white border-indigo-600' 
-                      : 'bg-slate-50 text-slate-600 border-slate-300 hover:bg-slate-100'
-                  }`}
-                >
-                  {s}
-                </button>
-              );
-            })}
-            {selectedSeasons.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setSelectedSeasons([])}
-                className="px-2 py-1.5 text-xs text-slate-400 hover:text-slate-600 underline"
-              >
-                Effacer
-              </button>
-            )}
-          </div>
+          <select 
+            value={filterSeason} 
+            onChange={(e) => setFilterSeason(e.target.value)}
+            className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800"
+          >
+            <option value="Tous">Toutes les saisons</option>
+            {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
 
           <select 
             value={filterEquip} 
