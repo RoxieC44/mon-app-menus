@@ -530,12 +530,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
     </span>
   )}
 </div>
-<button
-  onClick={() => setViewingRecipe(dinnerRecipe)}
-  className="text-[11px] font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded transition-colors flex items-center gap-1 mt-2"
->
-  <Eye className="w-3 h-3" /> Voir
-</button>
+
   const filteredRecipes = recipes.filter(r => {
     if (filterSeason !== 'Tous' && r.season !== filterSeason) return false;
     if (filterEquip !== 'Tous' && r.equipment !== filterEquip) return false;
