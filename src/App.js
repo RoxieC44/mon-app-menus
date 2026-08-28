@@ -519,17 +519,6 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
                 <div className="flex gap-1 ml-1 flex-wrap">
 <div className="flex gap-1 ml-1 flex-wrap">
   {Array.isArray(dinnerRecipe.season) ? (
-    dinnerRecipe.season.map(s => (
-      <span key={s} className="text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">
-        {s}
-      </span>
-    ))
-  ) : (
-    <span className="text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">
-      {dinnerRecipe.season || 'Toutes'}
-    </span>
-  )}
-</div>
 
   const filteredRecipes = recipes.filter(r => {
     if (filterSeason !== 'Tous' && r.season !== filterSeason) return false;
