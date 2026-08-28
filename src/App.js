@@ -516,8 +516,32 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
               <div className="flex justify-between items-center pt-1">
                 <span className="text-[11px] text-slate-500 flex items-center gap-1 font-medium">
                   <Settings className="w-3 h-3 text-slate-400" /> {dinnerRecipe.equipment}
-                <div className="flex gap-1 ml-1 flex-wrap">
-<div className="flex gap-1 ml-1 flex-wrap">
+                  <span className="ml-1 px-1.5 py-0.5 bg-slate-100 rounded text-[9px]">{dinnerRecipe.season}</span>
+                </span>
+                <button 
+                  onClick={() => setViewingRecipe(dinnerRecipe)}
+                  className="text-[11px] font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded transition-colors flex items-center gap-1"
+                >
+                  <Eye className="w-3 h-3" /> Voir
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, title }) {
+  const [filterSeason, setFilterSeason] = useState('Tous');
+  const [filterEquip, setFilterEquip] = useState('Tous');
+
+  const filteredRecipes = recipes.filter(r => {
+    if (filterSeason !== 'Tous' && r.season !== filterSeason) return false;
+    if (filterEquip !== 'Tous' && r.equipment !== filterEquip) return false;
+    return true;
+  });
 
   return (
     <div className="space-y-4">
@@ -581,19 +605,12 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
                 <span className="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded flex items-center gap-1 font-medium">
                   <Settings className="w-3 h-3 text-slate-400" /> {recipe.equipment}
                 </span>
-               <div className="flex flex-wrap gap-1">
-  {Array.isArray(recipe.season) ? (
-    recipe.season.map(s => (
-      <span key={s} className="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">
-        {s}
-      </span>
-    ))
-  ) : (
-    <span className="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">
-      {recipe.season}
-    </span>
-  )}
-</div>
+                <span className={`text-[11px] px-2 py-0.5 rounded font-medium flex items-center gap-1
+                  ${recipe.season === currentSeason ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-slate-100 text-slate-600'}
+                `}>
+                  <Sun className="w-3 h-3" /> {recipe.season}
+                </span>
+              </div>
 
               {recipe.ingredients && recipe.ingredients.length > 0 && (
                 <p className="text-xs text-slate-500 line-clamp-2 mb-3">
@@ -640,6 +657,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
           </div>
         )}
       </div>
+    </div>
   );
 }
 
@@ -767,7 +785,7 @@ React.useEffect(() => {
       setName(editingRecipe.name || '');
       setCarb(editingRecipe.carb || 'Plaisir');
       setEquipment(editingRecipe.equipment || 'Four');
-      setSeason(Array.isArray(editingRecipe.season) ? editingRecipe.season : (editingRecipe.season ? [editingRecipe.season] : ['Toutes']));
+      setSeason(editingRecipe.season || 'Toutes');
       setCategory(editingRecipe.category || 'repas');
       setUrl(editingRecipe.url || '');
       setImage(editingRecipe.image || '');
@@ -884,48 +902,18 @@ const handleSubmit = (e) => {
           </div>
         </div>
 
-<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-  <div className="col-span-full">
-    <label className="block text-xs font-semibold text-slate-700 uppercase mb-1.5">Saison(s)</label>
-    <div className="flex flex-wrap gap-2">
-      {['Printemps', 'Été', 'Automne', 'Hiver'].map((s) => {
-        const currentSeasons = Array.isArray(season) ? season : (season ? [season] : []);
-        const isSelected = currentSeasons.includes(s) || currentSeasons.includes('Toutes');
-
-        return (
-          <button
-            key={s}
-            type="button"
-            onClick={() => {
-              let updatedSeasons = [...currentSeasons];
-              if (updatedSeasons.includes('Toutes')) {
-                updatedSeasons = ['Printemps', 'Été', 'Automne', 'Hiver'].filter(item => item !== s);
-              } else if (isSelected) {
-                updatedSeasons = updatedSeasons.filter(item => item !== s);
-              } else {
-                updatedSeasons.push(s);
-              }
-
-              const allFour = ['Printemps', 'Été', 'Automne', 'Hiver'];
-              if (allFour.every(item => updatedSeasons.includes(item))) {
-                updatedSeasons = ['Toutes'];
-              }
-
-              setSeason(updatedSeasons);
-            }}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-              isSelected 
-                ? 'bg-indigo-600 text-white border-indigo-600' 
-                : 'bg-slate-50 text-slate-600 border-slate-300 hover:bg-slate-100'
-            }`}
-          >
-            {s}
-          </button>
-        );
-      })}
-    </div>
-  </div>
-</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="col-span-full">
+            <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Saison idéale</label>
+            <select 
+              value={season}
+              onChange={(e) => setSeason(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
+            >
+              {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
