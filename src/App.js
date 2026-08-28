@@ -57,6 +57,7 @@ export default function App() {
   const [bakingItems, setBakingItems] = useState(['', '']);
   const [shoppingChecks, setShoppingChecks] = useState({});
 
+  // 1. CHARGEMENT INITIAL DEPUIS SUPABASE
   useEffect(() => {
     async function loadData() {
       setLoading(true);
@@ -79,8 +80,9 @@ export default function App() {
     loadData();
   }, []);
 
+  // 2. SAUVEGARDE AUTOMATIQUE SUR SUPABASE À CHAQUE MODIFICATION
   useEffect(() => {
-    if (loading) return;
+    if (loading) return; // Empêche d'écraser pendant le chargement initial
 
     async function saveData() {
       const payload = {
@@ -110,18 +112,20 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [recipes, menu, inventory, bakingItems, shoppingChecks]);
 
-  const addRecipe = (newRecipe) => {
+const addRecipe = (newRecipe) => {
     setRecipes(prev => {
+      // Si la recette a déjà un id qui existe, on la met à jour
       const exists = prev.some(r => r.id === newRecipe.id);
       if (exists) {
         return prev.map(r => r.id === newRecipe.id ? newRecipe : r);
       }
+      // Sinon, c'est une création, on lui met un nouvel id
       return [...prev, { ...newRecipe, id: Date.now().toString() }];
     });
     setActiveTab(newRecipe.category === 'gateau' ? 'baking' : 'menu');
   };
 
-  const deleteRecipe = (id) => {
+      const deleteRecipe = (id) => {
     setRecipes(recipes.filter(r => r.id !== id));
     const newMenu = { ...menu };
     Object.keys(newMenu).forEach(day => {
@@ -137,7 +141,7 @@ export default function App() {
   const mealRecipes = recipes.filter(r => r.category !== 'gateau');
   const bakingRecipes = recipes.filter(r => r.category === 'gateau');
   
-  return (
+return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-24 md:pb-0 relative">
       <header className="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-10">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -196,11 +200,13 @@ export default function App() {
         <RecipeModal recipe={viewingRecipe} onClose={() => setViewingRecipe(null)} />
       )}
 
+      {/* BOTTOM NAVIGATION FIXED WITH CENTRAL FLOATING ADD BUTTON */}
       <nav className="sticky bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-40 px-4 py-2 shadow-[0_-10px_15px_-3px_rgb(0,0,0,0.05)] md:relative md:border-t-0 md:bg-transparent md:max-w-4xl md:mx-auto md:p-0 md:mb-6 md:shadow-none">
         <div className="max-w-md mx-auto flex justify-between items-center relative">
           <NavButton active={activeTab === 'menu'} onClick={() => setActiveTab('menu')} icon={<Calendar />} label="Menus" />
           <NavButton active={activeTab === 'baking'} onClick={() => setActiveTab('baking')} icon={<Cake />} label="Gâteaux" />
           
+          {/* GROS BOUTON "+" DU MILIEU EN RELIEF */}
           <button
             onClick={() => setActiveTab('add')}
             className={`bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-lg transform -translate-y-4 transition-transform hover:scale-105 border-4 border-white flex items-center justify-center flex-shrink-0 ${activeTab === 'add' ? 'ring-2 ring-indigo-400 scale-105' : ''}`}
@@ -614,7 +620,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
               )}
             </div>
 
-            <div className="flex justify-between items-center pt-3 border-t border-slate-100 mt-2">
+          <div className="flex justify-between items-center pt-3 border-t border-slate-100 mt-2">
               <button 
                 onClick={() => setViewingRecipe(recipe)}
                 className="text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-md transition-colors flex items-center gap-1"
@@ -774,7 +780,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
   const [instructions, setInstructions] = useState('');
   const [ingredientsText, setIngredientsText] = useState('');
   
-  React.useEffect(() => {
+React.useEffect(() => {
     if (editingRecipe) {
       setName(editingRecipe.name || '');
       setCarb(editingRecipe.carb || 'Plaisir');
@@ -799,8 +805,9 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
     }
   };
 
-  const handleSubmit = (e) => {
+const handleSubmit = (e) => {
     e.preventDefault();
+    console.log("Clic sur enregistrer ! Nom:", name, "Editing:", editingRecipe);
     if (!name.trim()) return;
 
     const ingredients = ingredientsText
@@ -821,12 +828,14 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
     };
 
     if (editingRecipe) {
+      // Si on édite, on garde l'id d'origine
       addRecipe({ ...recipeData, id: editingRecipe.id });
       setEditingRecipe(null);
     } else {
       addRecipe(recipeData);
     }
 
+    // Retour à l'onglet correspondant
     setActiveTab(category === 'gateau' ? 'baking' : 'menu');
   };
 
@@ -928,7 +937,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
           </div>
         </div>
 
-        {image && (
+       {image && (
           <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-slate-200">
             <img src={image} alt="Aperçu" className="w-full h-full object-cover" />
             <button 
@@ -1053,7 +1062,7 @@ function InventoryManager({ inventory, setInventory }) {
                   if (window.confirm("Supprimer cet élément du placard ?")) {
                     removeItem(index);
                   }
-                }}
+                 }}
                 className="text-slate-400 hover:text-red-600 p-1"
                 title="Supprimer"
               >
@@ -1258,3 +1267,8 @@ function RecipeModal({ recipe, onClose }) {
     </div>
   );
 }
+
+
+
+
+
