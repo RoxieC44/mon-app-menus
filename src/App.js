@@ -640,7 +640,6 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
           </div>
         )}
       </div>
-    </div>
   );
 }
 
