@@ -517,17 +517,18 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
                 <span className="text-[11px] text-slate-500 flex items-center gap-1 font-medium">
                   <Settings className="w-3 h-3 text-slate-400" /> {dinnerRecipe.equipment}
                 <div className="flex gap-1 ml-1 flex-wrap">
-  {Array.isArray(dinnerRecipe.season) ? (
-    dinnerRecipe.season.map(s => (
+{Array.isArray(dinnerRecipe.season) 
+  ? dinnerRecipe.season.map(s => (
       <span key={s} className="text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">
         {s}
       </span>
     ))
-  ) : (
-    <span className="text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">
-      {dinnerRecipe.season || 'Toutes'}
-    </span>
-  )}
+  : (
+      <span className="text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">
+        {dinnerRecipe.season || 'Toutes'}
+      </span>
+    )
+}
 </div>
 </div>
                   onClick={() => setViewingRecipe(dinnerRecipe)}
