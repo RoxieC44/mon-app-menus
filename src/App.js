@@ -21,40 +21,22 @@ const DEFAULT_RECIPES = [
 
 const EQUIPMENTS = ['Thermomix', 'Cookeo', 'Poêle', 'Four', 'Casserole', 'Airfryer', 'Autre appareil', 'Sans Cuisson'];
 const CARBS = ['Pâtes', 'Pommes de terre', 'Semoule', 'Riz', 'Blé', 'Plaisir'];
-const SEASONS = ['Printemps', 'Été', 'Automne', 'Hiver'];
+const SEASONS = ['Toutes', 'Printemps', 'Été', 'Automne', 'Hiver'];
 
 const getCurrentSeason = () => {
-  const month = new Date().getMonth(); // 0 à 11
-  if (month >= 2 && month <= 4) return 'Printemps'; // Mars, Avril, Mai
-  if (month >= 5 && month <= 7) return 'Été';       // Juin, Juillet, Août
-  if (month >= 8 && month <= 10) return 'Automne';  // Septembre, Octobre, Novembre
-  return 'Hiver';                                   // Décembre, Janvier, Février
+  const month = new Date().getMonth();
+  if (month >= 2 && month <= 4) return 'Printemps';
+  if (month >= 5 && month <= 7) return 'Été';
+  if (month >= 8 && month <= 10) return 'Automne';
+  return 'Hiver';
 };
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('menu');
   const [viewingRecipe, setViewingRecipe] = useState(null);
   const [editingRecipe, setEditingRecipe] = useState(null);
-
-  // Nouveaux états pour la gestion des saisons (choix multiple + option "Toutes")
-  const [toutesSaisons, setToutesSaisons] = useState(true);
-  const [saisonsSelectionnees, setSaisonsSelectionnees] = useState([]);
   const currentSeason = getCurrentSeason();
 
-  const genererMenu = () => {
-  // C'est ici qu'on place le calcul des saisons actives
-  const saisonsActives = toutesSaisons 
-    ? [] 
-    : (saisonsSelectionnees.length > 0 ? saisonsSelectionnees : [currentSeason]);
-
-  const recettesFiltrees = recipes.filter(recipe => {
-    if (toutesSaisons) return true;
-    return saisonsActives.includes(recipe.season) || recipe.season === 'Toutes';
-  });
-
-  // Ensuite, tu continues avec le reste de ta logique pour assigner les recettes à ton menu...
-};
-  
   const [loading, setLoading] = useState(true);
 
   const [recipes, setRecipes] = useState(DEFAULT_RECIPES);
@@ -577,44 +559,9 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
             onChange={(e) => setFilterSeason(e.target.value)}
             className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800"
           >
-<div className="flex flex-wrap gap-4 my-4 items-center">
-  <label className="flex items-center space-x-2 cursor-pointer font-semibold">
-    <input
-      type="checkbox"
-      checked={toutesSaisons}
-      onChange={(e) => {
-        setToutesSaisons(e.target.checked);
-        if (e.target.checked) setSaisonsSelectionnees([]);
-      }}
-      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-    />
-    <span>Toutes</span>
-  </label>
-
-  {SEASONS.map((saison) => (
-    <label key={saison} className="flex items-center space-x-2 cursor-pointer">
-      <input
-        type="checkbox"
-        checked={!toutesSaisons && saisonsSelectionnees.includes(saison)}
-        onChange={(e) => {
-          setToutesSaisons(false);
-          if (e.target.checked) {
-            setSaisonsSelectionnees([...saisonsSelectionnees, saison]);
-          } else {
-            const newSelections = saisonsSelectionnees.filter(s => s !== saison);
-            if (newSelections.length === 0) {
-              setToutesSaisons(true);
-            } else {
-              setSaisonsSelectionnees(newSelections);
-            }
-          }
-        }}
-        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-      />
-      <span>{saison}</span>
-    </label>
-  ))}
-</div>
+            <option value="Tous">Toutes les saisons</option>
+            {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
 
           <select 
             value={filterEquip} 
