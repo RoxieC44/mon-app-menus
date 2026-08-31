@@ -22,6 +22,7 @@ const DEFAULT_RECIPES = [
 const EQUIPMENTS = ['Thermomix', 'Cookeo', 'Poêle', 'Four', 'Casserole', 'Airfryer', 'Autre appareil', 'Sans Cuisson'];
 const CARBS = ['Pâtes', 'Pommes de terre', 'Semoule', 'Riz', 'Blé', 'Plaisir'];
 const SEASONS_LIST = ['Printemps', 'Été', 'Automne', 'Hiver'];
+const STORAGE_ZONES = ['Placard', 'Frigo', 'Congélateur'];
 
 const getCurrentSeason = () => {
   const month = new Date().getMonth();
@@ -54,14 +55,14 @@ export default function App() {
     mondayLunch: 'restes', tuesdayLunch: 'restes', wednesdayLunch: '', thursdayLunch: 'restes', fridayLunch: 'restes', saturdayLunch: '', sundayLunch: ''
   });
   const [inventory, setInventory] = useState([
-    { name: 'Sel', status: 'Plein' },
-    { name: 'Poivre', status: 'Plein' },
-    { name: "Huile d'olive", status: 'Plein' },
-    { name: 'Beurre', status: 'Entamé' },
-    { name: 'Pâtes', status: 'Entamé' },
-    { name: 'Riz', status: 'Presque vide' },
-    { name: 'Oignons', status: 'Plein' },
-    { name: 'Ail', status: 'Plein' }
+    { name: 'Sel', status: 'Plein', zone: 'Placard' },
+    { name: 'Poivre', status: 'Plein', zone: 'Placard' },
+    { name: "Huile d'olive", status: 'Plein', zone: 'Placard' },
+    { name: 'Beurre', status: 'Entamé', zone: 'Frigo' },
+    { name: 'Pâtes', status: 'Entamé', zone: 'Placard' },
+    { name: 'Riz', status: 'Presque vide', zone: 'Placard' },
+    { name: 'Oignons', status: 'Plein', zone: 'Placard' },
+    { name: 'Ail', status: 'Plein', zone: 'Placard' }
   ]);
   const [bakingItems, setBakingItems] = useState(['', '']);
   const [shoppingChecks, setShoppingChecks] = useState({});
@@ -79,7 +80,14 @@ export default function App() {
         const saved = data.data;
         if (saved.recipes) setRecipes(saved.recipes);
         if (saved.menu) setMenu(saved.menu);
-        if (saved.inventory) setInventory(saved.inventory);
+        if (saved.inventory) {
+          // Migration rétrocompatible si les anciens éléments n'ont pas de zone
+          const migrated = saved.inventory.map(item => ({
+            ...item,
+            zone: item.zone || 'Placard'
+          }));
+          setInventory(migrated);
+        }
         if (saved.bakingItems) setBakingItems(saved.bakingItems);
         if (saved.shoppingChecks) setShoppingChecks(saved.shoppingChecks);
       }
@@ -1066,11 +1074,13 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
 function InventoryManager({ inventory, setInventory }) {
   const [newItemName, setNewItemName] = useState('');
   const [newItemStatus, setNewItemStatus] = useState('Plein');
+  const [newItemZone, setNewItemZone] = useState('Placard');
+  const [filterZone, setFilterZone] = useState('Tous');
 
   const addItem = (e) => {
     e.preventDefault();
     if (!newItemName.trim()) return;
-    setInventory([...inventory, { name: newItemName.trim(), status: newItemStatus }]);
+    setInventory([...inventory, { name: newItemName.trim(), status: newItemStatus, zone: newItemZone }]);
     setNewItemName('');
   };
 
@@ -1080,78 +1090,133 @@ function InventoryManager({ inventory, setInventory }) {
     setInventory(updated);
   };
 
+  const updateZone = (index, zone) => {
+    const updated = [...inventory];
+    updated[index].zone = zone;
+    setInventory(updated);
+  };
+
   const removeItem = (index) => {
     setInventory(inventory.filter((_, i) => i !== index));
   };
+
+  const filteredInventory = inventory.filter(item => {
+    if (filterZone === 'Tous') return true;
+    return item.zone === filterZone;
+  });
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 max-w-2xl mx-auto space-y-6">
       <div>
         <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2 mb-1">
-          <Package className="w-5 h-5 text-indigo-600" /> Mon Placard & Frigo
+          <Package className="w-5 h-5 text-indigo-600" /> Gestion des Provisions
         </h2>
         <p className="text-xs text-slate-500">
-          Listez vos provisions et leur état actuel pour affiner la liste de courses.
+          Rangez vos provisions par zone (Placard, Frigo, Congélateur) pour suivre vos stocks.
         </p>
       </div>
 
-      <form onSubmit={addItem} className="flex gap-2">
-        <input 
-          type="text" 
-          placeholder="Ex: Riz, Farine, Lait..." 
-          value={newItemName}
-          onChange={(e) => setNewItemName(e.target.value)}
-          className="flex-1 bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm"
-        />
-        <select 
-          value={newItemStatus}
-          onChange={(e) => setNewItemStatus(e.target.value)}
-          className="bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs"
-        >
-          <option value="Plein">Plein</option>
-          <option value="Entamé">Entamé</option>
-          <option value="Presque vide">Presque vide</option>
-        </select>
-        <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
-          Ajouter
-        </button>
+      <form onSubmit={addItem} className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+        <h3 className="text-xs font-bold text-slate-700 uppercase">Ajouter un article</h3>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input 
+            type="text" 
+            placeholder="Nom (ex: Lait, Farine, Steaks...)" 
+            value={newItemName}
+            onChange={(e) => setNewItemName(e.target.value)}
+            className="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm"
+          />
+          <select 
+            value={newItemZone}
+            onChange={(e) => setNewItemZone(e.target.value)}
+            className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700"
+          >
+            {STORAGE_ZONES.map(z => <option key={z} value={z}>{z}</option>)}
+          </select>
+          <select 
+            value={newItemStatus}
+            onChange={(e) => setNewItemStatus(e.target.value)}
+            className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700"
+          >
+            <option value="Plein">Plein</option>
+            <option value="Entamé">Entamé</option>
+            <option value="Presque vide">Presque vide</option>
+          </select>
+          <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+            Ajouter
+          </button>
+        </div>
       </form>
 
-      <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
-        {inventory.map((item, index) => (
-          <div key={index} className="flex items-center justify-between p-3 bg-white hover:bg-slate-50 transition-colors">
-            <span className="font-medium text-slate-800 text-sm">{item.name}</span>
-            <div className="flex items-center gap-3">
-              <select 
-                value={item.status} 
-                onChange={(e) => updateStatus(index, e.target.value)}
-                className={`text-xs font-semibold rounded-md px-2 py-1 border
-                  ${item.status === 'Plein' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : ''}
-                  ${item.status === 'Entamé' ? 'bg-amber-50 text-amber-700 border-amber-200' : ''}
-                  ${item.status === 'Presque vide' ? 'bg-red-50 text-red-700 border-red-200' : ''}
-                `}
-              >
-                <option value="Plein">Plein</option>
-                <option value="Entamé">Entamé</option>
-                <option value="Presque vide">Presque vide</option>
-              </select>
-
-              <button 
-                onClick={() => {
-                  if (window.confirm("Supprimer cet élément du placard ?")) {
-                    removeItem(index);
-                  }
-                }}
-                className="text-slate-400 hover:text-red-600 p-1"
-                title="Supprimer"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+      <div className="flex bg-slate-200/70 p-1 rounded-xl">
+        <button 
+          onClick={() => setFilterZone('Tous')}
+          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all
+            ${filterZone === 'Tous' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
+          `}
+        >
+          Tout ({inventory.length})
+        </button>
+        {STORAGE_ZONES.map(z => (
+          <button 
+            key={z}
+            onClick={() => setFilterZone(z)}
+            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all
+              ${filterZone === z ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
+            `}
+          >
+            {z} ({inventory.filter(i => i.zone === z).length})
+          </button>
         ))}
-        {inventory.length === 0 && (
-          <div className="p-6 text-center text-slate-400 text-sm">Votre placard est vide.</div>
+      </div>
+
+      <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
+        {filteredInventory.map((item, index) => {
+          const originalIndex = inventory.findIndex(i => i === item);
+
+          return (
+            <div key={originalIndex} className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-white hover:bg-slate-50 transition-colors gap-2">
+              <span className="font-medium text-slate-800 text-sm">{item.name}</span>
+              <div className="flex items-center gap-2 flex-wrap justify-end">
+                <select 
+                  value={item.zone || 'Placard'} 
+                  onChange={(e) => updateZone(originalIndex, e.target.value)}
+                  className="text-xs font-semibold rounded-md px-2 py-1 border bg-slate-50 text-slate-700 border-slate-200"
+                >
+                  {STORAGE_ZONES.map(z => <option key={z} value={z}>{z}</option>)}
+                </select>
+
+                <select 
+                  value={item.status} 
+                  onChange={(e) => updateStatus(originalIndex, e.target.value)}
+                  className={`text-xs font-semibold rounded-md px-2 py-1 border
+                    ${item.status === 'Plein' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : ''}
+                    ${item.status === 'Entamé' ? 'bg-amber-50 text-amber-700 border-amber-200' : ''}
+                    ${item.status === 'Presque vide' ? 'bg-red-50 text-red-700 border-red-200' : ''}
+                  `}
+                >
+                  <option value="Plein">Plein</option>
+                  <option value="Entamé">Entamé</option>
+                  <option value="Presque vide">Presque vide</option>
+                </select>
+
+                <button 
+                  onClick={() => {
+                    if (window.confirm("Supprimer cet élément ?")) {
+                      removeItem(originalIndex);
+                    }
+                  }}
+                  className="text-slate-400 hover:text-red-600 p-1"
+                  title="Supprimer"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          );
+        })}
+        {filteredInventory.length === 0 && (
+          <div className="p-8 text-center text-slate-400 text-sm">Aucun élément dans cette catégorie.</div>
         )}
       </div>
     </div>
@@ -1183,9 +1248,9 @@ function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingCheck
   const getStockStatus = (ingName) => {
     const found = inventory.find(i => ingName.toLowerCase().includes(i.name.toLowerCase()));
     if (!found) return { status: 'A acheter', color: 'text-indigo-600 bg-indigo-50 border-indigo-200' };
-    if (found.status === 'Plein') return { status: 'En stock (Plein)', color: 'text-emerald-700 bg-emerald-50 border-emerald-200' };
-    if (found.status === 'Entamé') return { status: 'En stock (Entamé - Attention quantité)', color: 'text-amber-700 bg-amber-50 border-amber-200' };
-    return { status: 'Presque vide (A racheter)', color: 'text-red-700 bg-red-50 border-red-200' };
+    if (found.status === 'Plein') return { status: `En stock (${found.zone} - Plein)`, color: 'text-emerald-700 bg-emerald-50 border-emerald-200' };
+    if (found.status === 'Entamé') return { status: `En stock (${found.zone} - Entamé)`, color: 'text-amber-700 bg-amber-50 border-amber-200' };
+    return { status: `Presque vide (${found.zone})`, color: 'text-red-700 bg-red-50 border-red-200' };
   };
 
   const toggleCheck = (ing) => {
@@ -1206,7 +1271,7 @@ function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingCheck
           <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2">
             <ShoppingBag className="w-5 h-5 text-indigo-600" /> Liste de Courses Intelligente
           </h2>
-          <p className="text-xs text-slate-500">Basée sur les menus et les gâteaux de la semaine.</p>
+          <p className="text-xs text-slate-500">Basée sur les menus, gâteaux et l'état de vos provisions.</p>
         </div>
         {rawList.length > 0 && (
           <button 
