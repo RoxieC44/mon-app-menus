@@ -67,20 +67,21 @@ export default function App() {
   const [bakingItems, setBakingItems] = useState(['', '']);
   const [shoppingChecks, setShoppingChecks] = useState({});
 
+  // Chargement initial depuis Supabase
   useEffect(() => {
     async function loadData() {
       setLoading(true);
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('stockage_donnees')
         .select('data')
         .eq('user_key', 'ma_famille')
         .maybeSingle();
 
-      if (data && data.data) {
+      if (!error && data && data.data) {
         const saved = data.data;
-        if (saved.recipes) setRecipes(saved.recipes);
+        if (saved.recipes && saved.recipes.length > 0) setRecipes(saved.recipes);
         if (saved.menu) setMenu(saved.menu);
-        if (saved.inventory) {
+        if (saved.inventory && saved.inventory.length > 0) {
           const migrated = saved.inventory.map(item => ({
             ...item,
             zone: item.zone || 'Placard'
@@ -95,6 +96,7 @@ export default function App() {
     loadData();
   }, []);
 
+  // Sauvegarde automatique vers Supabase à chaque modification (avec protection contre l'écrasement au chargement)
   useEffect(() => {
     if (loading) return;
 
@@ -122,9 +124,9 @@ export default function App() {
       }
     }
 
-    const timer = setTimeout(saveData, 1000);
+    const timer = setTimeout(saveData, 500);
     return () => clearTimeout(timer);
-  }, [recipes, menu, inventory, bakingItems, shoppingChecks]);
+  }, [recipes, menu, inventory, bakingItems, shoppingChecks, loading]);
 
   const addRecipe = (newRecipe) => {
     setRecipes(prev => {
@@ -138,21 +140,31 @@ export default function App() {
   };
 
   const deleteRecipe = (id) => {
-    setRecipes(recipes.filter(r => r.id !== id));
-    const newMenu = { ...menu };
-    Object.keys(newMenu).forEach(day => {
-      if (newMenu[day] === id) newMenu[day] = '';
+    setRecipes(prev => prev.filter(r => r.id !== id));
+    setMenu(prevMenu => {
+      const newMenu = { ...prevMenu };
+      Object.keys(newMenu).forEach(day => {
+        if (newMenu[day] === id) newMenu[day] = '';
+      });
+      return newMenu;
     });
-    setMenu(newMenu);
   };
 
   const updateMenu = (key, value) => {
-    setMenu({ ...menu, [key]: value });
+    setMenu(prev => ({ ...prev, [key]: value }));
   };
 
   const mealRecipes = recipes.filter(r => r.category !== 'gateau');
   const bakingRecipes = recipes.filter(r => r.category === 'gateau');
   
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-500 font-medium">
+        Chargement de vos données...
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-28 relative">
       <header className="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-10">
