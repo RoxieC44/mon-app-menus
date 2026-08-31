@@ -519,7 +519,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
             </div>
             {day.key === 'wednesday' ? (
               <div className="w-full bg-slate-100 border border-slate-300 text-slate-800 text-xs rounded-lg p-2 font-medium flex items-center justify-between">
-                <span>Gnocchis Saucisse</span>
+                <span>Cordon bleu et Pommes de terre</span>
                 <span className="text-[10px] bg-slate-200 px-2 py-0.5 rounded text-slate-600">Fixe</span>
               </div>
             ) : dinnerRecipes.length === 0 ? (
@@ -1229,7 +1229,7 @@ function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingCheck
       ) : (
         <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
           {rawList.map((ing, idx) => {
-            const stock = getStockStatus(ing);
+            const stock = getStatus(ing); // Corrigé ici
             const isChecked = !!shoppingChecks[ing];
 
             return (
@@ -1348,4 +1348,3 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
     </div>
   );
 }
-```[cite: 4]
