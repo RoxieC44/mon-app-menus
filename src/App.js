@@ -81,7 +81,6 @@ export default function App() {
         if (saved.recipes) setRecipes(saved.recipes);
         if (saved.menu) setMenu(saved.menu);
         if (saved.inventory) {
-          // Migration rétrocompatible si les anciens éléments n'ont pas de zone
           const migrated = saved.inventory.map(item => ({
             ...item,
             zone: item.zone || 'Placard'
@@ -287,7 +286,7 @@ function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, delete
             ${subTab === 'catalog' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
           `}
         >
-          <List className="w-4 h-4" /> Catalogue Repas ({mealRecipes.length})
+          <List className="w-4 h-4" /> Catalogue Repas {mealRecipes.length}
         </button>
       </div>
 
@@ -720,7 +719,7 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
             ${subTab === 'planning' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
           `}
         >
-          <Calendar className="w-4 h-4" /> Choix de la semaine ({bakingItems.filter(Boolean).length}/2)
+          <Calendar className="w-4 h-4" /> Choix de la semaine {bakingItems.filter(Boolean).length}/2
         </button>
         <button 
           onClick={() => setSubTab('list')}
@@ -728,7 +727,7 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
             ${subTab === 'list' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
           `}
         >
-          <Cake className="w-4 h-4" /> Catalogue Gâteaux ({bakingRecipes.length})
+          <Cake className="w-4 h-4" /> Catalogue Gâteaux {bakingRecipes.length}
         </button>
       </div>
 
@@ -1416,4 +1415,4 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
     </div>
   );
 }
-
+```[cite: 2]
