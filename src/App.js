@@ -21,7 +21,8 @@ const DEFAULT_RECIPES = [
 
 const EQUIPMENTS = ['Thermomix', 'Cookeo', 'Poêle', 'Four', 'Casserole', 'Airfryer', 'Autre appareil', 'Sans Cuisson'];
 const CARBS = ['Pâtes', 'Pommes de terre', 'Semoule', 'Riz', 'Blé', 'Plaisir'];
-const SEASONS = ['Toutes', 'Printemps', 'Été', 'Automne', 'Hiver'];
+const SEASONS_LIST = ['Printemps', 'Été', 'Automne', 'Hiver'];
+const STORAGE_ZONES = ['Placard', 'Frigo', 'Congélateur'];
 
 const getCurrentSeason = () => {
   const month = new Date().getMonth();
@@ -31,10 +32,19 @@ const getCurrentSeason = () => {
   return 'Hiver';
 };
 
+const recipeMatchesSeason = (seasonValue, targetSeason) => {
+  if (targetSeason === 'Tous') return true;
+  if (!seasonValue || seasonValue === 'Toutes') return true;
+  if (typeof seasonValue !== 'string') return true;
+  const seasonsArr = seasonValue.split(',').map(s => s.trim());
+  return seasonsArr.includes('Toutes') || seasonsArr.includes(targetSeason);
+};
+
 export default function App() {
   const [activeTab, setActiveTab] = useState('menu');
   const [viewingRecipe, setViewingRecipe] = useState(null);
   const [editingRecipe, setEditingRecipe] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
   const currentSeason = getCurrentSeason();
 
   const [loading, setLoading] = useState(true);
@@ -45,19 +55,18 @@ export default function App() {
     mondayLunch: 'restes', tuesdayLunch: 'restes', wednesdayLunch: '', thursdayLunch: 'restes', fridayLunch: 'restes', saturdayLunch: '', sundayLunch: ''
   });
   const [inventory, setInventory] = useState([
-    { name: 'Sel', status: 'Plein' },
-    { name: 'Poivre', status: 'Plein' },
-    { name: "Huile d'olive", status: 'Plein' },
-    { name: 'Beurre', status: 'Entamé' },
-    { name: 'Pâtes', status: 'Entamé' },
-    { name: 'Riz', status: 'Presque vide' },
-    { name: 'Oignons', status: 'Plein' },
-    { name: 'Ail', status: 'Plein' }
+    { name: 'Sel', status: 'Plein', zone: 'Placard' },
+    { name: 'Poivre', status: 'Plein', zone: 'Placard' },
+    { name: "Huile d'olive", status: 'Plein', zone: 'Placard' },
+    { name: 'Beurre', status: 'Entamé', zone: 'Frigo' },
+    { name: 'Pâtes', status: 'Entamé', zone: 'Placard' },
+    { name: 'Riz', status: 'Presque vide', zone: 'Placard' },
+    { name: 'Oignons', status: 'Plein', zone: 'Placard' },
+    { name: 'Ail', status: 'Plein', zone: 'Placard' }
   ]);
   const [bakingItems, setBakingItems] = useState(['', '']);
   const [shoppingChecks, setShoppingChecks] = useState({});
 
-  // 1. CHARGEMENT INITIAL DEPUIS SUPABASE
   useEffect(() => {
     async function loadData() {
       setLoading(true);
@@ -71,7 +80,14 @@ export default function App() {
         const saved = data.data;
         if (saved.recipes) setRecipes(saved.recipes);
         if (saved.menu) setMenu(saved.menu);
-        if (saved.inventory) setInventory(saved.inventory);
+        if (saved.inventory) {
+          // Migration rétrocompatible si les anciens éléments n'ont pas de zone
+          const migrated = saved.inventory.map(item => ({
+            ...item,
+            zone: item.zone || 'Placard'
+          }));
+          setInventory(migrated);
+        }
         if (saved.bakingItems) setBakingItems(saved.bakingItems);
         if (saved.shoppingChecks) setShoppingChecks(saved.shoppingChecks);
       }
@@ -80,9 +96,8 @@ export default function App() {
     loadData();
   }, []);
 
-  // 2. SAUVEGARDE AUTOMATIQUE SUR SUPABASE À CHAQUE MODIFICATION
   useEffect(() => {
-    if (loading) return; // Empêche d'écraser pendant le chargement initial
+    if (loading) return;
 
     async function saveData() {
       const payload = {
@@ -112,20 +127,18 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [recipes, menu, inventory, bakingItems, shoppingChecks]);
 
-const addRecipe = (newRecipe) => {
+  const addRecipe = (newRecipe) => {
     setRecipes(prev => {
-      // Si la recette a déjà un id qui existe, on la met à jour
       const exists = prev.some(r => r.id === newRecipe.id);
       if (exists) {
         return prev.map(r => r.id === newRecipe.id ? newRecipe : r);
       }
-      // Sinon, c'est une création, on lui met un nouvel id
       return [...prev, { ...newRecipe, id: Date.now().toString() }];
     });
     setActiveTab(newRecipe.category === 'gateau' ? 'baking' : 'menu');
   };
 
-      const deleteRecipe = (id) => {
+  const deleteRecipe = (id) => {
     setRecipes(recipes.filter(r => r.id !== id));
     const newMenu = { ...menu };
     Object.keys(newMenu).forEach(day => {
@@ -141,8 +154,8 @@ const addRecipe = (newRecipe) => {
   const mealRecipes = recipes.filter(r => r.category !== 'gateau');
   const bakingRecipes = recipes.filter(r => r.category === 'gateau');
   
-return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-24 md:pb-0 relative">
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-28 relative">
       <header className="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-10">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <h1 className="text-xl font-bold flex items-center gap-2">
@@ -191,24 +204,43 @@ return (
             currentSeason={currentSeason}
           />
         )}
-        {activeTab === 'add' && <AddRecipeForm addRecipe={addRecipe} editingRecipe={editingRecipe} setEditingRecipe={setEditingRecipe} setActiveTab={setActiveTab} />}
+        {activeTab === 'add' && <AddRecipeForm addRecipe={addRecipe} editingRecipe={editingRecipe} setEditingRecipe={setEditingRecipe} setActiveTab={setActiveTab} setSelectedImage={setSelectedImage} />}
         {activeTab === 'inventory' && <InventoryManager inventory={inventory} setInventory={setInventory} />}
         {activeTab === 'shopping' && <ShoppingListView menu={menu} recipes={recipes} inventory={inventory} bakingItems={bakingItems} shoppingChecks={shoppingChecks} setShoppingChecks={setShoppingChecks} setActiveTab={setActiveTab} />}
       </main>
 
       {viewingRecipe && (
-        <RecipeModal recipe={viewingRecipe} onClose={() => setViewingRecipe(null)} />
+        <RecipeModal recipe={viewingRecipe} onClose={() => setViewingRecipe(null)} setSelectedImage={setSelectedImage} />
       )}
 
-      {/* BOTTOM NAVIGATION FIXED WITH CENTRAL FLOATING ADD BUTTON */}
-      <nav className="sticky bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-40 px-4 py-2 shadow-[0_-10px_15px_-3px_rgb(0,0,0,0.05)] md:relative md:border-t-0 md:bg-transparent md:max-w-4xl md:mx-auto md:p-0 md:mb-6 md:shadow-none">
+      {selectedImage && (
+        <div 
+          onClick={() => setSelectedImage(null)} 
+          className="fixed inset-0 z-50 bg-black bg-opacity-80 flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div className="relative max-w-4xl max-h-full" onClick={(e) => e.stopPropagation()}>
+            <img 
+              src={selectedImage} 
+              alt="Agrandissement" 
+              className="max-h-[90vh] max-w-[90vw] object-contain rounded-lg shadow-2xl"
+            />
+            <button 
+              onClick={() => setSelectedImage(null)}
+              className="absolute top-2 right-2 text-white bg-black bg-opacity-50 rounded-full w-8 h-8 flex items-center justify-center hover:bg-opacity-75 font-bold"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-40 px-4 py-2 shadow-[0_-10px_25px_-3px_rgb(0,0,0,0.1)]">
         <div className="max-w-md mx-auto flex justify-between items-center relative">
           <NavButton active={activeTab === 'menu'} onClick={() => setActiveTab('menu')} icon={<Calendar />} label="Menus" />
           <NavButton active={activeTab === 'baking'} onClick={() => setActiveTab('baking')} icon={<Cake />} label="Gâteaux" />
           
-          {/* GROS BOUTON "+" DU MILIEU EN RELIEF */}
           <button
-            onClick={() => setActiveTab('add')}
+            onClick={() => { setEditingRecipe(null); setActiveTab('add'); }}
             className={`bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-lg transform -translate-y-4 transition-transform hover:scale-105 border-4 border-white flex items-center justify-center flex-shrink-0 ${activeTab === 'add' ? 'ring-2 ring-indigo-400 scale-105' : ''}`}
           >
             <Plus size={26} />
@@ -226,11 +258,11 @@ function NavButton({ active, onClick, icon, label }) {
   return (
     <button
       onClick={onClick}
-      className={`flex flex-col items-center gap-1 p-2 min-w-[70px] flex-shrink-0 md:w-auto md:flex-row md:px-5 md:py-3 md:rounded-xl md:shadow-sm transition-all
-        ${active ? 'text-indigo-600 md:bg-indigo-600 md:text-white scale-105 md:scale-100 font-semibold' : 'text-slate-400 hover:text-indigo-500 md:bg-white'}`}
+      className={`flex flex-col items-center gap-1 p-2 min-w-[70px] flex-shrink-0 transition-all
+        ${active ? 'text-indigo-600 scale-105 font-semibold' : 'text-slate-400 hover:text-indigo-500'}`}
     >
       <div className="w-5 h-5 flex items-center justify-center">{icon}</div>
-      <span className="text-[10px] md:text-sm font-medium">{label}</span>
+      <span className="text-[10px] font-medium">{label}</span>
     </button>
   );
 }
@@ -301,7 +333,7 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
     return recipes.filter(r => {
       const matchCarb = reqCarb ? r.carb === reqCarb : true;
       if (!matchCarb) return false;
-      return r.season === 'Toutes' || r.season === currentSeason;
+      return recipeMatchesSeason(r.season, currentSeason);
     });
   };
 
@@ -422,12 +454,12 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
     return recipes.filter(r => {
       const matchCarb = reqCarb ? r.carb === reqCarb : true;
       if (!matchCarb) return false;
-      return r.season === 'Toutes' || r.season === currentSeason;
+      return recipeMatchesSeason(r.season, currentSeason);
     });
   };
 
   const dinnerRecipes = getAvailableRecipes(day.reqCarb);
-  const anyRecipes = recipes.filter(r => r.season === 'Toutes' || r.season === currentSeason);
+  const anyRecipes = recipes.filter(r => recipeMatchesSeason(r.season, currentSeason));
 
   const lunchVal = menu[lunchKey] || '';
   const dinnerVal = menu[dinnerKey] || '';
@@ -464,7 +496,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
               <option value="restes">🔁 Restes de la veille</option>
               {anyRecipes.map(r => (
                 <option key={r.id} value={r.id}>
-                  {r.name} {r.season !== 'Toutes' ? `(${r.season})` : ''}
+                  {r.name}
                 </option>
               ))}
             </select>
@@ -506,7 +538,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
                 <option value="">-- Choisir le soir --</option>
                 {dinnerRecipes.map(r => (
                   <option key={r.id} value={r.id}>
-                    {r.name} {r.season !== 'Toutes' ? `(${r.season})` : ''}
+                    {r.name}
                   </option>
                 ))}
               </select>
@@ -516,7 +548,6 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
               <div className="flex justify-between items-center pt-1">
                 <span className="text-[11px] text-slate-500 flex items-center gap-1 font-medium">
                   <Settings className="w-3 h-3 text-slate-400" /> {dinnerRecipe.equipment}
-                  <span className="ml-1 px-1.5 py-0.5 bg-slate-100 rounded text-[9px]">{dinnerRecipe.season}</span>
                 </span>
                 <button 
                   onClick={() => setViewingRecipe(dinnerRecipe)}
@@ -538,7 +569,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
   const [filterEquip, setFilterEquip] = useState('Tous');
 
   const filteredRecipes = recipes.filter(r => {
-    if (filterSeason !== 'Tous' && r.season !== filterSeason) return false;
+    if (filterSeason !== 'Tous' && !recipeMatchesSeason(r.season, filterSeason)) return false;
     if (filterEquip !== 'Tous' && r.equipment !== filterEquip) return false;
     return true;
   });
@@ -566,7 +597,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
             className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800"
           >
             <option value="Tous">Toutes les saisons</option>
-            {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
+            {SEASONS_LIST.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
 
           <select 
@@ -620,7 +651,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
               )}
             </div>
 
-          <div className="flex justify-between items-center pt-3 border-t border-slate-100 mt-2">
+            <div className="flex justify-between items-center pt-3 border-t border-slate-100 mt-2">
               <button 
                 onClick={() => setViewingRecipe(recipe)}
                 className="text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-md transition-colors flex items-center gap-1"
@@ -769,30 +800,63 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
   );
 }
 
-function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTab }) {
+function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTab, setSelectedImage }) {
   const [name, setName] = useState('');
   const [carb, setCarb] = useState('Plaisir');
   const [equipment, setEquipment] = useState('Four');
-  const [season, setSeason] = useState('Toutes');
+  const [selectedSeasons, setSelectedSeasons] = useState(['Toutes']);
   const [category, setCategory] = useState('repas');
   const [url, setUrl] = useState('');
   const [image, setImage] = useState('');
   const [instructions, setInstructions] = useState('');
   const [ingredientsText, setIngredientsText] = useState('');
   
-React.useEffect(() => {
+  useEffect(() => {
     if (editingRecipe) {
       setName(editingRecipe.name || '');
       setCarb(editingRecipe.carb || 'Plaisir');
       setEquipment(editingRecipe.equipment || 'Four');
-      setSeason(editingRecipe.season || 'Toutes');
       setCategory(editingRecipe.category || 'repas');
       setUrl(editingRecipe.url || '');
       setImage(editingRecipe.image || '');
       setInstructions(editingRecipe.instructions || '');
       setIngredientsText(editingRecipe.ingredients ? editingRecipe.ingredients.join('\n') : '');
+      
+      if (editingRecipe.season) {
+        if (typeof editingRecipe.season === 'string') {
+          if (editingRecipe.season === 'Toutes') {
+            setSelectedSeasons(['Toutes']);
+          } else {
+            setSelectedSeasons(editingRecipe.season.split(',').map(s => s.trim()));
+          }
+        } else {
+          setSelectedSeasons(['Toutes']);
+        }
+      } else {
+        setSelectedSeasons(['Toutes']);
+      }
     }
   }, [editingRecipe]);
+
+  const handleSeasonCheckboxChange = (seasonOption) => {
+    if (seasonOption === 'Toutes') {
+      setSelectedSeasons(['Toutes']);
+      return;
+    }
+
+    let current = selectedSeasons.filter(s => s !== 'Toutes');
+    if (current.includes(seasonOption)) {
+      current = current.filter(s => s !== seasonOption);
+    } else {
+      current.push(seasonOption);
+    }
+
+    if (current.length === 0 || current.length === SEASONS_LIST.length) {
+      setSelectedSeasons(['Toutes']);
+    } else {
+      setSelectedSeasons(current);
+    }
+  };
   
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -805,9 +869,8 @@ React.useEffect(() => {
     }
   };
 
-const handleSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Clic sur enregistrer ! Nom:", name, "Editing:", editingRecipe);
     if (!name.trim()) return;
 
     const ingredients = ingredientsText
@@ -815,11 +878,13 @@ const handleSubmit = (e) => {
       .map(i => i.trim().replace(/^[-*•]\s*/, ''))
       .filter(i => i.length > 0);
 
+    const finalSeason = selectedSeasons.includes('Toutes') ? 'Toutes' : selectedSeasons.join(', ');
+
     const recipeData = {
       name,
       carb,
       equipment,
-      season,
+      season: finalSeason,
       category,
       url,
       image,
@@ -828,22 +893,31 @@ const handleSubmit = (e) => {
     };
 
     if (editingRecipe) {
-      // Si on édite, on garde l'id d'origine
       addRecipe({ ...recipeData, id: editingRecipe.id });
       setEditingRecipe(null);
     } else {
       addRecipe(recipeData);
     }
 
-    // Retour à l'onglet correspondant
     setActiveTab(category === 'gateau' ? 'baking' : 'menu');
   };
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 max-w-2xl mx-auto relative">
-      <h2 className="font-bold text-slate-800 text-lg mb-4 flex items-center gap-2">
-        <Plus className="w-5 h-5 text-indigo-600" /> Ajouter une nouvelle recette
-      </h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+          <Plus className="w-5 h-5 text-indigo-600" /> {editingRecipe ? 'Modifier la recette' : 'Ajouter une nouvelle recette'}
+        </h2>
+        {editingRecipe && (
+          <button 
+            type="button"
+            onClick={() => { setEditingRecipe(null); setActiveTab('menu'); }}
+            className="text-xs text-slate-500 hover:text-slate-800 underline"
+          >
+            Annuler l'édition
+          </button>
+        )}
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -902,16 +976,29 @@ const handleSubmit = (e) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="col-span-full">
-            <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Saison idéale</label>
-            <select 
-              value={season}
-              onChange={(e) => setSeason(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
-            >
-              {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 uppercase mb-2">Saison(s) idéale(s)</label>
+          <div className="flex flex-wrap gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={selectedSeasons.includes('Toutes')}
+                onChange={() => handleSeasonCheckboxChange('Toutes')}
+                className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+              />
+              Toutes
+            </label>
+            {SEASONS_LIST.map(s => (
+              <label key={s} className="flex items-center gap-2 text-xs font-medium cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  checked={!selectedSeasons.includes('Toutes') && selectedSeasons.includes(s)}
+                  onChange={() => handleSeasonCheckboxChange(s)}
+                  className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                />
+                {s}
+              </label>
+            ))}
           </div>
         </div>
 
@@ -937,9 +1024,9 @@ const handleSubmit = (e) => {
           </div>
         </div>
 
-       {image && (
+        {image && (
           <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-slate-200">
-            <img src={image} alt="Aperçu" className="w-full h-full object-cover" />
+            <img src={image} alt="Aperçu" onClick={() => setSelectedImage(image)} className="w-full h-full object-cover cursor-pointer hover:opacity-95 transition" />
             <button 
               type="button" 
               onClick={() => setImage('')}
@@ -977,7 +1064,7 @@ const handleSubmit = (e) => {
           type="submit"
           className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-xl transition-colors shadow-sm text-sm"
         >
-          Enregistrer la recette
+          {editingRecipe ? 'Mettre à jour la recette' : 'Enregistrer la recette'}
         </button>
       </form>
     </div>
@@ -987,11 +1074,13 @@ const handleSubmit = (e) => {
 function InventoryManager({ inventory, setInventory }) {
   const [newItemName, setNewItemName] = useState('');
   const [newItemStatus, setNewItemStatus] = useState('Plein');
+  const [newItemZone, setNewItemZone] = useState('Placard');
+  const [filterZone, setFilterZone] = useState('Tous');
 
   const addItem = (e) => {
     e.preventDefault();
     if (!newItemName.trim()) return;
-    setInventory([...inventory, { name: newItemName.trim(), status: newItemStatus }]);
+    setInventory([...inventory, { name: newItemName.trim(), status: newItemStatus, zone: newItemZone }]);
     setNewItemName('');
   };
 
@@ -1001,78 +1090,133 @@ function InventoryManager({ inventory, setInventory }) {
     setInventory(updated);
   };
 
+  const updateZone = (index, zone) => {
+    const updated = [...inventory];
+    updated[index].zone = zone;
+    setInventory(updated);
+  };
+
   const removeItem = (index) => {
     setInventory(inventory.filter((_, i) => i !== index));
   };
+
+  const filteredInventory = inventory.filter(item => {
+    if (filterZone === 'Tous') return true;
+    return item.zone === filterZone;
+  });
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 max-w-2xl mx-auto space-y-6">
       <div>
         <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2 mb-1">
-          <Package className="w-5 h-5 text-indigo-600" /> Mon Placard & Frigo
+          <Package className="w-5 h-5 text-indigo-600" /> Gestion des Provisions
         </h2>
         <p className="text-xs text-slate-500">
-          Listez vos provisions et leur état actuel pour affiner la liste de courses.
+          Rangez vos provisions par zone (Placard, Frigo, Congélateur) pour suivre vos stocks.
         </p>
       </div>
 
-      <form onSubmit={addItem} className="flex gap-2">
-        <input 
-          type="text" 
-          placeholder="Ex: Riz, Farine, Lait..." 
-          value={newItemName}
-          onChange={(e) => setNewItemName(e.target.value)}
-          className="flex-1 bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm"
-        />
-        <select 
-          value={newItemStatus}
-          onChange={(e) => setNewItemStatus(e.target.value)}
-          className="bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs"
-        >
-          <option value="Plein">Plein</option>
-          <option value="Entamé">Entamé</option>
-          <option value="Presque vide">Presque vide</option>
-        </select>
-        <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
-          Ajouter
-        </button>
+      <form onSubmit={addItem} className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+        <h3 className="text-xs font-bold text-slate-700 uppercase">Ajouter un article</h3>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input 
+            type="text" 
+            placeholder="Nom (ex: Lait, Farine, Steaks...)" 
+            value={newItemName}
+            onChange={(e) => setNewItemName(e.target.value)}
+            className="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm"
+          />
+          <select 
+            value={newItemZone}
+            onChange={(e) => setNewItemZone(e.target.value)}
+            className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700"
+          >
+            {STORAGE_ZONES.map(z => <option key={z} value={z}>{z}</option>)}
+          </select>
+          <select 
+            value={newItemStatus}
+            onChange={(e) => setNewItemStatus(e.target.value)}
+            className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700"
+          >
+            <option value="Plein">Plein</option>
+            <option value="Entamé">Entamé</option>
+            <option value="Presque vide">Presque vide</option>
+          </select>
+          <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+            Ajouter
+          </button>
+        </div>
       </form>
 
-      <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
-        {inventory.map((item, index) => (
-          <div key={index} className="flex items-center justify-between p-3 bg-white hover:bg-slate-50 transition-colors">
-            <span className="font-medium text-slate-800 text-sm">{item.name}</span>
-            <div className="flex items-center gap-3">
-              <select 
-                value={item.status} 
-                onChange={(e) => updateStatus(index, e.target.value)}
-                className={`text-xs font-semibold rounded-md px-2 py-1 border
-                  ${item.status === 'Plein' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : ''}
-                  ${item.status === 'Entamé' ? 'bg-amber-50 text-amber-700 border-amber-200' : ''}
-                  ${item.status === 'Presque vide' ? 'bg-red-50 text-red-700 border-red-200' : ''}
-                `}
-              >
-                <option value="Plein">Plein</option>
-                <option value="Entamé">Entamé</option>
-                <option value="Presque vide">Presque vide</option>
-              </select>
-
-              <button 
-                onClick={() => {
-                  if (window.confirm("Supprimer cet élément du placard ?")) {
-                    removeItem(index);
-                  }
-                 }}
-                className="text-slate-400 hover:text-red-600 p-1"
-                title="Supprimer"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+      <div className="flex bg-slate-200/70 p-1 rounded-xl">
+        <button 
+          onClick={() => setFilterZone('Tous')}
+          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all
+            ${filterZone === 'Tous' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
+          `}
+        >
+          Tout ({inventory.length})
+        </button>
+        {STORAGE_ZONES.map(z => (
+          <button 
+            key={z}
+            onClick={() => setFilterZone(z)}
+            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all
+              ${filterZone === z ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
+            `}
+          >
+            {z} ({inventory.filter(i => i.zone === z).length})
+          </button>
         ))}
-        {inventory.length === 0 && (
-          <div className="p-6 text-center text-slate-400 text-sm">Votre placard est vide.</div>
+      </div>
+
+      <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
+        {filteredInventory.map((item, index) => {
+          const originalIndex = inventory.findIndex(i => i === item);
+
+          return (
+            <div key={originalIndex} className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-white hover:bg-slate-50 transition-colors gap-2">
+              <span className="font-medium text-slate-800 text-sm">{item.name}</span>
+              <div className="flex items-center gap-2 flex-wrap justify-end">
+                <select 
+                  value={item.zone || 'Placard'} 
+                  onChange={(e) => updateZone(originalIndex, e.target.value)}
+                  className="text-xs font-semibold rounded-md px-2 py-1 border bg-slate-50 text-slate-700 border-slate-200"
+                >
+                  {STORAGE_ZONES.map(z => <option key={z} value={z}>{z}</option>)}
+                </select>
+
+                <select 
+                  value={item.status} 
+                  onChange={(e) => updateStatus(originalIndex, e.target.value)}
+                  className={`text-xs font-semibold rounded-md px-2 py-1 border
+                    ${item.status === 'Plein' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : ''}
+                    ${item.status === 'Entamé' ? 'bg-amber-50 text-amber-700 border-amber-200' : ''}
+                    ${item.status === 'Presque vide' ? 'bg-red-50 text-red-700 border-red-200' : ''}
+                  `}
+                >
+                  <option value="Plein">Plein</option>
+                  <option value="Entamé">Entamé</option>
+                  <option value="Presque vide">Presque vide</option>
+                </select>
+
+                <button 
+                  onClick={() => {
+                    if (window.confirm("Supprimer cet élément ?")) {
+                      removeItem(originalIndex);
+                    }
+                  }}
+                  className="text-slate-400 hover:text-red-600 p-1"
+                  title="Supprimer"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          );
+        })}
+        {filteredInventory.length === 0 && (
+          <div className="p-8 text-center text-slate-400 text-sm">Aucun élément dans cette catégorie.</div>
         )}
       </div>
     </div>
@@ -1104,9 +1248,9 @@ function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingCheck
   const getStockStatus = (ingName) => {
     const found = inventory.find(i => ingName.toLowerCase().includes(i.name.toLowerCase()));
     if (!found) return { status: 'A acheter', color: 'text-indigo-600 bg-indigo-50 border-indigo-200' };
-    if (found.status === 'Plein') return { status: 'En stock (Plein)', color: 'text-emerald-700 bg-emerald-50 border-emerald-200' };
-    if (found.status === 'Entamé') return { status: 'En stock (Entamé - Attention quantité)', color: 'text-amber-700 bg-amber-50 border-amber-200' };
-    return { status: 'Presque vide (A racheter)', color: 'text-red-700 bg-red-50 border-red-200' };
+    if (found.status === 'Plein') return { status: `En stock (${found.zone} - Plein)`, color: 'text-emerald-700 bg-emerald-50 border-emerald-200' };
+    if (found.status === 'Entamé') return { status: `En stock (${found.zone} - Entamé)`, color: 'text-amber-700 bg-amber-50 border-amber-200' };
+    return { status: `Presque vide (${found.zone})`, color: 'text-red-700 bg-red-50 border-red-200' };
   };
 
   const toggleCheck = (ing) => {
@@ -1127,7 +1271,7 @@ function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingCheck
           <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2">
             <ShoppingBag className="w-5 h-5 text-indigo-600" /> Liste de Courses Intelligente
           </h2>
-          <p className="text-xs text-slate-500">Basée sur les menus et les gâteaux de la semaine.</p>
+          <p className="text-xs text-slate-500">Basée sur les menus, gâteaux et l'état de vos provisions.</p>
         </div>
         {rawList.length > 0 && (
           <button 
@@ -1185,7 +1329,7 @@ function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingCheck
   );
 }
 
-function RecipeModal({ recipe, onClose }) {
+function RecipeModal({ recipe, onClose, setSelectedImage }) {
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
       <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 space-y-6 relative">
@@ -1213,7 +1357,12 @@ function RecipeModal({ recipe, onClose }) {
 
         {recipe.image && (
           <div className="w-full bg-slate-900 rounded-xl overflow-hidden border border-slate-200 flex items-center justify-center">
-            <img src={recipe.image} alt={recipe.name} className="w-full h-auto max-h-[350px] object-contain" />
+            <img 
+              src={recipe.image} 
+              alt={recipe.name} 
+              onClick={() => setSelectedImage(recipe.image)}
+              className="w-full h-auto max-h-[350px] object-contain cursor-pointer hover:opacity-95 transition" 
+            />
           </div>
         )}
 
@@ -1267,8 +1416,4 @@ function RecipeModal({ recipe, onClose }) {
     </div>
   );
 }
-
-
-
-
 
