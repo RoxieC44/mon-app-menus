@@ -31,7 +31,6 @@ const getCurrentSeason = () => {
   return 'Hiver';
 };
 
-// Fonction sécurisée pour vérifier la saison
 const recipeMatchesSeason = (seasonValue, targetSeason) => {
   if (targetSeason === 'Tous') return true;
   if (!seasonValue || seasonValue === 'Toutes') return true;
@@ -233,7 +232,7 @@ export default function App() {
           <NavButton active={activeTab === 'baking'} onClick={() => setActiveTab('baking')} icon={<Cake />} label="Gâteaux" />
           
           <button
-            onClick={() => setActiveTab('add')}
+            onClick={() => { setEditingRecipe(null); setActiveTab('add'); }}
             className={`bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-lg transform -translate-y-4 transition-transform hover:scale-105 border-4 border-white flex items-center justify-center flex-shrink-0 ${activeTab === 'add' ? 'ring-2 ring-indigo-400 scale-105' : ''}`}
           >
             <Plus size={26} />
@@ -817,11 +816,17 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
       setIngredientsText(editingRecipe.ingredients ? editingRecipe.ingredients.join('\n') : '');
       
       if (editingRecipe.season) {
-        if (editingRecipe.season === 'Toutes') {
-          setSelectedSeasons(['Toutes']);
+        if (typeof editingRecipe.season === 'string') {
+          if (editingRecipe.season === 'Toutes') {
+            setSelectedSeasons(['Toutes']);
+          } else {
+            setSelectedSeasons(editingRecipe.season.split(',').map(s => s.trim()));
+          }
         } else {
-          setSelectedSeasons(editingRecipe.season.split(',').map(s => s.trim()));
+          setSelectedSeasons(['Toutes']);
         }
+      } else {
+        setSelectedSeasons(['Toutes']);
       }
     }
   }, [editingRecipe]);
@@ -892,9 +897,20 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 max-w-2xl mx-auto relative">
-      <h2 className="font-bold text-slate-800 text-lg mb-4 flex items-center gap-2">
-        <Plus className="w-5 h-5 text-indigo-600" /> Ajouter une nouvelle recette
-      </h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+          <Plus className="w-5 h-5 text-indigo-600" /> {editingRecipe ? 'Modifier la recette' : 'Ajouter une nouvelle recette'}
+        </h2>
+        {editingRecipe && (
+          <button 
+            type="button"
+            onClick={() => { setEditingRecipe(null); setActiveTab('menu'); }}
+            className="text-xs text-slate-500 hover:text-slate-800 underline"
+          >
+            Annuler l'édition
+          </button>
+        )}
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -1041,7 +1057,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
           type="submit"
           className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-xl transition-colors shadow-sm text-sm"
         >
-          Enregistrer la recette
+          {editingRecipe ? 'Mettre à jour la recette' : 'Enregistrer la recette'}
         </button>
       </form>
     </div>
