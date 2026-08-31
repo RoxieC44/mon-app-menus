@@ -224,8 +224,8 @@ export default function App() {
           <NavButton active={activeTab === 'baking'} onClick={() => setActiveTab('baking')} icon={<Cake />} label="Gâteaux" />
           
           <button
-            onClick={() => { setEditingRecipe(null); setActiveTab('add'); }}
-            className={`bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-lg transform -translate-y-4 transition-transform hover:scale-105 border-4 border-white flex items-center justify-center flex-shrink-0 ${activeTab === 'add' && !editingRecipe ? 'ring-2 ring-indigo-400 scale-105' : ''}`}
+            onClick={() => setActiveTab('add')}
+            className={`bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-lg transform -translate-y-4 transition-transform hover:scale-105 border-4 border-white flex items-center justify-center flex-shrink-0 ${activeTab === 'add' ? 'ring-2 ring-indigo-400 scale-105' : ''}`}
           >
             <Plus size={26} />
           </button>
@@ -833,16 +833,6 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
           setSelectedSeasons(editingRecipe.season.split(',').map(s => s.trim()));
         }
       }
-    } else {
-      setName('');
-      setCarb('Plaisir');
-      setEquipment('Four');
-      setSelectedSeasons(['Toutes']);
-      setCategory('repas');
-      setUrl('');
-      setImage('');
-      setInstructions('');
-      setIngredientsText('');
     }
   }, [editingRecipe]);
 
@@ -973,6 +963,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
           </div>
         </div>
 
+        {/* Sélection des saisons par cases à cocher */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 uppercase mb-2">Saison(s) idéale(s)</label>
           <div className="flex flex-wrap gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
