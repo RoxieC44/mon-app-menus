@@ -21,7 +21,7 @@ const DEFAULT_RECIPES = [
 
 const EQUIPMENTS = ['Thermomix', 'Cookeo', 'Poêle', 'Four', 'Casserole', 'Airfryer', 'Autre appareil', 'Sans Cuisson'];
 const CARBS = ['Pâtes', 'Pommes de terre', 'Semoule', 'Riz', 'Blé', 'Plaisir'];
-const SEASONS = ['Toutes', 'Printemps', 'Été', 'Automne', 'Hiver'];
+const SEASONS_LIST = ['Printemps', 'Été', 'Automne', 'Hiver'];
 
 const getCurrentSeason = () => {
   const month = new Date().getMonth();
@@ -35,6 +35,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('menu');
   const [viewingRecipe, setViewingRecipe] = useState(null);
   const [editingRecipe, setEditingRecipe] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null); // État pour l'image en grand
   const currentSeason = getCurrentSeason();
 
   const [loading, setLoading] = useState(true);
@@ -187,13 +188,35 @@ export default function App() {
             currentSeason={currentSeason}
           />
         )}
-        {activeTab === 'add' && <AddRecipeForm addRecipe={addRecipe} editingRecipe={editingRecipe} setEditingRecipe={setEditingRecipe} setActiveTab={setActiveTab} />}
+        {activeTab === 'add' && <AddRecipeForm addRecipe={addRecipe} editingRecipe={editingRecipe} setEditingRecipe={setEditingRecipe} setActiveTab={setActiveTab} setSelectedImage={setSelectedImage} />}
         {activeTab === 'inventory' && <InventoryManager inventory={inventory} setInventory={setInventory} />}
         {activeTab === 'shopping' && <ShoppingListView menu={menu} recipes={recipes} inventory={inventory} bakingItems={bakingItems} shoppingChecks={shoppingChecks} setShoppingChecks={setShoppingChecks} setActiveTab={setActiveTab} />}
       </main>
 
       {viewingRecipe && (
-        <RecipeModal recipe={viewingRecipe} onClose={() => setViewingRecipe(null)} />
+        <RecipeModal recipe={viewingRecipe} onClose={() => setViewingRecipe(null)} setSelectedImage={setSelectedImage} />
+      )}
+
+      {/* Modale d'agrandissement d'image */}
+      {selectedImage && (
+        <div 
+          onClick={() => setSelectedImage(null)} 
+          className="fixed inset-0 z-50 bg-black bg-opacity-80 flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div className="relative max-w-4xl max-h-full" onClick={(e) => e.stopPropagation()}>
+            <img 
+              src={selectedImage} 
+              alt="Agrandissement" 
+              className="max-h-[90vh] max-w-[90vw] object-contain rounded-lg shadow-2xl"
+            />
+            <button 
+              onClick={() => setSelectedImage(null)}
+              className="absolute top-2 right-2 text-white bg-black bg-opacity-50 rounded-full w-8 h-8 flex items-center justify-center hover:bg-opacity-75 font-bold"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
       )}
 
       <nav className="sticky bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-40 px-4 py-2 shadow-[0_-10px_15px_-3px_rgb(0,0,0,0.05)] md:relative md:border-t-0 md:bg-transparent md:max-w-4xl md:mx-auto md:p-0 md:mb-6 md:shadow-none">
@@ -291,11 +314,17 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
     { key: 'sunday', label: 'Dimanche', reqCarb: 'Pâtes' },
   ];
 
+  const recipeMatchesSeason = (seasonValue, targetSeason) => {
+    if (!seasonValue || seasonValue === 'Toutes') return true;
+    const seasonsArr = seasonValue.split(',').map(s => s.trim());
+    return seasonsArr.includes('Toutes') || seasonsArr.includes(targetSeason);
+  };
+
   const getEligibleRecipes = (reqCarb) => {
     return recipes.filter(r => {
       const matchCarb = reqCarb ? r.carb === reqCarb : true;
       if (!matchCarb) return false;
-      return r.season === 'Toutes' || r.season === currentSeason;
+      return recipeMatchesSeason(r.season, currentSeason);
     });
   };
 
@@ -412,16 +441,22 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
   const lunchKey = `${day.key}Lunch`;
   const dinnerKey = `${day.key}Dinner`;
 
+  const recipeMatchesSeason = (seasonValue, targetSeason) => {
+    if (!seasonValue || seasonValue === 'Toutes') return true;
+    const seasonsArr = seasonValue.split(',').map(s => s.trim());
+    return seasonsArr.includes('Toutes') || seasonsArr.includes(targetSeason);
+  };
+
   const getAvailableRecipes = (reqCarb) => {
     return recipes.filter(r => {
       const matchCarb = reqCarb ? r.carb === reqCarb : true;
       if (!matchCarb) return false;
-      return r.season === 'Toutes' || r.season === currentSeason;
+      return recipeMatchesSeason(r.season, currentSeason);
     });
   };
 
   const dinnerRecipes = getAvailableRecipes(day.reqCarb);
-  const anyRecipes = recipes.filter(r => r.season === 'Toutes' || r.season === currentSeason);
+  const anyRecipes = recipes.filter(r => recipeMatchesSeason(r.season, currentSeason));
 
   const lunchVal = menu[lunchKey] || '';
   const dinnerVal = menu[dinnerKey] || '';
@@ -531,8 +566,15 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
   const [filterSeason, setFilterSeason] = useState('Tous');
   const [filterEquip, setFilterEquip] = useState('Tous');
 
+  const recipeMatchesFilterSeason = (seasonValue, targetSeason) => {
+    if (targetSeason === 'Tous') return true;
+    if (!seasonValue || seasonValue === 'Toutes') return true;
+    const seasonsArr = seasonValue.split(',').map(s => s.trim());
+    return seasonsArr.includes('Toutes') || seasonsArr.includes(targetSeason);
+  };
+
   const filteredRecipes = recipes.filter(r => {
-    if (filterSeason !== 'Tous' && r.season !== filterSeason) return false;
+    if (filterSeason !== 'Tous' && !recipeMatchesFilterSeason(r.season, filterSeason)) return false;
     if (filterEquip !== 'Tous' && r.equipment !== filterEquip) return false;
     return true;
   });
@@ -560,7 +602,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
             className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800"
           >
             <option value="Tous">Toutes les saisons</option>
-            {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
+            {SEASONS_LIST.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
 
           <select 
@@ -763,30 +805,57 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
   );
 }
 
-function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTab }) {
+function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTab, setSelectedImage }) {
   const [name, setName] = useState('');
   const [carb, setCarb] = useState('Plaisir');
   const [equipment, setEquipment] = useState('Four');
-  const [season, setSeason] = useState('Toutes');
+  const [selectedSeasons, setSelectedSeasons] = useState(['Toutes']);
   const [category, setCategory] = useState('repas');
   const [url, setUrl] = useState('');
   const [image, setImage] = useState('');
   const [instructions, setInstructions] = useState('');
   const [ingredientsText, setIngredientsText] = useState('');
   
-  React.useEffect(() => {
+  useEffect(() => {
     if (editingRecipe) {
       setName(editingRecipe.name || '');
       setCarb(editingRecipe.carb || 'Plaisir');
       setEquipment(editingRecipe.equipment || 'Four');
-      setSeason(editingRecipe.season || 'Toutes');
       setCategory(editingRecipe.category || 'repas');
       setUrl(editingRecipe.url || '');
       setImage(editingRecipe.image || '');
       setInstructions(editingRecipe.instructions || '');
       setIngredientsText(editingRecipe.ingredients ? editingRecipe.ingredients.join('\n') : '');
+      
+      if (editingRecipe.season) {
+        if (editingRecipe.season === 'Toutes') {
+          setSelectedSeasons(['Toutes']);
+        } else {
+          setSelectedSeasons(editingRecipe.season.split(',').map(s => s.trim()));
+        }
+      }
     }
   }, [editingRecipe]);
+
+  const handleSeasonCheckboxChange = (seasonOption) => {
+    if (seasonOption === 'Toutes') {
+      setSelectedSeasons(['Toutes']);
+      return;
+    }
+
+    let current = selectedSeasons.filter(s => s !== 'Toutes');
+    if (current.includes(seasonOption)) {
+      current = current.filter(s => s !== seasonOption);
+    } else {
+      current.push(seasonOption);
+    }
+
+    if (current.length === 0 || current.length === SEASONS_LIST.length) {
+      setSelectedSeasons(['Toutes']);
+    } else {
+      setSelectedSeasons(current);
+    }
+  };
   
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -808,11 +877,13 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
       .map(i => i.trim().replace(/^[-*•]\s*/, ''))
       .filter(i => i.length > 0);
 
+    const finalSeason = selectedSeasons.includes('Toutes') ? 'Toutes' : selectedSeasons.join(', ');
+
     const recipeData = {
       name,
       carb,
       equipment,
-      season,
+      season: finalSeason,
       category,
       url,
       image,
@@ -893,16 +964,30 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="col-span-full">
-            <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Saison idéale</label>
-            <select 
-              value={season}
-              onChange={(e) => setSeason(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
-            >
-              {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+        {/* Sélection des saisons par cases à cocher */}
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 uppercase mb-2">Saison(s) idéale(s)</label>
+          <div className="flex flex-wrap gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={selectedSeasons.includes('Toutes')}
+                onChange={() => handleSeasonCheckboxChange('Toutes')}
+                className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+              />
+              Toutes
+            </label>
+            {SEASONS_LIST.map(s => (
+              <label key={s} className="flex items-center gap-2 text-xs font-medium cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  checked={!selectedSeasons.includes('Toutes') && selectedSeasons.includes(s)}
+                  onChange={() => handleSeasonCheckboxChange(s)}
+                  className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                />
+                {s}
+              </label>
+            ))}
           </div>
         </div>
 
@@ -930,7 +1015,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
 
         {image && (
           <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-slate-200">
-            <img src={image} alt="Aperçu" className="w-full h-full object-cover" />
+            <img src={image} alt="Aperçu" onClick={() => setSelectedImage(image)} className="w-full h-full object-cover cursor-pointer hover:opacity-95 transition" />
             <button 
               type="button" 
               onClick={() => setImage('')}
@@ -1176,7 +1261,7 @@ function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingCheck
   );
 }
 
-function RecipeModal({ recipe, onClose }) {
+function RecipeModal({ recipe, onClose, setSelectedImage }) {
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
       <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 space-y-6 relative">
@@ -1204,7 +1289,12 @@ function RecipeModal({ recipe, onClose }) {
 
         {recipe.image && (
           <div className="w-full bg-slate-900 rounded-xl overflow-hidden border border-slate-200 flex items-center justify-center">
-            <img src={recipe.image} alt={recipe.name} className="w-full h-auto max-h-[350px] object-contain" />
+            <img 
+              src={recipe.image} 
+              alt={recipe.name} 
+              onClick={() => setSelectedImage(recipe.image)}
+              className="w-full h-auto max-h-[350px] object-contain cursor-pointer hover:opacity-95 transition" 
+            />
           </div>
         )}
 
@@ -1258,5 +1348,3 @@ function RecipeModal({ recipe, onClose }) {
     </div>
   );
 }
-
-
