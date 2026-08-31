@@ -35,7 +35,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('menu');
   const [viewingRecipe, setViewingRecipe] = useState(null);
   const [editingRecipe, setEditingRecipe] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null); // État pour l'image en grand
   const currentSeason = getCurrentSeason();
 
   const [loading, setLoading] = useState(true);
@@ -197,6 +197,7 @@ export default function App() {
         <RecipeModal recipe={viewingRecipe} onClose={() => setViewingRecipe(null)} setSelectedImage={setSelectedImage} />
       )}
 
+      {/* Modale d'agrandissement d'image */}
       {selectedImage && (
         <div 
           onClick={() => setSelectedImage(null)} 
@@ -518,7 +519,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
             </div>
             {day.key === 'wednesday' ? (
               <div className="w-full bg-slate-100 border border-slate-300 text-slate-800 text-xs rounded-lg p-2 font-medium flex items-center justify-between">
-                <span>Cordon bleu et Pommes de terre</span>
+                <span>Gnocchis Saucisse</span>
                 <span className="text-[10px] bg-slate-200 px-2 py-0.5 rounded text-slate-600">Fixe</span>
               </div>
             ) : dinnerRecipes.length === 0 ? (
@@ -903,7 +904,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 max-w-2xl mx-auto relative">
       <h2 className="font-bold text-slate-800 text-lg mb-4 flex items-center gap-2">
-        <Plus className="w-5 h-5 text-indigo-600" /> {editingRecipe ? 'Modifier la recette' : 'Ajouter une nouvelle recette'}
+        <Plus className="w-5 h-5 text-indigo-600" /> Ajouter une nouvelle recette
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -1052,7 +1053,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
           type="submit"
           className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-xl transition-colors shadow-sm text-sm"
         >
-          {editingRecipe ? 'Mettre à jour la recette' : 'Enregistrer la recette'}
+          Enregistrer la recette
         </button>
       </form>
     </div>
@@ -1347,3 +1348,4 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
     </div>
   );
 }
+```[cite: 4]
