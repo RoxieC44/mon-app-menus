@@ -147,7 +147,7 @@ export default function App() {
   const bakingRecipes = recipes.filter(r => r.category === 'gateau');
   
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-24 md:pb-0 relative">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-28 relative">
       <header className="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-10">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <h1 className="text-xl font-bold flex items-center gap-2">
@@ -226,7 +226,7 @@ export default function App() {
         </div>
       )}
 
-      <nav className="sticky bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-40 px-4 py-2 shadow-[0_-10px_15px_-3px_rgb(0,0,0,0.05)] md:relative md:border-t-0 md:bg-transparent md:max-w-4xl md:mx-auto md:p-0 md:mb-6 md:shadow-none">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-40 px-4 py-2 shadow-[0_-10px_25px_-3px_rgb(0,0,0,0.1)]">
         <div className="max-w-md mx-auto flex justify-between items-center relative">
           <NavButton active={activeTab === 'menu'} onClick={() => setActiveTab('menu')} icon={<Calendar />} label="Menus" />
           <NavButton active={activeTab === 'baking'} onClick={() => setActiveTab('baking')} icon={<Cake />} label="Gâteaux" />
@@ -250,11 +250,11 @@ function NavButton({ active, onClick, icon, label }) {
   return (
     <button
       onClick={onClick}
-      className={`flex flex-col items-center gap-1 p-2 min-w-[70px] flex-shrink-0 md:w-auto md:flex-row md:px-5 md:py-3 md:rounded-xl md:shadow-sm transition-all
-        ${active ? 'text-indigo-600 md:bg-indigo-600 md:text-white scale-105 md:scale-100 font-semibold' : 'text-slate-400 hover:text-indigo-500 md:bg-white'}`}
+      className={`flex flex-col items-center gap-1 p-2 min-w-[70px] flex-shrink-0 transition-all
+        ${active ? 'text-indigo-600 scale-105 font-semibold' : 'text-slate-400 hover:text-indigo-500'}`}
     >
       <div className="w-5 h-5 flex items-center justify-center">{icon}</div>
-      <span className="text-[10px] md:text-sm font-medium">{label}</span>
+      <span className="text-[10px] font-medium">{label}</span>
     </button>
   );
 }
@@ -488,7 +488,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
               <option value="restes">🔁 Restes de la veille</option>
               {anyRecipes.map(r => (
                 <option key={r.id} value={r.id}>
-                  {r.name} {r.season !== 'Toutes' ? `(${r.season})` : ''}
+                  {r.name}
                 </option>
               ))}
             </select>
@@ -530,7 +530,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
                 <option value="">-- Choisir le soir --</option>
                 {dinnerRecipes.map(r => (
                   <option key={r.id} value={r.id}>
-                    {r.name} {r.season !== 'Toutes' ? `(${r.season})` : ''}
+                    {r.name}
                   </option>
                 ))}
               </select>
@@ -540,7 +540,6 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
               <div className="flex justify-between items-center pt-1">
                 <span className="text-[11px] text-slate-500 flex items-center gap-1 font-medium">
                   <Settings className="w-3 h-3 text-slate-400" /> {dinnerRecipe.equipment}
-                  <span className="ml-1 px-1.5 py-0.5 bg-slate-100 rounded text-[9px]">{dinnerRecipe.season}</span>
                 </span>
                 <button 
                   onClick={() => setViewingRecipe(dinnerRecipe)}
