@@ -67,17 +67,20 @@ export default function App() {
   const [bakingItems, setBakingItems] = useState(['', '']);
   const [shoppingChecks, setShoppingChecks] = useState({});
 
-  // Fonction de sauvegarde globale ultra-robuste
-  const saveAllToSupabase = async (newRecipes, newMenu, newInventory, newBaking, newShopping) => {
+  // Fonction centrale de sauvegarde universelle
+  const saveToSupabase = async (updatedData) => {
+    const fullPayload = {
+      recipes,
+      menu,
+      inventory,
+      bakingItems,
+      shoppingChecks,
+      ...updatedData
+    };
+
     const payload = {
       user_key: 'ma_famille',
-      data: {
-        recipes: newRecipes,
-        menu: newMenu,
-        inventory: newInventory,
-        bakingItems: newBaking,
-        shoppingChecks: newShopping
-      }
+      data: fullPayload
     };
 
     const { data: existing } = await supabase
@@ -136,7 +139,7 @@ export default function App() {
     }
     
     setRecipes(updatedRecipes);
-    saveAllToSupabase(updatedRecipes, menu, inventory, bakingItems, shoppingChecks);
+    saveToSupabase({ recipes: updatedRecipes });
     setActiveTab(newRecipe.category === 'gateau' ? 'baking' : 'menu');
   };
 
@@ -150,14 +153,34 @@ export default function App() {
     });
     setMenu(newMenu);
 
-    saveAllToSupabase(updatedRecipes, newMenu, inventory, bakingItems, shoppingChecks);
+    saveToSupabase({ recipes: updatedRecipes, menu: newMenu });
   };
 
-  const updateMenu = (key, value) => {
-    const newMenu = { ...menu, [key]: value };
+  const updateMenuState = (newMenu) => {
     setMenu(newMenu);
     if (!loading) {
-      saveAllToSupabase(recipes, newMenu, inventory, bakingItems, shoppingChecks);
+      saveToSupabase({ menu: newMenu });
+    }
+  };
+
+  const updateInventoryState = (newInv) => {
+    setInventory(newInv);
+    if (!loading) {
+      saveToSupabase({ inventory: newInv });
+    }
+  };
+
+  const updateBakingState = (newBaking) => {
+    setBakingItems(newBaking);
+    if (!loading) {
+      saveToSupabase({ bakingItems: newBaking });
+    }
+  };
+
+  const updateShoppingState = (newChecks) => {
+    setShoppingChecks(newChecks);
+    if (!loading) {
+      saveToSupabase({ shoppingChecks: newChecks });
     }
   };
 
@@ -189,10 +212,10 @@ export default function App() {
         {activeTab === 'menu' && (
           <MenuContainer 
             menu={menu} 
-            updateMenu={updateMenu} 
+            updateMenu={updateMenuState} 
             recipes={recipes}
             mealRecipes={mealRecipes}
-            setMenu={(newM) => { setMenu(newM); saveAllToSupabase(recipes, newM, inventory, bakingItems, shoppingChecks); }} 
+            setMenu={updateMenuState} 
             deleteRecipe={deleteRecipe}
             setViewingRecipe={setViewingRecipe} 
             setEditingRecipe={setEditingRecipe}
@@ -204,7 +227,7 @@ export default function App() {
           <BakingPlanner 
             menu={menu} 
             bakingItems={bakingItems} 
-            setBakingItems={(newB) => { setBakingItems(newB); saveAllToSupabase(recipes, menu, inventory, newB, shoppingChecks); }} 
+            setBakingItems={updateBakingState} 
             bakingRecipes={bakingRecipes} 
             recipes={recipes}
             deleteRecipe={deleteRecipe}
@@ -215,8 +238,8 @@ export default function App() {
           />
         )}
         {activeTab === 'add' && <AddRecipeForm addRecipe={addRecipe} editingRecipe={editingRecipe} setEditingRecipe={setEditingRecipe} setActiveTab={setActiveTab} setSelectedImage={setSelectedImage} />}
-        {activeTab === 'inventory' && <InventoryManager inventory={inventory} setInventory={(newInv) => { setInventory(newInv); saveAllToSupabase(recipes, menu, newInv, bakingItems, shoppingChecks); }} />}
-        {activeTab === 'shopping' && <ShoppingListView menu={menu} recipes={recipes} inventory={inventory} bakingItems={bakingItems} shoppingChecks={shoppingChecks} setShoppingChecks={(newCheck) => { setShoppingChecks(newCheck); saveAllToSupabase(recipes, menu, inventory, bakingItems, newCheck); }} setActiveTab={setActiveTab} />}
+        {activeTab === 'inventory' && <InventoryManager inventory={inventory} setInventory={updateInventoryState} />}
+        {activeTab === 'shopping' && <ShoppingListView menu={menu} recipes={recipes} inventory={inventory} bakingItems={bakingItems} shoppingChecks={shoppingChecks} setShoppingChecks={updateShoppingState} setActiveTab={setActiveTab} />}
       </main>
 
       {viewingRecipe && (
