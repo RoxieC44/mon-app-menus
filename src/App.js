@@ -67,40 +67,6 @@ export default function App() {
   const [bakingItems, setBakingItems] = useState(['', '']);
   const [shoppingChecks, setShoppingChecks] = useState({});
 
-  // Fonction centrale de sauvegarde universelle
-  const saveToSupabase = async (updatedData) => {
-    const fullPayload = {
-      recipes,
-      menu,
-      inventory,
-      bakingItems,
-      shoppingChecks,
-      ...updatedData
-    };
-
-    const payload = {
-      user_key: 'ma_famille',
-      data: fullPayload
-    };
-
-    const { data: existing } = await supabase
-      .from('stockage_donnees')
-      .select('id')
-      .eq('user_key', 'ma_famille')
-      .maybeSingle();
-
-    if (existing) {
-      await supabase
-        .from('stockage_donnees')
-        .update(payload)
-        .eq('user_key', 'ma_famille');
-    } else {
-      await supabase
-        .from('stockage_donnees')
-        .insert([payload]);
-    }
-  };
-
   useEffect(() => {
     async function loadData() {
       setLoading(true);
@@ -129,59 +95,59 @@ export default function App() {
     loadData();
   }, []);
 
-  const addRecipe = (newRecipe) => {
-    const exists = recipes.some(r => r.id === newRecipe.id);
-    let updatedRecipes;
-    if (exists) {
-      updatedRecipes = recipes.map(r => r.id === newRecipe.id ? newRecipe : r);
-    } else {
-      updatedRecipes = [...recipes, { ...newRecipe, id: Date.now().toString() }];
+  useEffect(() => {
+    if (loading) return;
+
+    async function saveData() {
+      const payload = {
+        user_key: 'ma_famille',
+        data: { recipes, menu, inventory, bakingItems, shoppingChecks }
+      };
+
+      const { data: existing } = await supabase
+        .from('stockage_donnees')
+        .select('id')
+        .eq('user_key', 'ma_famille')
+        .maybeSingle();
+
+      if (existing) {
+        await supabase
+          .from('stockage_donnees')
+          .update(payload)
+          .eq('user_key', 'ma_famille');
+      } else {
+        await supabase
+          .from('stockage_donnees')
+          .insert([payload]);
+      }
     }
-    
-    setRecipes(updatedRecipes);
-    saveToSupabase({ recipes: updatedRecipes });
+
+    const timer = setTimeout(saveData, 1000);
+    return () => clearTimeout(timer);
+  }, [recipes, menu, inventory, bakingItems, shoppingChecks]);
+
+  const addRecipe = (newRecipe) => {
+    setRecipes(prev => {
+      const exists = prev.some(r => r.id === newRecipe.id);
+      if (exists) {
+        return prev.map(r => r.id === newRecipe.id ? newRecipe : r);
+      }
+      return [...prev, { ...newRecipe, id: Date.now().toString() }];
+    });
     setActiveTab(newRecipe.category === 'gateau' ? 'baking' : 'menu');
   };
 
   const deleteRecipe = (id) => {
-    const updatedRecipes = recipes.filter(r => r.id !== id);
-    setRecipes(updatedRecipes);
-    
+    setRecipes(recipes.filter(r => r.id !== id));
     const newMenu = { ...menu };
     Object.keys(newMenu).forEach(day => {
       if (newMenu[day] === id) newMenu[day] = '';
     });
     setMenu(newMenu);
-
-    saveToSupabase({ recipes: updatedRecipes, menu: newMenu });
   };
 
-  const updateMenuState = (newMenu) => {
-    setMenu(newMenu);
-    if (!loading) {
-      saveToSupabase({ menu: newMenu });
-    }
-  };
-
-  const updateInventoryState = (newInv) => {
-    setInventory(newInv);
-    if (!loading) {
-      saveToSupabase({ inventory: newInv });
-    }
-  };
-
-  const updateBakingState = (newBaking) => {
-    setBakingItems(newBaking);
-    if (!loading) {
-      saveToSupabase({ bakingItems: newBaking });
-    }
-  };
-
-  const updateShoppingState = (newChecks) => {
-    setShoppingChecks(newChecks);
-    if (!loading) {
-      saveToSupabase({ shoppingChecks: newChecks });
-    }
+  const updateMenu = (key, value) => {
+    setMenu({ ...menu, [key]: value });
   };
 
   const mealRecipes = recipes.filter(r => r.category !== 'gateau');
@@ -212,10 +178,10 @@ export default function App() {
         {activeTab === 'menu' && (
           <MenuContainer 
             menu={menu} 
-            updateMenu={updateMenuState} 
+            updateMenu={updateMenu} 
             recipes={recipes}
             mealRecipes={mealRecipes}
-            setMenu={updateMenuState} 
+            setMenu={setMenu} 
             deleteRecipe={deleteRecipe}
             setViewingRecipe={setViewingRecipe} 
             setEditingRecipe={setEditingRecipe}
@@ -227,7 +193,7 @@ export default function App() {
           <BakingPlanner 
             menu={menu} 
             bakingItems={bakingItems} 
-            setBakingItems={updateBakingState} 
+            setBakingItems={setBakingItems} 
             bakingRecipes={bakingRecipes} 
             recipes={recipes}
             deleteRecipe={deleteRecipe}
@@ -238,8 +204,8 @@ export default function App() {
           />
         )}
         {activeTab === 'add' && <AddRecipeForm addRecipe={addRecipe} editingRecipe={editingRecipe} setEditingRecipe={setEditingRecipe} setActiveTab={setActiveTab} setSelectedImage={setSelectedImage} />}
-        {activeTab === 'inventory' && <InventoryManager inventory={inventory} setInventory={updateInventoryState} />}
-        {activeTab === 'shopping' && <ShoppingListView menu={menu} recipes={recipes} inventory={inventory} bakingItems={bakingItems} shoppingChecks={shoppingChecks} setShoppingChecks={updateShoppingState} setActiveTab={setActiveTab} />}
+        {activeTab === 'inventory' && <InventoryManager inventory={inventory} setInventory={setInventory} />}
+        {activeTab === 'shopping' && <ShoppingListView menu={menu} recipes={recipes} inventory={inventory} bakingItems={bakingItems} shoppingChecks={shoppingChecks} setShoppingChecks={setShoppingChecks} setActiveTab={setActiveTab} />}
       </main>
 
       {viewingRecipe && (
