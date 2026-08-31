@@ -67,21 +67,20 @@ export default function App() {
   const [bakingItems, setBakingItems] = useState(['', '']);
   const [shoppingChecks, setShoppingChecks] = useState({});
 
-  // Chargement initial depuis Supabase
   useEffect(() => {
     async function loadData() {
       setLoading(true);
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('stockage_donnees')
         .select('data')
         .eq('user_key', 'ma_famille')
         .maybeSingle();
 
-      if (!error && data && data.data) {
+      if (data && data.data) {
         const saved = data.data;
-        if (saved.recipes && saved.recipes.length > 0) setRecipes(saved.recipes);
+        if (saved.recipes) setRecipes(saved.recipes);
         if (saved.menu) setMenu(saved.menu);
-        if (saved.inventory && saved.inventory.length > 0) {
+        if (saved.inventory) {
           const migrated = saved.inventory.map(item => ({
             ...item,
             zone: item.zone || 'Placard'
@@ -96,35 +95,24 @@ export default function App() {
     loadData();
   }, []);
 
-  // Sauvegarde automatique vers Supabase à chaque modification (avec protection contre l'écrasement au chargement)
+  // Sauvegarde automatique vers Supabase (avec upsert)
   useEffect(() => {
     if (loading) return;
 
     async function saveData() {
-      const payload = {
-        user_key: 'ma_famille',
-        data: { recipes, menu, inventory, bakingItems, shoppingChecks }
-      };
-
-      const { data: existing } = await supabase
+      const { error } = await supabase
         .from('stockage_donnees')
-        .select('id')
-        .eq('user_key', 'ma_famille')
-        .maybeSingle();
+        .upsert(
+          { user_key: 'ma_famille', data: { recipes, menu, inventory, bakingItems, shoppingChecks } },
+          { onConflict: 'user_key' }
+        );
 
-      if (existing) {
-        await supabase
-          .from('stockage_donnees')
-          .update(payload)
-          .eq('user_key', 'ma_famille');
-      } else {
-        await supabase
-          .from('stockage_donnees')
-          .insert([payload]);
+      if (error) {
+        console.error("Erreur lors de la sauvegarde Supabase :", error.message);
       }
     }
 
-    const timer = setTimeout(saveData, 500);
+    const timer = setTimeout(saveData, 1000);
     return () => clearTimeout(timer);
   }, [recipes, menu, inventory, bakingItems, shoppingChecks, loading]);
 
@@ -140,31 +128,21 @@ export default function App() {
   };
 
   const deleteRecipe = (id) => {
-    setRecipes(prev => prev.filter(r => r.id !== id));
-    setMenu(prevMenu => {
-      const newMenu = { ...prevMenu };
-      Object.keys(newMenu).forEach(day => {
-        if (newMenu[day] === id) newMenu[day] = '';
-      });
-      return newMenu;
+    setRecipes(recipes.filter(r => r.id !== id));
+    const newMenu = { ...menu };
+    Object.keys(newMenu).forEach(day => {
+      if (newMenu[day] === id) newMenu[day] = '';
     });
+    setMenu(newMenu);
   };
 
   const updateMenu = (key, value) => {
-    setMenu(prev => ({ ...prev, [key]: value }));
+    setMenu({ ...menu, [key]: value });
   };
 
   const mealRecipes = recipes.filter(r => r.category !== 'gateau');
   const bakingRecipes = recipes.filter(r => r.category === 'gateau');
   
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-500 font-medium">
-        Chargement de vos données...
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-28 relative">
       <header className="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-10">
