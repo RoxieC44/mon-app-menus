@@ -31,11 +31,20 @@ const getCurrentSeason = () => {
   return 'Hiver';
 };
 
+// Fonction sécurisée pour vérifier la saison
+const recipeMatchesSeason = (seasonValue, targetSeason) => {
+  if (targetSeason === 'Tous') return true;
+  if (!seasonValue || seasonValue === 'Toutes') return true;
+  if (typeof seasonValue !== 'string') return true;
+  const seasonsArr = seasonValue.split(',').map(s => s.trim());
+  return seasonsArr.includes('Toutes') || seasonsArr.includes(targetSeason);
+};
+
 export default function App() {
   const [activeTab, setActiveTab] = useState('menu');
   const [viewingRecipe, setViewingRecipe] = useState(null);
   const [editingRecipe, setEditingRecipe] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(null); // État pour l'image en grand
+  const [selectedImage, setSelectedImage] = useState(null);
   const currentSeason = getCurrentSeason();
 
   const [loading, setLoading] = useState(true);
@@ -197,7 +206,6 @@ export default function App() {
         <RecipeModal recipe={viewingRecipe} onClose={() => setViewingRecipe(null)} setSelectedImage={setSelectedImage} />
       )}
 
-      {/* Modale d'agrandissement d'image */}
       {selectedImage && (
         <div 
           onClick={() => setSelectedImage(null)} 
@@ -313,12 +321,6 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
     { key: 'saturday', label: 'Samedi', reqCarb: 'Plaisir' },
     { key: 'sunday', label: 'Dimanche', reqCarb: 'Pâtes' },
   ];
-
-  const recipeMatchesSeason = (seasonValue, targetSeason) => {
-    if (!seasonValue || seasonValue === 'Toutes') return true;
-    const seasonsArr = seasonValue.split(',').map(s => s.trim());
-    return seasonsArr.includes('Toutes') || seasonsArr.includes(targetSeason);
-  };
 
   const getEligibleRecipes = (reqCarb) => {
     return recipes.filter(r => {
@@ -441,12 +443,6 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
   const lunchKey = `${day.key}Lunch`;
   const dinnerKey = `${day.key}Dinner`;
 
-  const recipeMatchesSeason = (seasonValue, targetSeason) => {
-    if (!seasonValue || seasonValue === 'Toutes') return true;
-    const seasonsArr = seasonValue.split(',').map(s => s.trim());
-    return seasonsArr.includes('Toutes') || seasonsArr.includes(targetSeason);
-  };
-
   const getAvailableRecipes = (reqCarb) => {
     return recipes.filter(r => {
       const matchCarb = reqCarb ? r.carb === reqCarb : true;
@@ -566,15 +562,8 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
   const [filterSeason, setFilterSeason] = useState('Tous');
   const [filterEquip, setFilterEquip] = useState('Tous');
 
-  const recipeMatchesFilterSeason = (seasonValue, targetSeason) => {
-    if (targetSeason === 'Tous') return true;
-    if (!seasonValue || seasonValue === 'Toutes') return true;
-    const seasonsArr = seasonValue.split(',').map(s => s.trim());
-    return seasonsArr.includes('Toutes') || seasonsArr.includes(targetSeason);
-  };
-
   const filteredRecipes = recipes.filter(r => {
-    if (filterSeason !== 'Tous' && !recipeMatchesFilterSeason(r.season, filterSeason)) return false;
+    if (filterSeason !== 'Tous' && !recipeMatchesSeason(r.season, filterSeason)) return false;
     if (filterEquip !== 'Tous' && r.equipment !== filterEquip) return false;
     return true;
   });
@@ -964,7 +953,6 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
           </div>
         </div>
 
-        {/* Sélection des saisons par cases à cocher */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 uppercase mb-2">Saison(s) idéale(s)</label>
           <div className="flex flex-wrap gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
@@ -1229,7 +1217,7 @@ function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingCheck
       ) : (
         <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
           {rawList.map((ing, idx) => {
-            const stock = getStatus(ing); // Corrigé ici
+            const stock = getStockStatus(ing);
             const isChecked = !!shoppingChecks[ing];
 
             return (
@@ -1348,4 +1336,3 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
     </div>
   );
 }
-
