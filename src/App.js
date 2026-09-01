@@ -19,20 +19,40 @@ const DEFAULT_RECIPES = [
   { id: '14', name: 'Cookies pépites de chocolat', carb: 'Plaisir', equipment: 'Four', season: 'Toutes', type: 'text', instructions: 'Mélanger beurre mou, sucre, sucre vanillé, œuf, farine et pépites. Faire des boules et cuire 10 min à 180°C.', ingredients: ['150g de beurre', '100g de sucre', '1 œuf', '220g de farine', '100g de pépites de chocolat'], category: 'gateau' },
 ];
 
-const EQUIPMENTS = ['Thermomix', 'Cookeo', 'Poêle', 'Four', 'Casserole', 'Airfryer', 'Autre appareil', 'Sans Cuisson'];
+const INITIAL_EQUIPMENTS = ['Thermomix', 'Cookeo', 'Poêle', 'Four', 'Casserole', 'Airfryer', 'Autre appareil', 'Sans Cuisson'];
 const CARBS = ['Pâtes', 'Pommes de terre', 'Semoule', 'Riz', 'Blé', 'Plaisir', 'Autre'];
 const SEASONS_LIST = ['Printemps', 'Été', 'Automne', 'Hiver'];
 const STORAGE_ZONES = ['Placard', 'Frigo', 'Congélateur'];
 
-const getCurrentSeason = () => {
-  const month = new Date().getMonth();
-  if (month >= 2 && month <= 4) return 'Printemps';
-  if (month >= 5 && month <= 7) return 'Été';
-  if (month >= 8 && month <= 10) return 'Automne';
-  return 'Hiver';
+// Définition des bornes des saisons au jour près (Mois 1-12, Jour 1-31)
+const DEFAULT_SEASON_DATES = {
+  Printemps: { startMonth: 3, startDay: 20, endMonth: 6, endDay: 20 },
+  Été: { startMonth: 6, startDay: 21, endMonth: 9, endDay: 21 },
+  Automne: { startMonth: 9, startDay: 22, endMonth: 12, endDay: 20 },
+  Hiver: { startMonth: 12, startDay: 21, endMonth: 3, endDay: 19 }
 };
 
-const recipeMatchesSeason = (seasonValue, targetSeason) => {
+const getCurrentSeason = (seasonDates = DEFAULT_SEASON_DATES) => {
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1;
+  const currentDay = now.getDate();
+  const currentVal = currentMonth * 100 + currentDay;
+
+  for (const [season, bounds] of Object.entries(seasonDates)) {
+    const startVal = bounds.startMonth * 100 + bounds.startDay;
+    const endVal = bounds.endMonth * 100 + bounds.endDay;
+
+    if (startVal <= endVal) {
+      if (currentVal >= startVal && currentVal <= endVal) return season;
+    } else {
+      // Cas de l'hiver qui chevauche le Nouvel An (ex: 21 déc au 19 mars)
+      if (currentVal >= startVal || currentVal <= endVal) return season;
+    }
+  }
+  return 'Printemps';
+};
+
+const recipeMatchesSeason = (seasonValue, targetSeason, seasonDates) => {
   if (targetSeason === 'Tous') return true;
   if (!seasonValue || seasonValue === 'Toutes') return true;
   if (typeof seasonValue !== 'string') return true;
@@ -45,11 +65,15 @@ export default function App() {
   const [viewingRecipe, setViewingRecipe] = useState(null);
   const [editingRecipe, setEditingRecipe] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
-  const currentSeason = getCurrentSeason();
 
   const [loading, setLoading] = useState(true);
 
   const [recipes, setRecipes] = useState(DEFAULT_RECIPES);
+  const [equipments, setEquipments] = useState(INITIAL_EQUIPMENTS);
+  const [seasonDates, setSeasonDates] = useState(DEFAULT_SEASON_DATES);
+
+  const currentSeason = getCurrentSeason(seasonDates);
+
   const [menu, setMenu] = useState({
     mondayDinner: '', tuesdayDinner: '', wednesdayDinner: '', thursdayDinner: '', fridayDinner: '', saturdayDinner: '', sundayDinner: '',
     mondayLunch: 'restes', tuesdayLunch: 'restes', wednesdayLunch: '', thursdayLunch: 'restes', fridayLunch: 'restes', saturdayLunch: '', sundayLunch: ''
@@ -79,6 +103,8 @@ export default function App() {
       if (data && data.data) {
         const saved = data.data;
         if (saved.recipes) setRecipes(saved.recipes);
+        if (saved.equipments) setEquipments(saved.equipments);
+        if (saved.seasonDates) setSeasonDates(saved.seasonDates);
         if (saved.menu) setMenu(saved.menu);
         if (saved.inventory) {
           const migrated = saved.inventory.map(item => ({
@@ -101,7 +127,7 @@ export default function App() {
     async function saveData() {
       const payload = {
         user_key: 'ma_famille',
-        data: { recipes, menu, inventory, bakingItems, shoppingChecks }
+        data: { recipes, equipments, seasonDates, menu, inventory, bakingItems, shoppingChecks }
       };
 
       const { data: existing } = await supabase
@@ -124,7 +150,7 @@ export default function App() {
 
     const timer = setTimeout(saveData, 1000);
     return () => clearTimeout(timer);
-  }, [recipes, menu, inventory, bakingItems, shoppingChecks]);
+  }, [recipes, equipments, seasonDates, menu, inventory, bakingItems, shoppingChecks]);
 
   const addRecipe = (newRecipe) => {
     setRecipes(prev => {
@@ -167,9 +193,13 @@ export default function App() {
               <Sun className="w-3.5 h-3.5" />
               Saison actuelle : {currentSeason}
             </div>
-            <div className="text-xs bg-indigo-700 py-1.5 px-3 rounded-full opacity-90 hidden md:flex items-center gap-1">
-               <Info className="w-3.5 h-3.5" /> {recipes.length} recettes
-            </div>
+            <button
+              onClick={() => setActiveTab('settings')}
+              className="text-xs bg-indigo-700 hover:bg-indigo-800 text-white py-1.5 px-3 rounded-full flex items-center gap-1 transition-colors"
+              title="Paramètres & Saisons"
+            >
+               <Settings className="w-3.5 h-3.5" /> Saisons
+            </button>
           </div>
         </div>
       </header>
@@ -186,7 +216,9 @@ export default function App() {
             setViewingRecipe={setViewingRecipe} 
             setEditingRecipe={setEditingRecipe}
             setActiveTab={setActiveTab}
-            currentSeason={currentSeason} 
+            currentSeason={currentSeason}
+            seasonDates={seasonDates}
+            equipments={equipments}
           />
         )}
         {activeTab === 'baking' && (
@@ -201,11 +233,14 @@ export default function App() {
             setEditingRecipe={setEditingRecipe}
             setActiveTab={setActiveTab}
             currentSeason={currentSeason}
+            seasonDates={seasonDates}
+            equipments={equipments}
           />
         )}
-        {activeTab === 'add' && <AddRecipeForm addRecipe={addRecipe} editingRecipe={editingRecipe} setEditingRecipe={setEditingRecipe} setActiveTab={setActiveTab} setSelectedImage={setSelectedImage} />}
+        {activeTab === 'add' && <AddRecipeForm addRecipe={addRecipe} editingRecipe={editingRecipe} setEditingRecipe={setEditingRecipe} setActiveTab={setActiveTab} setSelectedImage={setSelectedImage} equipments={equipments} setEquipments={setEquipments} />}
         {activeTab === 'inventory' && <InventoryManager inventory={inventory} setInventory={setInventory} />}
         {activeTab === 'shopping' && <ShoppingListView menu={menu} recipes={recipes} inventory={inventory} bakingItems={bakingItems} shoppingChecks={shoppingChecks} setShoppingChecks={setShoppingChecks} setActiveTab={setActiveTab} />}
+        {activeTab === 'settings' && <SettingsView seasonDates={seasonDates} setSeasonDates={setSeasonDates} equipments={equipments} setEquipments={setEquipments} setActiveTab={setActiveTab} />}
       </main>
 
       {viewingRecipe && (
@@ -266,7 +301,7 @@ function NavButton({ active, onClick, icon, label }) {
   );
 }
 
-function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, deleteRecipe, setEditingRecipe, setActiveTab, setViewingRecipe, currentSeason }) {
+function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, deleteRecipe, setEditingRecipe, setActiveTab, setViewingRecipe, currentSeason, seasonDates, equipments }) {
   const [subTab, setSubTab] = useState('planning');
 
   return (
@@ -299,7 +334,8 @@ function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, delete
           setEditingRecipe={setEditingRecipe}
           setActiveTab={setActiveTab}
           setViewingRecipe={setViewingRecipe} 
-          currentSeason={currentSeason} 
+          currentSeason={currentSeason}
+          seasonDates={seasonDates}
         />
       ) : (
         <RecipeList 
@@ -310,6 +346,8 @@ function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, delete
           setEditingRecipe={setEditingRecipe}
           setActiveTab={setActiveTab}
           currentSeason={currentSeason}
+          seasonDates={seasonDates}
+          equipments={equipments}
           title="Toutes les recettes de repas"
         />
       )}
@@ -317,7 +355,7 @@ function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, delete
   );
 }
 
-function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason }) {
+function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, seasonDates }) {
   const daysConfig = [
     { key: 'monday', label: 'Lundi', reqCarb: 'Blé' },
     { key: 'tuesday', label: 'Mardi', reqCarb: 'Semoule' },
@@ -332,7 +370,7 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
     return recipes.filter(r => {
       const matchCarb = reqCarb ? r.carb === reqCarb : true;
       if (!matchCarb) return false;
-      return recipeMatchesSeason(r.season, currentSeason);
+      return recipeMatchesSeason(r.season, currentSeason, seasonDates);
     });
   };
 
@@ -435,6 +473,7 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
             updateMenu={updateMenu}
             recipes={recipes}
             currentSeason={currentSeason}
+            seasonDates={seasonDates}
             setEditingRecipe={setEditingRecipe}
             setActiveTab={setActiveTab}
             setViewingRecipe={setViewingRecipe}
@@ -445,7 +484,7 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
   );
 }
 
-function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActiveTab, currentSeason, setViewingRecipe }) {
+function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActiveTab, currentSeason, seasonDates, setViewingRecipe }) {
   const lunchKey = `${day.key}Lunch`;
   const dinnerKey = `${day.key}Dinner`;
 
@@ -453,12 +492,12 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
     return recipes.filter(r => {
       const matchCarb = reqCarb ? r.carb === reqCarb : true;
       if (!matchCarb) return false;
-      return recipeMatchesSeason(r.season, currentSeason);
+      return recipeMatchesSeason(r.season, currentSeason, seasonDates);
     });
   };
 
   const dinnerRecipes = getAvailableRecipes(day.reqCarb);
-  const anyRecipes = recipes.filter(r => recipeMatchesSeason(r.season, currentSeason));
+  const anyRecipes = recipes.filter(r => recipeMatchesSeason(r.season, currentSeason, seasonDates));
 
   const lunchVal = menu[lunchKey] || '';
   const dinnerVal = menu[dinnerKey] || '';
@@ -563,12 +602,12 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
   );
 }
 
-function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, title }) {
+function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, seasonDates, equipments, title }) {
   const [filterSeason, setFilterSeason] = useState('Tous');
   const [filterEquip, setFilterEquip] = useState('Tous');
 
   const filteredRecipes = recipes.filter(r => {
-    if (filterSeason !== 'Tous' && !recipeMatchesSeason(r.season, filterSeason)) return false;
+    if (filterSeason !== 'Tous' && !recipeMatchesSeason(r.season, filterSeason, seasonDates)) return false;
     if (filterEquip !== 'Tous' && r.equipment !== filterEquip) return false;
     return true;
   });
@@ -605,7 +644,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
             className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800"
           >
             <option value="Tous">Tous les appareils</option>
-            {EQUIPMENTS.map(eq => <option key={eq} value={eq}>{eq}</option>)}
+            {equipments.map(eq => <option key={eq} value={eq}>{eq}</option>)}
           </select>
         </div>
 
@@ -691,7 +730,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
   );
 }
 
-function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, setActiveTab, bakingRecipes, recipes, deleteRecipe, setViewingRecipe, currentSeason }) {
+function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, setActiveTab, bakingRecipes, recipes, deleteRecipe, setViewingRecipe, currentSeason, seasonDates, equipments }) {
   const [subTab, setSubTab] = useState('planning');
 
   const updateBakingItem = (index, recipeId) => {
@@ -793,17 +832,19 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
           setEditingRecipe={setEditingRecipe}
           setActiveTab={setActiveTab}
           currentSeason={currentSeason}
+          seasonDates={seasonDates}
+          equipments={equipments}
         />
       )}
     </div>
   );
 }
 
-function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTab, setSelectedImage }) {
+function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTab, setSelectedImage, equipments, setEquipments }) {
   const [name, setName] = useState('');
   const [carb, setCarb] = useState('Plaisir');
   const [customCarb, setCustomCarb] = useState('');
-  const [equipment, setEquipment] = useState('Four');
+  const [equipment, setEquipment] = useState(equipments[0] || 'Four');
   const [selectedSeasons, setSelectedSeasons] = useState(['Toutes']);
   const [category, setCategory] = useState('repas');
   const [url, setUrl] = useState('');
@@ -811,6 +852,10 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
   const [instructions, setInstructions] = useState('');
   const [ingredientsText, setIngredientsText] = useState('');
   
+  // État pour la modale d'ajout rapide d'appareil
+  const [showAddEquipmentModal, setShowAddEquipmentModal] = useState(false);
+  const [newEquipmentName, setNewEquipmentName] = useState('');
+
   useEffect(() => {
     if (editingRecipe) {
       setName(editingRecipe.name || '');
@@ -821,7 +866,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
         setCarb('Autre');
         setCustomCarb(editingRecipe.carb);
       }
-      setEquipment(editingRecipe.equipment || 'Four');
+      setEquipment(editingRecipe.equipment || equipments[0] || 'Four');
       setCategory(editingRecipe.category || 'repas');
       setUrl(editingRecipe.url || '');
       setImage(editingRecipe.image || '');
@@ -843,6 +888,27 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
       }
     }
   }, [editingRecipe]);
+
+  const handleEquipmentSelectChange = (e) => {
+    const val = e.target.value;
+    if (val === 'ADD_NEW_EQUIPMENT') {
+      setShowAddEquipmentModal(true);
+    } else {
+      setEquipment(val);
+    }
+  };
+
+  const handleSaveNewEquipment = (e) => {
+    e.preventDefault();
+    if (!newEquipmentName.trim()) return;
+    const trimmed = newEquipmentName.trim();
+    if (!equipments.includes(trimmed)) {
+      setEquipments([...equipments, trimmed]);
+    }
+    setEquipment(trimmed);
+    setNewEquipmentName('');
+    setShowAddEquipmentModal(false);
+  };
 
   const handleSeasonCheckboxChange = (seasonOption) => {
     if (seasonOption === 'Toutes') {
@@ -984,13 +1050,24 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
 
           <div className={category === 'gateau' ? 'col-span-full' : ''}>
             <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Appareil utilisé</label>
-            <select 
-              value={equipment}
-              onChange={(e) => setEquipment(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
-            >
-              {EQUIPMENTS.map(eq => <option key={eq} value={eq}>{eq}</option>)}
-            </select>
+            <div className="flex gap-2">
+              <select 
+                value={equipment}
+                onChange={handleEquipmentSelectChange}
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
+              >
+                {equipments.map(eq => <option key={eq} value={eq}>{eq}</option>)}
+                <option value="ADD_NEW_EQUIPMENT" className="font-bold text-indigo-600">+ Ajouter un nouvel appareil...</option>
+              </select>
+              <button
+                type="button"
+                onClick={() => setShowAddEquipmentModal(true)}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg text-sm flex items-center justify-center flex-shrink-0"
+                title="Ajouter un appareil"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1085,6 +1162,190 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
           {editingRecipe ? 'Mettre à jour la recette' : 'Enregistrer la recette'}
         </button>
       </form>
+
+      {/* Modale d'ajout rapide d'appareil */}
+      {showAddEquipmentModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-4">
+            <h3 className="font-bold text-slate-800 text-base">Ajouter un appareil</h3>
+            <form onSubmit={handleSaveNewEquipment} className="space-y-3">
+              <input 
+                type="text"
+                placeholder="Nom de l'appareil (ex: Plancha, Barbecue...)"
+                value={newEquipmentName}
+                onChange={(e) => setNewEquipmentName(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm"
+                autoFocus
+                required
+              />
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAddEquipmentModal(false)}
+                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg text-xs font-semibold"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-xs font-semibold"
+                >
+                  Ajouter
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SettingsView({ seasonDates, setSeasonDates, equipments, setEquipments, setActiveTab }) {
+  const [localDates, setLocalDates] = useState(seasonDates);
+  const [newEquip, setNewEquip] = useState('');
+
+  const months = [
+    { value: 1, label: 'Janvier' }, { value: 2, label: 'Février' }, { value: 3, label: 'Mars' },
+    { value: 4, label: 'Avril' }, { value: 5, label: 'Mai' }, { value: 6, label: 'Juin' },
+    { value: 7, label: 'Juillet' }, { value: 8, label: 'Août' }, { value: 9, label: 'Septembre' },
+    { value: 10, label: 'Octobre' }, { value: 11, label: 'Novembre' }, { value: 12, label: 'Décembre' }
+  ];
+
+  const handleDateChange = (season, field, value) => {
+    setLocalDates({
+      ...localDates,
+      [season]: {
+        ...localDates[season],
+        [field]: parseInt(value, 10)
+      }
+    });
+  };
+
+  const handleSaveSeasons = (e) => {
+    e.preventDefault();
+    setSeasonDates(localDates);
+    alert('Dates des saisons mises à jour avec succès !');
+    setActiveTab('menu');
+  };
+
+  const handleAddEquipment = (e) => {
+    e.preventDefault();
+    if (!newEquip.trim()) return;
+    const trimmed = newEquip.trim();
+    if (!equipments.includes(trimmed)) {
+      setEquipments([...equipments, trimmed]);
+    }
+    setNewEquip('');
+  };
+
+  const handleDeleteEquipment = (eqToDelete) => {
+    if (equipments.length <= 1) {
+      alert("Vous devez garder au moins un appareil.");
+      return;
+    }
+    setEquipments(equipments.filter(e => e !== eqToDelete));
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 max-w-2xl mx-auto space-y-6">
+      <div>
+        <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2 mb-1">
+          <Settings className="w-5 h-5 text-indigo-600" /> Configuration des Saisons et Appareils
+        </h2>
+        <p className="text-xs text-slate-500">
+          Ajustez précisément les dates de début et de fin de chaque saison pour un filtrage au jour près, et gérez votre liste d'appareils de cuisson.
+        </p>
+      </div>
+
+      <form onSubmit={handleSaveSeasons} className="space-y-4 border-b border-slate-200 pb-6">
+        <h3 className="text-xs font-bold text-slate-700 uppercase">Dates des Saisons (au jour près)</h3>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {SEASONS_LIST.map(season => {
+            const bounds = localDates[season] || { startMonth: 1, startDay: 1, endMonth: 1, endDay: 1 };
+            return (
+              <div key={season} className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
+                <span className="font-bold text-xs text-indigo-700 uppercase block">{season}</span>
+                
+                <div className="text-[11px] text-slate-600 font-medium">Début :</div>
+                <div className="flex gap-2">
+                  <input 
+                    type="number" min="1" max="31" 
+                    value={bounds.startDay}
+                    onChange={(e) => handleDateChange(season, 'startDay', e.target.value)}
+                    className="w-16 bg-white border border-slate-300 rounded-lg p-1.5 text-xs text-center"
+                    placeholder="Jour"
+                  />
+                  <select
+                    value={bounds.startMonth}
+                    onChange={(e) => handleDateChange(season, 'startMonth', e.target.value)}
+                    className="flex-1 bg-white border border-slate-300 rounded-lg p-1.5 text-xs"
+                  >
+                    {months.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+                  </select>
+                </div>
+
+                <div className="text-[11px] text-slate-600 font-medium pt-1">Fin :</div>
+                <div className="flex gap-2">
+                  <input 
+                    type="number" min="1" max="31" 
+                    value={bounds.endDay}
+                    onChange={(e) => handleDateChange(season, 'endDay', e.target.value)}
+                    className="w-16 bg-white border border-slate-300 rounded-lg p-1.5 text-xs text-center"
+                    placeholder="Jour"
+                  />
+                  <select
+                    value={bounds.endMonth}
+                    onChange={(e) => handleDateChange(season, 'endMonth', e.target.value)}
+                    className="flex-1 bg-white border border-slate-300 rounded-lg p-1.5 text-xs"
+                  >
+                    {months.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+                  </select>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <button 
+          type="submit"
+          className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-xl text-xs transition-colors shadow-sm"
+        >
+          Enregistrer les dates des saisons
+        </button>
+      </form>
+
+      {/* Gestion globale des appareils */}
+      <div className="space-y-4">
+        <h3 className="text-xs font-bold text-slate-700 uppercase">Liste des Appareils disponibles</h3>
+        <form onSubmit={handleAddEquipment} className="flex gap-2">
+          <input 
+            type="text" 
+            placeholder="Nouvel appareil (ex: Pierre à pizza...)" 
+            value={newEquip}
+            onChange={(e) => setNewEquip(e.target.value)}
+            className="flex-1 bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm"
+          />
+          <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-1">
+            <Plus className="w-4 h-4" /> Ajouter
+          </button>
+        </form>
+
+        <div className="flex flex-wrap gap-2 pt-2">
+          {equipments.map(eq => (
+            <span key={eq} className="bg-slate-100 border border-slate-200 text-slate-800 text-xs px-3 py-1.5 rounded-lg font-medium flex items-center gap-2">
+              {eq}
+              <button 
+                type="button"
+                onClick={() => handleDeleteEquipment(eq)}
+                className="text-slate-400 hover:text-red-600"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </span>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -1405,7 +1666,7 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
           <div>
             <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Ingrédients</h3>
             <ul className="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-1.5">
-              {recipe.ingredients.map((ing, idx) => (
+              {recipe.ingredients.key ? null : recipe.ingredients.map((ing, idx) => (
                 <li key={idx} className="text-sm text-slate-800 flex items-center gap-2 list-none">
                   <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full inline-block mr-2"></span>
                   {ing}
@@ -1434,4 +1695,3 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
     </div>
   );
 }
-
