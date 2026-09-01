@@ -3,20 +3,20 @@ import { Plus, List, Calendar, Trash2, Utensils, Info, Tag, Sun, Settings, Link 
 import { supabase } from './supabaseClient';
 
 const DEFAULT_RECIPES = [
-  { id: '1', name: 'Poêlée de blé façon risotto aux champignons', carb: 'Blé', equipment: ['Poêle'], season: 'Toutes', type: 'text', instructions: 'Faire revenir les champignons. Ajouter le blé, puis le bouillon louche par louche jusqu\'à absorption.', ingredients: ['250g de blé', '500g de champignons', '1 oignon', 'Bouillon de volaille', 'Crème liquide'], category: 'repas' },
-  { id: '2', name: 'Couscous express aux légumes et pois chiches', carb: 'Semoule', equipment: ['Cookeo'], season: 'Toutes', type: 'text', instructions: 'Mettre les légumes coupés, les pois chiches, les épices et l\'eau. Cuisson sous pression 10 min. Préparer la semoule à part.', ingredients: ['300g de semoule', '1 boîte de pois chiches', '3 carottes', '2 courgettes', 'Épices à couscous'], category: 'repas' },
-  { id: '3', name: 'Dhal de lentilles et riz basmati', carb: 'Riz', equipment: ['Casserole'], season: 'Toutes', type: 'link', url: 'https://www.marmiton.org/recettes/recette_dhal-de-lentilles-corail_345759.aspx', ingredients: ['250g de lentilles corail', '200g de riz basmati', '400ml de lait de coco', 'Curry', '1 oignon'], category: 'repas' },
-  { id: '4', name: 'Pommes de terre rôties et poisson', carb: 'Pommes de terre', equipment: ['Airfryer'], season: 'Toutes', type: 'text', instructions: 'Couper les pdt en dés, filet d\'huile, 20 min à 200°C à l\'Airfryer. Ajouter le poisson les 8 dernières minutes.', ingredients: ['800g de pommes de terre', '4 filets de poisson blanc', 'Huile d\'olive', 'Herbes de Provence'], category: 'repas' },
-  { id: '5', name: 'Pâtes au pesto et tomates cerises', carb: 'Pâtes', equipment: ['Casserole'], season: 'Été', type: 'text', instructions: 'Cuire les pâtes. Mélanger avec le pesto et des tomates cerises coupées en deux.', ingredients: ['400g de pâtes', '1 pot de pesto', '250g de tomates cerises', 'Parmesan'], category: 'repas' },
-  { id: '6', name: 'Pizza Maison Reine', carb: 'Plaisir', equipment: ['Four'], season: 'Toutes', type: 'text', instructions: 'Étaler la pâte, sauce tomate, jambon, mozza, champignons. Cuire 15 min à 220°C.', ingredients: ['1 pâte à pizza', 'Sauce tomate', '4 tranches de jambon', '2 boules de mozzarella', 'Champignons de Paris'], category: 'repas' },
-  { id: '7', name: 'Poulet coco et riz', carb: 'Riz', equipment: ['Cookeo'], season: 'Toutes', type: 'text', instructions: 'Faire dorer le poulet. Ajouter lait de coco et curry. Cuisson 8 min.', ingredients: ['4 blancs de poulet', '250g de riz', '400ml de lait de coco', 'Curry en poudre'], category: 'repas' },
-  { id: '8', name: 'Gratin de potiron / chou-fleur', carb: 'Pommes de terre', equipment: ['Four'], season: 'Hiver', type: 'text', instructions: 'Cuire le chou-fleur ou potiron. Mélanger crème, muscade, gruyère. Cuire 30 min au four.', ingredients: ['1 chou-fleur ou potiron', '50cl de crème liquide', 'Gruyère râpé', 'Muscade'], category: 'repas' },
-  { id: '9', name: 'Tian de courgettes et tomates', carb: 'Plaisir', equipment: ['Four'], season: 'Été', type: 'text', instructions: 'Trancher courgettes et tomates en rondelles, alterner dans un plat, herbes de Provence, huile d\'olive, 45 min au four.', ingredients: ['3 courgettes', '4 tomates', 'Huile d\'olive', 'Herbes de Provence', 'Ail'], category: 'repas' },
-  { id: '10', name: 'Soupe de chou et lardons', carb: 'Pommes de terre', equipment: ['Casserole'], season: 'Hiver', type: 'text', instructions: 'Faire bouillir le chou, les pommes de terre et des lardons. Mixer ou servir tel quel.', ingredients: ['1/2 chou vert', '4 pommes de terre', '100g de lardons', 'Bouillon'], category: 'repas' },
-  { id: '11', name: 'Gnocchis Saucisse', carb: 'Pâtes', equipment: ['Poêle'], season: 'Toutes', type: 'text', instructions: 'Faire poêler les gnocchis avec les saucisses coupées en morceaux jusqu\'à dorage.', ingredients: ['500g de gnocchis', '4 saucisses', '1 filet d\'huile d\'olive'], category: 'repas' },
-  { id: '12', name: 'Cordon bleu et Pommes de terre', carb: 'Pommes de terre', equipment: ['Poêle'], season: 'Toutes', type: 'text', instructions: 'Cuire les cordons bleus à la poêle et accompagner de pommes de terre sautées.', ingredients: ['4 cordons bleus', '600g de pommes de terre cuites', 'Beurre'], category: 'repas' },
-  { id: '13', name: 'Gâteau au yaourt moelleux', carb: 'Plaisir', equipment: ['Four'], season: 'Toutes', type: 'text', instructions: 'Mélanger un pot de yaourt, 2 pots de sucre, 3 pots de farine, 1/2 pot d\'huile, 3 œufs et de la levure. Cuire 35 min à 180°C.', ingredients: ['1 yaourt nature', '3 pots de farine', '2 pots de sucre', '1/2 pot d\'huile', '3 œufs', '1 sachet de levure'], category: 'gateau' },
-  { id: '14', name: 'Cookies pépites de chocolat', carb: 'Plaisir', equipment: ['Four'], season: 'Toutes', type: 'text', instructions: 'Mélanger beurre mou, sucre, sucre vanillé, œuf, farine et pépites. Faire des boules et cuire 10 min à 180°C.', ingredients: ['150g de beurre', '100g de sucre', '1 œuf', '220g de farine', '100g de pépites de chocolat'], category: 'gateau' },
+  { id: '1', name: 'Poêlée de blé façon risotto aux champignons', carb: 'Blé', equipment: 'Poêle', season: 'Toutes', type: 'text', instructions: 'Faire revenir les champignons. Ajouter le blé, puis le bouillon louche par louche jusqu\'à absorption.', ingredients: ['250g de blé', '500g de champignons', '1 oignon', 'Bouillon de volaille', 'Crème liquide'], category: 'repas' },
+  { id: '2', name: 'Couscous express aux légumes et pois chiches', carb: 'Semoule', equipment: 'Cookeo', season: 'Toutes', type: 'text', instructions: 'Mettre les légumes coupés, les pois chiches, les épices et l\'eau. Cuisson sous pression 10 min. Préparer la semoule à part.', ingredients: ['300g de semoule', '1 boîte de pois chiches', '3 carottes', '2 courgettes', 'Épices à couscous'], category: 'repas' },
+  { id: '3', name: 'Dhal de lentilles et riz basmati', carb: 'Riz', equipment: 'Casserole', season: 'Toutes', type: 'link', url: 'https://www.marmiton.org/recettes/recette_dhal-de-lentilles-corail_345759.aspx', ingredients: ['250g de lentilles corail', '200g de riz basmati', '400ml de lait de coco', 'Curry', '1 oignon'], category: 'repas' },
+  { id: '4', name: 'Pommes de terre rôties et poisson', carb: 'Pommes de terre', equipment: 'Airfryer', season: 'Toutes', type: 'text', instructions: 'Couper les pdt en dés, filet d\'huile, 20 min à 200°C à l\'Airfryer. Ajouter le poisson les 8 dernières minutes.', ingredients: ['800g de pommes de terre', '4 filets de poisson blanc', 'Huile d\'olive', 'Herbes de Provence'], category: 'repas' },
+  { id: '5', name: 'Pâtes au pesto et tomates cerises', carb: 'Pâtes', equipment: 'Casserole', season: 'Été', type: 'text', instructions: 'Cuire les pâtes. Mélanger avec le pesto et des tomates cerises coupées en deux.', ingredients: ['400g de pâtes', '1 pot de pesto', '250g de tomates cerises', 'Parmesan'], category: 'repas' },
+  { id: '6', name: 'Pizza Maison Reine', carb: 'Plaisir', equipment: 'Four', season: 'Toutes', type: 'text', instructions: 'Étaler la pâte, sauce tomate, jambon, mozza, champignons. Cuire 15 min à 220°C.', ingredients: ['1 pâte à pizza', 'Sauce tomate', '4 tranches de jambon', '2 boules de mozzarella', 'Champignons de Paris'], category: 'repas' },
+  { id: '7', name: 'Poulet coco et riz', carb: 'Riz', equipment: 'Cookeo', season: 'Toutes', type: 'text', instructions: 'Faire dorer le poulet. Ajouter lait de coco et curry. Cuisson 8 min.', ingredients: ['4 blancs de poulet', '250g de riz', '400ml de lait de coco', 'Curry en poudre'], category: 'repas' },
+  { id: '8', name: 'Gratin de potiron / chou-fleur', carb: 'Pommes de terre', equipment: 'Four', season: 'Hiver', type: 'text', instructions: 'Cuire le chou-fleur ou potiron. Mélanger crème, muscade, gruyère. Cuire 30 min au four.', ingredients: ['1 chou-fleur ou potiron', '50cl de crème liquide', 'Gruyère râpé', 'Muscade'], category: 'repas' },
+  { id: '9', name: 'Tian de courgettes et tomates', carb: 'Plaisir', equipment: 'Four', season: 'Été', type: 'text', instructions: 'Trancher courgettes et tomates en rondelles, alterner dans un plat, herbes de Provence, huile d\'olive, 45 min au four.', ingredients: ['3 courgettes', '4 tomates', 'Huile d\'olive', 'Herbes de Provence', 'Ail'], category: 'repas' },
+  { id: '10', name: 'Soupe de chou et lardons', carb: 'Pommes de terre', equipment: 'Casserole', season: 'Hiver', type: 'text', instructions: 'Faire bouillir le chou, les pommes de terre et des lardons. Mixer ou servir tel quel.', ingredients: ['1/2 chou vert', '4 pommes de terre', '100g de lardons', 'Bouillon'], category: 'repas' },
+  { id: '11', name: 'Gnocchis Saucisse', carb: 'Pâtes', equipment: 'Poêle', season: 'Toutes', type: 'text', instructions: 'Faire poêler les gnocchis avec les saucisses coupées en morceaux jusqu\'à dorage.', ingredients: ['500g de gnocchis', '4 saucisses', '1 filet d\'huile d\'olive'], category: 'repas' },
+  { id: '12', name: 'Cordon bleu et Pommes de terre', carb: 'Pommes de terre', equipment: 'Poêle', season: 'Toutes', type: 'text', instructions: 'Cuire les cordons bleus à la poêle et accompagner de pommes de terre sautées.', ingredients: ['4 cordons bleus', '600g de pommes de terre cuites', 'Beurre'], category: 'repas' },
+  { id: '13', name: 'Gâteau au yaourt moelleux', carb: 'Plaisir', equipment: 'Four', season: 'Toutes', type: 'text', instructions: 'Mélanger un pot de yaourt, 2 pots de sucre, 3 pots de farine, 1/2 pot d\'huile, 3 œufs et de la levure. Cuire 35 min à 180°C.', ingredients: ['1 yaourt nature', '3 pots de farine', '2 pots de sucre', '1/2 pot d\'huile', '3 œufs', '1 sachet de levure'], category: 'gateau' },
+  { id: '14', name: 'Cookies pépites de chocolat', carb: 'Plaisir', equipment: 'Four', season: 'Toutes', type: 'text', instructions: 'Mélanger beurre mou, sucre, sucre vanillé, œuf, farine et pépites. Faites des boules et cuire 10 min à 180°C.', ingredients: ['150g de beurre', '100g de sucre', '1 œuf', '220g de farine', '100g de pépites de chocolat'], category: 'gateau' },
 ];
 
 const INITIAL_EQUIPMENTS = ['Thermomix', 'Cookeo', 'Poêle', 'Four', 'Casserole', 'Airfryer', 'Autre appareil', 'Sans Cuisson'];
@@ -25,11 +25,12 @@ const SEASONS_LIST = ['Printemps', 'Été', 'Automne', 'Hiver'];
 const STORAGE_ZONES = ['Placard', 'Frigo', 'Congélateur'];
 
 const getCurrentSeason = () => {
-  const month = new Date().getMonth();
-  if (month >= 2 && month <= 4) return 'Printemps';
-  if (month >= 5 && month <= 7) return 'Été';
+  const month = new Date().getMonth(); // 0 = Janvier, 8 = Septembre
+  // Septembre (8), Octobre (9), Novembre (10) -> Automne
   if (month >= 8 && month <= 10) return 'Automne';
-  return 'Hiver';
+  if (month >= 11 || month <= 1) return 'Hiver';
+  if (month >= 2 && month <= 4) return 'Printemps';
+  return 'Été';
 };
 
 const recipeMatchesSeason = (seasonValue, targetSeason) => {
@@ -80,10 +81,9 @@ export default function App() {
       if (data && data.data) {
         const saved = data.data;
         if (saved.recipes) {
-          // Migration des anciennes recettes ayant un equipment string unique vers un tableau
           const migratedRecipes = saved.recipes.map(r => ({
             ...r,
-            equipment: Array.isArray(r.equipment) ? r.equipment : [r.equipment || 'Four']
+            equipment: Array.isArray(r.equipment) ? r.equipment[0] : (r.equipment || 'Four')
           }));
           setRecipes(migratedRecipes);
         }
@@ -350,9 +350,7 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
     if (!val || val === 'restes') return;
     const r = recipes.find(x => x.id === val);
     if (r && r.equipment) {
-      r.equipment.forEach(eq => {
-        equipmentCounts[eq] = (equipmentCounts[eq] || 0) + 1;
-      });
+      equipmentCounts[r.equipment] = (equipmentCounts[r.equipment] || 0) + 1;
     }
   });
 
@@ -379,20 +377,19 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
       if (possibleRecipes.length === 0) return;
 
       possibleRecipes.sort((a, b) => {
-        const countA = Math.max(...(a.equipment || ['']).map(eq => tempEquipCounts[eq] || 0));
-        const countB = Math.max(...(b.equipment || ['']).map(eq => tempEquipCounts[eq] || 0));
+        const countA = tempEquipCounts[a.equipment] || 0;
+        const countB = tempEquipCounts[b.equipment] || 0;
         return countA - countB;
       });
 
-      const getMinUsageForRecipe = (r) => Math.min(...(r.equipment || ['']).map(eq => tempEquipCounts[eq] || 0));
-      const minUsage = getMinUsageForRecipe(possibleRecipes[0]);
-      const bestCandidates = possibleRecipes.filter(r => getMinUsageForRecipe(r) === minUsage);
+      const minUsage = tempEquipCounts[possibleRecipes[0].equipment] || 0;
+      const bestCandidates = possibleRecipes.filter(r => (tempEquipCounts[r.equipment] || 0) === minUsage);
       const picked = bestCandidates[Math.floor(Math.random() * bestCandidates.length)];
       
       newMenu[day.key] = picked.id;
-      (picked.equipment || []).forEach(eq => {
-        tempEquipCounts[eq] = (tempEquipCounts[eq] || 0) + 1;
-      });
+      if (picked.equipment) {
+        tempEquipCounts[picked.equipment] = (tempEquipCounts[picked.equipment] || 0) + 1;
+      }
     });
 
     setMenu(newMenu);
@@ -517,7 +514,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
             {lunchRecipe && (
               <div className="flex justify-between items-center pt-1">
                 <span className="text-[11px] text-slate-500 flex items-center gap-1 font-medium">
-                  <Settings className="w-3 h-3 text-slate-400" /> {(lunchRecipe.equipment || []).join(', ')}
+                  <Settings className="w-3 h-3 text-slate-400" /> {lunchRecipe.equipment}
                 </span>
                 <button 
                   onClick={() => setViewingRecipe(lunchRecipe)}
@@ -560,7 +557,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
             {dinnerRecipe && (
               <div className="flex justify-between items-center pt-1">
                 <span className="text-[11px] text-slate-500 flex items-center gap-1 font-medium">
-                  <Settings className="w-3 h-3 text-slate-400" /> {(dinnerRecipe.equipment || []).join(', ')}
+                  <Settings className="w-3 h-3 text-slate-400" /> {dinnerRecipe.equipment}
                 </span>
                 <button 
                   onClick={() => setViewingRecipe(dinnerRecipe)}
@@ -583,7 +580,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
 
   const filteredRecipes = recipes.filter(r => {
     if (filterSeason !== 'Tous' && !recipeMatchesSeason(r.season, filterSeason)) return false;
-    if (filterEquip !== 'Tous' && !(r.equipment || []).includes(filterEquip)) return false;
+    if (filterEquip !== 'Tous' && r.equipment !== filterEquip) return false;
     return true;
   });
 
@@ -647,7 +644,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
 
               <div className="flex flex-wrap gap-1.5 mb-3">
                 <span className="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded flex items-center gap-1 font-medium">
-                  <Settings className="w-3 h-3 text-slate-400" /> {(recipe.equipment || []).join(', ')}
+                  <Settings className="w-3 h-3 text-slate-400" /> {recipe.equipment}
                 </span>
                 <span className={`text-[11px] px-2 py-0.5 rounded font-medium flex items-center gap-1
                   ${recipe.season === currentSeason ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-slate-100 text-slate-600'}
@@ -785,7 +782,7 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
 
                   {selectedRecipe && (
                     <div className="flex justify-between items-center pt-2 border-t border-slate-100">
-                      <span className="text-xs text-slate-600 font-medium">Appareil : {(selectedRecipe.equipment || []).join(', ')}</span>
+                      <span className="text-xs text-slate-600 font-medium">Appareil : {selectedRecipe.equipment}</span>
                       <button 
                         onClick={() => setViewingRecipe(selectedRecipe)}
                         className="text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded transition-colors flex items-center gap-1"
@@ -818,8 +815,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
   const [carb, setCarb] = useState('Plaisir');
   const [customCarb, setCustomCarb] = useState('');
   
-  // Équipements sélectionnés pour la recette (ex: ['Thermomix', 'Four'])
-  const [selectedEquipments, setSelectedEquipments] = useState(['Four']);
+  const [equipment, setEquipment] = useState('Four');
   const [newEquipName, setNewEquipName] = useState('');
   const [showNewEquipInput, setShowNewEquipInput] = useState(false);
 
@@ -840,7 +836,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
         setCarb('Autre');
         setCustomCarb(editingRecipe.carb);
       }
-      setSelectedEquipments(editingRecipe.equipment || ['Four']);
+      setEquipment(editingRecipe.equipment || 'Four');
       setCategory(editingRecipe.category || 'repas');
       setUrl(editingRecipe.url || '');
       setImage(editingRecipe.image || '');
@@ -863,16 +859,6 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
     }
   }, [editingRecipe]);
 
-  const handleEquipmentToggle = (eq) => {
-    if (selectedEquipments.includes(eq)) {
-      if (selectedEquipments.length > 1) {
-        setSelectedEquipments(selectedEquipments.filter(item => item !== eq));
-      }
-    } else {
-      setSelectedEquipments([...selectedEquipments, eq]);
-    }
-  };
-
   const handleCreateNewEquipment = (e) => {
     e.preventDefault();
     if (!newEquipName.trim()) return;
@@ -880,9 +866,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
     if (!equipmentsList.includes(trimmed)) {
       setEquipmentsList([...equipmentsList, trimmed]);
     }
-    if (!selectedEquipments.includes(trimmed)) {
-      setSelectedEquipments([...selectedEquipments, trimmed]);
-    }
+    setEquipment(trimmed);
     setNewEquipName('');
     setShowNewEquipInput(false);
   };
@@ -933,7 +917,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
     const recipeData = {
       name,
       carb: finalCarb,
-      equipment: selectedEquipments.length > 0 ? selectedEquipments : ['Four'],
+      equipment,
       season: finalSeason,
       category,
       url,
@@ -1026,62 +1010,48 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
           )}
 
           <div className={category === 'gateau' ? 'col-span-full' : ''}>
-            <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Appareil(s) utilisé(s) (Sélection multiple)</label>
-            <div className="bg-slate-50 border border-slate-300 rounded-lg p-3 space-y-2 max-h-40 overflow-y-auto">
-              <div className="flex flex-wrap gap-2">
-                {equipmentsList.map(eq => {
-                  const isSelected = selectedEquipments.includes(eq);
-                  return (
-                    <button
-                      type="button"
-                      key={eq}
-                      onClick={() => handleEquipmentToggle(eq)}
-                      className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors flex items-center gap-1.5
-                        ${isSelected ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'}
-                      `}
-                    >
-                      {isSelected && <Check className="w-3 h-3" />}
-                      {eq}
-                    </button>
-                  );
-                })}
-              </div>
+            <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Appareil principal</label>
+            <select 
+              value={equipment}
+              onChange={(e) => setEquipment(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500 mb-2"
+            >
+              {equipmentsList.map(eq => <option key={eq} value={eq}>{eq}</option>)}
+            </select>
 
-              {!showNewEquipInput ? (
+            {!showNewEquipInput ? (
+              <button
+                type="button"
+                onClick={() => setShowNewEquipInput(true)}
+                className="text-xs text-indigo-600 font-semibold hover:underline flex items-center gap-1"
+              >
+                <Plus className="w-3.5 h-3.5" /> Rajouter un appareil (facultatif)
+              </button>
+            ) : (
+              <div className="flex gap-2 mt-2">
+                <input 
+                  type="text"
+                  placeholder="Nom du nouvel appareil..."
+                  value={newEquipName}
+                  onChange={(e) => setNewEquipName(e.target.value)}
+                  className="flex-1 bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs text-slate-900"
+                />
                 <button
                   type="button"
-                  onClick={() => setShowNewEquipInput(true)}
-                  className="text-xs text-indigo-600 font-semibold hover:underline mt-1 flex items-center gap-1"
+                  onClick={handleCreateNewEquipment}
+                  className="bg-indigo-600 text-white text-xs px-3 py-1 rounded-lg font-medium"
                 >
-                  <Plus className="w-3.5 h-3.5" /> Créer un nouvel appareil
+                  Ajouter
                 </button>
-              ) : (
-                <div className="flex gap-2 mt-2 pt-2 border-t border-slate-200">
-                  <input 
-                    type="text"
-                    placeholder="Nom du nouvel appareil..."
-                    value={newEquipName}
-                    onChange={(e) => setNewEquipName(e.target.value)}
-                    className="flex-1 bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs text-slate-900"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleCreateNewEquipment}
-                    className="bg-indigo-600 text-white text-xs px-3 py-1 rounded-lg font-medium"
-                  >
-                    Ajouter
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowNewEquipInput(false)}
-                    className="bg-slate-200 text-slate-700 text-xs px-2 py-1 rounded-lg"
-                  >
-                    ✕
-                  </button>
-                </div>
-              )}
-            </div>
-            <p className="text-[11px] text-slate-500 mt-1">Sélectionnés : {selectedEquipments.join(', ')}</p>
+                <button
+                  type="button"
+                  onClick={() => setShowNewEquipInput(false)}
+                  className="bg-slate-200 text-slate-700 text-xs px-2 py-1 rounded-lg"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -1455,7 +1425,7 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
               {recipe.category === 'gateau' ? '🍰 Gâteau' : recipe.carb}
             </span>
             <span className="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md font-medium">
-              {(recipe.equipment || []).join(', ')}
+              {recipe.equipment}
             </span>
             <span className="text-xs bg-amber-50 text-amber-700 px-2.5 py-1 rounded-md font-medium">
               {recipe.season}
