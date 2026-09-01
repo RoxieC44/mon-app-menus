@@ -3,20 +3,20 @@ import { Plus, List, Calendar, Trash2, Utensils, Info, Tag, Sun, Settings, Link 
 import { supabase } from './supabaseClient';
 
 const DEFAULT_RECIPES = [
-  { id: '1', name: 'Poêlée de blé façon risotto aux champignons', carb: 'Blé', equipment: 'Poêle', season: 'Toutes', type: 'text', instructions: 'Faire revenir les champignons. Ajouter le blé, puis le bouillon louche par louche jusqu\'à absorption.', ingredients: ['250g de blé', '500g de champignons', '1 oignon', 'Bouillon de volaille', 'Crème liquide'], category: 'repas' },
-  { id: '2', name: 'Couscous express aux légumes et pois chiches', carb: 'Semoule', equipment: 'Cookeo', season: 'Toutes', type: 'text', instructions: 'Mettre les légumes coupés, les pois chiches, les épices et l\'eau. Cuisson sous pression 10 min. Préparer la semoule à part.', ingredients: ['300g de semoule', '1 boîte de pois chiches', '3 carottes', '2 courgettes', 'Épices à couscous'], category: 'repas' },
-  { id: '3', name: 'Dhal de lentilles et riz basmati', carb: 'Riz', equipment: 'Casserole', season: 'Toutes', type: 'link', url: 'https://www.marmiton.org/recettes/recette_dhal-de-lentilles-corail_345759.aspx', ingredients: ['250g de lentilles corail', '200g de riz basmati', '400ml de lait de coco', 'Curry', '1 oignon'], category: 'repas' },
-  { id: '4', name: 'Pommes de terre rôties et poisson', carb: 'Pommes de terre', equipment: 'Airfryer', season: 'Toutes', type: 'text', instructions: 'Couper les pdt en dés, filet d\'huile, 20 min à 200°C à l\'Airfryer. Ajouter le poisson les 8 dernières minutes.', ingredients: ['800g de pommes de terre', '4 filets de poisson blanc', 'Huile d\'olive', 'Herbes de Provence'], category: 'repas' },
-  { id: '5', name: 'Pâtes au pesto et tomates cerises', carb: 'Pâtes', equipment: 'Casserole', season: 'Été', type: 'text', instructions: 'Cuire les pâtes. Mélanger avec le pesto et des tomates cerises coupées en deux.', ingredients: ['400g de pâtes', '1 pot de pesto', '250g de tomates cerises', 'Parmesan'], category: 'repas' },
-  { id: '6', name: 'Pizza Maison Reine', carb: 'Plaisir', equipment: 'Four', season: 'Toutes', type: 'text', instructions: 'Étaler la pâte, sauce tomate, jambon, mozza, champignons. Cuire 15 min à 220°C.', ingredients: ['1 pâte à pizza', 'Sauce tomate', '4 tranches de jambon', '2 boules de mozzarella', 'Champignons de Paris'], category: 'repas' },
-  { id: '7', name: 'Poulet coco et riz', carb: 'Riz', equipment: 'Cookeo', season: 'Toutes', type: 'text', instructions: 'Faire dorer le poulet. Ajouter lait de coco et curry. Cuisson 8 min.', ingredients: ['4 blancs de poulet', '250g de riz', '400ml de lait de coco', 'Curry en poudre'], category: 'repas' },
-  { id: '8', name: 'Gratin de potiron / chou-fleur', carb: 'Pommes de terre', equipment: 'Four', season: 'Hiver', type: 'text', instructions: 'Cuire le chou-fleur ou potiron. Mélanger crème, muscade, gruyère. Cuire 30 min au four.', ingredients: ['1 chou-fleur ou potiron', '50cl de crème liquide', 'Gruyère râpé', 'Muscade'], category: 'repas' },
-  { id: '9', name: 'Tian de courgettes et tomates', carb: 'Plaisir', equipment: 'Four', season: 'Été', type: 'text', instructions: 'Trancher courgettes et tomates en rondelles, alterner dans un plat, herbes de Provence, huile d\'olive, 45 min au four.', ingredients: ['3 courgettes', '4 tomates', 'Huile d\'olive', 'Herbes de Provence', 'Ail'], category: 'repas' },
-  { id: '10', name: 'Soupe de chou et lardons', carb: 'Pommes de terre', equipment: 'Casserole', season: 'Hiver', type: 'text', instructions: 'Faire bouillir le chou, les pommes de terre et des lardons. Mixer ou servir tel quel.', ingredients: ['1/2 chou vert', '4 pommes de terre', '100g de lardons', 'Bouillon'], category: 'repas' },
-  { id: '11', name: 'Gnocchis Saucisse', carb: 'Pâtes', equipment: 'Poêle', season: 'Toutes', type: 'text', instructions: 'Faire poêler les gnocchis avec les saucisses coupées en morceaux jusqu\'à dorage.', ingredients: ['500g de gnocchis', '4 saucisses', '1 filet d\'huile d\'olive'], category: 'repas' },
-  { id: '12', name: 'Cordon bleu et Pommes de terre', carb: 'Pommes de terre', equipment: 'Poêle', season: 'Toutes', type: 'text', instructions: 'Cuire les cordons bleus à la poêle et accompagner de pommes de terre sautées.', ingredients: ['4 cordons bleus', '600g de pommes de terre cuites', 'Beurre'], category: 'repas' },
-  { id: '13', name: 'Gâteau au yaourt moelleux', carb: 'Plaisir', equipment: 'Four', season: 'Toutes', type: 'text', instructions: 'Mélanger un pot de yaourt, 2 pots de sucre, 3 pots de farine, 1/2 pot d\'huile, 3 œufs et de la levure. Cuire 35 min à 180°C.', ingredients: ['1 yaourt nature', '3 pots de farine', '2 pots de sucre', '1/2 pot d\'huile', '3 œufs', '1 sachet de levure'], category: 'gateau' },
-  { id: '14', name: 'Cookies pépites de chocolat', carb: 'Plaisir', equipment: 'Four', season: 'Toutes', type: 'text', instructions: 'Mélanger beurre mou, sucre, sucre vanillé, œuf, farine et pépites. Faire des boules et cuire 10 min à 180°C.', ingredients: ['150g de beurre', '100g de sucre', '1 œuf', '220g de farine', '100g de pépites de chocolat'], category: 'gateau' },
+  { id: '1', name: 'Poêlée de blé façon risotto aux champignons', carb: 'Blé', equipment: ['Poêle'], season: 'Toutes', type: 'text', instructions: 'Faire revenir les champignons. Ajouter le blé, puis le bouillon louche par louche jusqu\'à absorption.', ingredients: ['250g de blé', '500g de champignons', '1 oignon', 'Bouillon de volaille', 'Crème liquide'], category: 'repas' },
+  { id: '2', name: 'Couscous express aux légumes et pois chiches', carb: 'Semoule', equipment: ['Cookeo'], season: 'Toutes', type: 'text', instructions: 'Mettre les légumes coupés, les pois chiches, les épices et l\'eau. Cuisson sous pression 10 min. Préparer la semoule à part.', ingredients: ['300g de semoule', '1 boîte de pois chiches', '3 carottes', '2 courgettes', 'Épices à couscous'], category: 'repas' },
+  { id: '3', name: 'Dhal de lentilles et riz basmati', carb: 'Riz', equipment: ['Casserole'], season: 'Toutes', type: 'link', url: 'https://www.marmiton.org/recettes/recette_dhal-de-lentilles-corail_345759.aspx', ingredients: ['250g de lentilles corail', '200g de riz basmati', '400ml de lait de coco', 'Curry', '1 oignon'], category: 'repas' },
+  { id: '4', name: 'Pommes de terre rôties et poisson', carb: 'Pommes de terre', equipment: ['Airfryer'], season: 'Toutes', type: 'text', instructions: 'Couper les pdt en dés, filet d\'huile, 20 min à 200°C à l\'Airfryer. Ajouter le poisson les 8 dernières minutes.', ingredients: ['800g de pommes de terre', '4 filets de poisson blanc', 'Huile d\'olive', 'Herbes de Provence'], category: 'repas' },
+  { id: '5', name: 'Pâtes au pesto et tomates cerises', carb: 'Pâtes', equipment: ['Casserole'], season: 'Été', type: 'text', instructions: 'Cuire les pâtes. Mélanger avec le pesto et des tomates cerises coupées en deux.', ingredients: ['400g de pâtes', '1 pot de pesto', '250g de tomates cerises', 'Parmesan'], category: 'repas' },
+  { id: '6', name: 'Pizza Maison Reine', carb: 'Plaisir', equipment: ['Four'], season: 'Toutes', type: 'text', instructions: 'Étaler la pâte, sauce tomate, jambon, mozza, champignons. Cuire 15 min à 220°C.', ingredients: ['1 pâte à pizza', 'Sauce tomate', '4 tranches de jambon', '2 boules de mozzarella', 'Champignons de Paris'], category: 'repas' },
+  { id: '7', name: 'Poulet coco et riz', carb: 'Riz', equipment: ['Cookeo'], season: 'Toutes', type: 'text', instructions: 'Faire dorer le poulet. Ajouter lait de coco et curry. Cuisson 8 min.', ingredients: ['4 blancs de poulet', '250g de riz', '400ml de lait de coco', 'Curry en poudre'], category: 'repas' },
+  { id: '8', name: 'Gratin de potiron / chou-fleur', carb: 'Pommes de terre', equipment: ['Four'], season: 'Hiver', type: 'text', instructions: 'Cuire le chou-fleur ou potiron. Mélanger crème, muscade, gruyère. Cuire 30 min au four.', ingredients: ['1 chou-fleur ou potiron', '50cl de crème liquide', 'Gruyère râpé', 'Muscade'], category: 'repas' },
+  { id: '9', name: 'Tian de courgettes et tomates', carb: 'Plaisir', equipment: ['Four'], season: 'Été', type: 'text', instructions: 'Trancher courgettes et tomates en rondelles, alterner dans un plat, herbes de Provence, huile d\'olive, 45 min au four.', ingredients: ['3 courgettes', '4 tomates', 'Huile d\'olive', 'Herbes de Provence', 'Ail'], category: 'repas' },
+  { id: '10', name: 'Soupe de chou et lardons', carb: 'Pommes de terre', equipment: ['Casserole'], season: 'Hiver', type: 'text', instructions: 'Faire bouillir le chou, les pommes de terre et des lardons. Mixer ou servir tel quel.', ingredients: ['1/2 chou vert', '4 pommes de terre', '100g de lardons', 'Bouillon'], category: 'repas' },
+  { id: '11', name: 'Gnocchis Saucisse', carb: 'Pâtes', equipment: ['Poêle'], season: 'Toutes', type: 'text', instructions: 'Faire poêler les gnocchis avec les saucisses coupées en morceaux jusqu\'à dorage.', ingredients: ['500g de gnocchis', '4 saucisses', '1 filet d\'huile d\'olive'], category: 'repas' },
+  { id: '12', name: 'Cordon bleu et Pommes de terre', carb: 'Pommes de terre', equipment: ['Poêle'], season: 'Toutes', type: 'text', instructions: 'Cuire les cordons bleus à la poêle et accompagner de pommes de terre sautées.', ingredients: ['4 cordons bleus', '600g de pommes de terre cuites', 'Beurre'], category: 'repas' },
+  { id: '13', name: 'Gâteau au yaourt moelleux', carb: 'Plaisir', equipment: ['Four'], season: 'Toutes', type: 'text', instructions: 'Mélanger un pot de yaourt, 2 pots de sucre, 3 pots de farine, 1/2 pot d\'huile, 3 œufs et de la levure. Cuire 35 min à 180°C.', ingredients: ['1 yaourt nature', '3 pots de farine', '2 pots de sucre', '1/2 pot d\'huile', '3 œufs', '1 sachet de levure'], category: 'gateau' },
+  { id: '14', name: 'Cookies pépites de chocolat', carb: 'Plaisir', equipment: ['Four'], season: 'Toutes', type: 'text', instructions: 'Mélanger beurre mou, sucre, sucre vanillé, œuf, farine et pépites. Faire des boules et cuire 10 min à 180°C.', ingredients: ['150g de beurre', '100g de sucre', '1 œuf', '220g de farine', '100g de pépites de chocolat'], category: 'gateau' },
 ];
 
 const INITIAL_EQUIPMENTS = ['Thermomix', 'Cookeo', 'Poêle', 'Four', 'Casserole', 'Airfryer', 'Autre appareil', 'Sans Cuisson'];
@@ -24,35 +24,15 @@ const CARBS = ['Pâtes', 'Pommes de terre', 'Semoule', 'Riz', 'Blé', 'Plaisir',
 const SEASONS_LIST = ['Printemps', 'Été', 'Automne', 'Hiver'];
 const STORAGE_ZONES = ['Placard', 'Frigo', 'Congélateur'];
 
-// Définition des bornes des saisons au jour près (Mois 1-12, Jour 1-31)
-const DEFAULT_SEASON_DATES = {
-  Printemps: { startMonth: 3, startDay: 20, endMonth: 6, endDay: 20 },
-  Été: { startMonth: 6, startDay: 21, endMonth: 9, endDay: 21 },
-  Automne: { startMonth: 9, startDay: 22, endMonth: 12, endDay: 20 },
-  Hiver: { startMonth: 12, startDay: 21, endMonth: 3, endDay: 19 }
+const getCurrentSeason = () => {
+  const month = new Date().getMonth();
+  if (month >= 2 && month <= 4) return 'Printemps';
+  if (month >= 5 && month <= 7) return 'Été';
+  if (month >= 8 && month <= 10) return 'Automne';
+  return 'Hiver';
 };
 
-const getCurrentSeason = (seasonDates = DEFAULT_SEASON_DATES) => {
-  const now = new Date();
-  const currentMonth = now.getMonth() + 1;
-  const currentDay = now.getDate();
-  const currentVal = currentMonth * 100 + currentDay;
-
-  for (const [season, bounds] of Object.entries(seasonDates)) {
-    const startVal = bounds.startMonth * 100 + bounds.startDay;
-    const endVal = bounds.endMonth * 100 + bounds.endDay;
-
-    if (startVal <= endVal) {
-      if (currentVal >= startVal && currentVal <= endVal) return season;
-    } else {
-      // Cas de l'hiver qui chevauche le Nouvel An (ex: 21 déc au 19 mars)
-      if (currentVal >= startVal || currentVal <= endVal) return season;
-    }
-  }
-  return 'Printemps';
-};
-
-const recipeMatchesSeason = (seasonValue, targetSeason, seasonDates) => {
+const recipeMatchesSeason = (seasonValue, targetSeason) => {
   if (targetSeason === 'Tous') return true;
   if (!seasonValue || seasonValue === 'Toutes') return true;
   if (typeof seasonValue !== 'string') return true;
@@ -65,15 +45,12 @@ export default function App() {
   const [viewingRecipe, setViewingRecipe] = useState(null);
   const [editingRecipe, setEditingRecipe] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
+  const currentSeason = getCurrentSeason();
 
   const [loading, setLoading] = useState(true);
 
   const [recipes, setRecipes] = useState(DEFAULT_RECIPES);
-  const [equipments, setEquipments] = useState(INITIAL_EQUIPMENTS);
-  const [seasonDates, setSeasonDates] = useState(DEFAULT_SEASON_DATES);
-
-  const currentSeason = getCurrentSeason(seasonDates);
-
+  const [equipmentsList, setEquipmentsList] = useState(INITIAL_EQUIPMENTS);
   const [menu, setMenu] = useState({
     mondayDinner: '', tuesdayDinner: '', wednesdayDinner: '', thursdayDinner: '', fridayDinner: '', saturdayDinner: '', sundayDinner: '',
     mondayLunch: 'restes', tuesdayLunch: 'restes', wednesdayLunch: '', thursdayLunch: 'restes', fridayLunch: 'restes', saturdayLunch: '', sundayLunch: ''
@@ -102,9 +79,15 @@ export default function App() {
 
       if (data && data.data) {
         const saved = data.data;
-        if (saved.recipes) setRecipes(saved.recipes);
-        if (saved.equipments) setEquipments(saved.equipments);
-        if (saved.seasonDates) setSeasonDates(saved.seasonDates);
+        if (saved.recipes) {
+          // Migration des anciennes recettes ayant un equipment string unique vers un tableau
+          const migratedRecipes = saved.recipes.map(r => ({
+            ...r,
+            equipment: Array.isArray(r.equipment) ? r.equipment : [r.equipment || 'Four']
+          }));
+          setRecipes(migratedRecipes);
+        }
+        if (saved.equipmentsList) setEquipmentsList(saved.equipmentsList);
         if (saved.menu) setMenu(saved.menu);
         if (saved.inventory) {
           const migrated = saved.inventory.map(item => ({
@@ -127,7 +110,7 @@ export default function App() {
     async function saveData() {
       const payload = {
         user_key: 'ma_famille',
-        data: { recipes, equipments, seasonDates, menu, inventory, bakingItems, shoppingChecks }
+        data: { recipes, equipmentsList, menu, inventory, bakingItems, shoppingChecks }
       };
 
       const { data: existing } = await supabase
@@ -150,7 +133,7 @@ export default function App() {
 
     const timer = setTimeout(saveData, 1000);
     return () => clearTimeout(timer);
-  }, [recipes, equipments, seasonDates, menu, inventory, bakingItems, shoppingChecks]);
+  }, [recipes, equipmentsList, menu, inventory, bakingItems, shoppingChecks]);
 
   const addRecipe = (newRecipe) => {
     setRecipes(prev => {
@@ -193,13 +176,9 @@ export default function App() {
               <Sun className="w-3.5 h-3.5" />
               Saison actuelle : {currentSeason}
             </div>
-            <button
-              onClick={() => setActiveTab('settings')}
-              className="text-xs bg-indigo-700 hover:bg-indigo-800 text-white py-1.5 px-3 rounded-full flex items-center gap-1 transition-colors"
-              title="Paramètres & Saisons"
-            >
-               <Settings className="w-3.5 h-3.5" /> Saisons
-            </button>
+            <div className="text-xs bg-indigo-700 py-1.5 px-3 rounded-full opacity-90 hidden md:flex items-center gap-1">
+               <Info className="w-3.5 h-3.5" /> {recipes.length} recettes
+            </div>
           </div>
         </div>
       </header>
@@ -216,9 +195,7 @@ export default function App() {
             setViewingRecipe={setViewingRecipe} 
             setEditingRecipe={setEditingRecipe}
             setActiveTab={setActiveTab}
-            currentSeason={currentSeason}
-            seasonDates={seasonDates}
-            equipments={equipments}
+            currentSeason={currentSeason} 
           />
         )}
         {activeTab === 'baking' && (
@@ -233,14 +210,11 @@ export default function App() {
             setEditingRecipe={setEditingRecipe}
             setActiveTab={setActiveTab}
             currentSeason={currentSeason}
-            seasonDates={seasonDates}
-            equipments={equipments}
           />
         )}
-        {activeTab === 'add' && <AddRecipeForm addRecipe={addRecipe} editingRecipe={editingRecipe} setEditingRecipe={setEditingRecipe} setActiveTab={setActiveTab} setSelectedImage={setSelectedImage} equipments={equipments} setEquipments={setEquipments} />}
+        {activeTab === 'add' && <AddRecipeForm addRecipe={addRecipe} editingRecipe={editingRecipe} setEditingRecipe={setEditingRecipe} setActiveTab={setActiveTab} setSelectedImage={setSelectedImage} equipmentsList={equipmentsList} setEquipmentsList={setEquipmentsList} />}
         {activeTab === 'inventory' && <InventoryManager inventory={inventory} setInventory={setInventory} />}
         {activeTab === 'shopping' && <ShoppingListView menu={menu} recipes={recipes} inventory={inventory} bakingItems={bakingItems} shoppingChecks={shoppingChecks} setShoppingChecks={setShoppingChecks} setActiveTab={setActiveTab} />}
-        {activeTab === 'settings' && <SettingsView seasonDates={seasonDates} setSeasonDates={setSeasonDates} equipments={equipments} setEquipments={setEquipments} setActiveTab={setActiveTab} />}
       </main>
 
       {viewingRecipe && (
@@ -301,7 +275,7 @@ function NavButton({ active, onClick, icon, label }) {
   );
 }
 
-function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, deleteRecipe, setEditingRecipe, setActiveTab, setViewingRecipe, currentSeason, seasonDates, equipments }) {
+function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, deleteRecipe, setEditingRecipe, setActiveTab, setViewingRecipe, currentSeason }) {
   const [subTab, setSubTab] = useState('planning');
 
   return (
@@ -334,8 +308,7 @@ function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, delete
           setEditingRecipe={setEditingRecipe}
           setActiveTab={setActiveTab}
           setViewingRecipe={setViewingRecipe} 
-          currentSeason={currentSeason}
-          seasonDates={seasonDates}
+          currentSeason={currentSeason} 
         />
       ) : (
         <RecipeList 
@@ -346,8 +319,6 @@ function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, delete
           setEditingRecipe={setEditingRecipe}
           setActiveTab={setActiveTab}
           currentSeason={currentSeason}
-          seasonDates={seasonDates}
-          equipments={equipments}
           title="Toutes les recettes de repas"
         />
       )}
@@ -355,7 +326,7 @@ function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, delete
   );
 }
 
-function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, seasonDates }) {
+function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason }) {
   const daysConfig = [
     { key: 'monday', label: 'Lundi', reqCarb: 'Blé' },
     { key: 'tuesday', label: 'Mardi', reqCarb: 'Semoule' },
@@ -370,7 +341,7 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
     return recipes.filter(r => {
       const matchCarb = reqCarb ? r.carb === reqCarb : true;
       if (!matchCarb) return false;
-      return recipeMatchesSeason(r.season, currentSeason, seasonDates);
+      return recipeMatchesSeason(r.season, currentSeason);
     });
   };
 
@@ -378,8 +349,10 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
   Object.values(menu).forEach(val => {
     if (!val || val === 'restes') return;
     const r = recipes.find(x => x.id === val);
-    if (r) {
-      equipmentCounts[r.equipment] = (equipmentCounts[r.equipment] || 0) + 1;
+    if (r && r.equipment) {
+      r.equipment.forEach(eq => {
+        equipmentCounts[eq] = (equipmentCounts[eq] || 0) + 1;
+      });
     }
   });
 
@@ -406,17 +379,20 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
       if (possibleRecipes.length === 0) return;
 
       possibleRecipes.sort((a, b) => {
-        const countA = tempEquipCounts[a.equipment] || 0;
-        const countB = tempEquipCounts[b.equipment] || 0;
+        const countA = Math.max(...(a.equipment || ['']).map(eq => tempEquipCounts[eq] || 0));
+        const countB = Math.max(...(b.equipment || ['']).map(eq => tempEquipCounts[eq] || 0));
         return countA - countB;
       });
 
-      const minUsage = tempEquipCounts[possibleRecipes[0].equipment] || 0;
-      const bestCandidates = possibleRecipes.filter(r => (tempEquipCounts[r.equipment] || 0) === minUsage);
+      const getMinUsageForRecipe = (r) => Math.min(...(r.equipment || ['']).map(eq => tempEquipCounts[eq] || 0));
+      const minUsage = getMinUsageForRecipe(possibleRecipes[0]);
+      const bestCandidates = possibleRecipes.filter(r => getMinUsageForRecipe(r) === minUsage);
       const picked = bestCandidates[Math.floor(Math.random() * bestCandidates.length)];
       
       newMenu[day.key] = picked.id;
-      tempEquipCounts[picked.equipment] = (tempEquipCounts[picked.equipment] || 0) + 1;
+      (picked.equipment || []).forEach(eq => {
+        tempEquipCounts[eq] = (tempEquipCounts[eq] || 0) + 1;
+      });
     });
 
     setMenu(newMenu);
@@ -473,7 +449,6 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
             updateMenu={updateMenu}
             recipes={recipes}
             currentSeason={currentSeason}
-            seasonDates={seasonDates}
             setEditingRecipe={setEditingRecipe}
             setActiveTab={setActiveTab}
             setViewingRecipe={setViewingRecipe}
@@ -484,7 +459,7 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
   );
 }
 
-function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActiveTab, currentSeason, seasonDates, setViewingRecipe }) {
+function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActiveTab, currentSeason, setViewingRecipe }) {
   const lunchKey = `${day.key}Lunch`;
   const dinnerKey = `${day.key}Dinner`;
 
@@ -492,12 +467,12 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
     return recipes.filter(r => {
       const matchCarb = reqCarb ? r.carb === reqCarb : true;
       if (!matchCarb) return false;
-      return recipeMatchesSeason(r.season, currentSeason, seasonDates);
+      return recipeMatchesSeason(r.season, currentSeason);
     });
   };
 
   const dinnerRecipes = getAvailableRecipes(day.reqCarb);
-  const anyRecipes = recipes.filter(r => recipeMatchesSeason(r.season, currentSeason, seasonDates));
+  const anyRecipes = recipes.filter(r => recipeMatchesSeason(r.season, currentSeason));
 
   const lunchVal = menu[lunchKey] || '';
   const dinnerVal = menu[dinnerKey] || '';
@@ -542,7 +517,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
             {lunchRecipe && (
               <div className="flex justify-between items-center pt-1">
                 <span className="text-[11px] text-slate-500 flex items-center gap-1 font-medium">
-                  <Settings className="w-3 h-3 text-slate-400" /> {lunchRecipe.equipment}
+                  <Settings className="w-3 h-3 text-slate-400" /> {(lunchRecipe.equipment || []).join(', ')}
                 </span>
                 <button 
                   onClick={() => setViewingRecipe(lunchRecipe)}
@@ -585,7 +560,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
             {dinnerRecipe && (
               <div className="flex justify-between items-center pt-1">
                 <span className="text-[11px] text-slate-500 flex items-center gap-1 font-medium">
-                  <Settings className="w-3 h-3 text-slate-400" /> {dinnerRecipe.equipment}
+                  <Settings className="w-3 h-3 text-slate-400" /> {(dinnerRecipe.equipment || []).join(', ')}
                 </span>
                 <button 
                   onClick={() => setViewingRecipe(dinnerRecipe)}
@@ -602,13 +577,13 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
   );
 }
 
-function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, seasonDates, equipments, title }) {
+function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, title }) {
   const [filterSeason, setFilterSeason] = useState('Tous');
   const [filterEquip, setFilterEquip] = useState('Tous');
 
   const filteredRecipes = recipes.filter(r => {
-    if (filterSeason !== 'Tous' && !recipeMatchesSeason(r.season, filterSeason, seasonDates)) return false;
-    if (filterEquip !== 'Tous' && r.equipment !== filterEquip) return false;
+    if (filterSeason !== 'Tous' && !recipeMatchesSeason(r.season, filterSeason)) return false;
+    if (filterEquip !== 'Tous' && !(r.equipment || []).includes(filterEquip)) return false;
     return true;
   });
 
@@ -644,7 +619,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
             className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800"
           >
             <option value="Tous">Tous les appareils</option>
-            {equipments.map(eq => <option key={eq} value={eq}>{eq}</option>)}
+            {INITIAL_EQUIPMENTS.map(eq => <option key={eq} value={eq}>{eq}</option>)}
           </select>
         </div>
 
@@ -672,7 +647,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
 
               <div className="flex flex-wrap gap-1.5 mb-3">
                 <span className="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded flex items-center gap-1 font-medium">
-                  <Settings className="w-3 h-3 text-slate-400" /> {recipe.equipment}
+                  <Settings className="w-3 h-3 text-slate-400" /> {(recipe.equipment || []).join(', ')}
                 </span>
                 <span className={`text-[11px] px-2 py-0.5 rounded font-medium flex items-center gap-1
                   ${recipe.season === currentSeason ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-slate-100 text-slate-600'}
@@ -730,7 +705,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
   );
 }
 
-function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, setActiveTab, bakingRecipes, recipes, deleteRecipe, setViewingRecipe, currentSeason, seasonDates, equipments }) {
+function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, setActiveTab, bakingRecipes, recipes, deleteRecipe, setViewingRecipe, currentSeason }) {
   const [subTab, setSubTab] = useState('planning');
 
   const updateBakingItem = (index, recipeId) => {
@@ -810,7 +785,7 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
 
                   {selectedRecipe && (
                     <div className="flex justify-between items-center pt-2 border-t border-slate-100">
-                      <span className="text-xs text-slate-600 font-medium">Appareil : {selectedRecipe.equipment}</span>
+                      <span className="text-xs text-slate-600 font-medium">Appareil : {(selectedRecipe.equipment || []).join(', ')}</span>
                       <button 
                         onClick={() => setViewingRecipe(selectedRecipe)}
                         className="text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded transition-colors flex items-center gap-1"
@@ -832,19 +807,22 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
           setEditingRecipe={setEditingRecipe}
           setActiveTab={setActiveTab}
           currentSeason={currentSeason}
-          seasonDates={seasonDates}
-          equipments={equipments}
         />
       )}
     </div>
   );
 }
 
-function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTab, setSelectedImage, equipments, setEquipments }) {
+function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTab, setSelectedImage, equipmentsList, setEquipmentsList }) {
   const [name, setName] = useState('');
   const [carb, setCarb] = useState('Plaisir');
   const [customCarb, setCustomCarb] = useState('');
-  const [equipment, setEquipment] = useState(equipments[0] || 'Four');
+  
+  // Équipements sélectionnés pour la recette (ex: ['Thermomix', 'Four'])
+  const [selectedEquipments, setSelectedEquipments] = useState(['Four']);
+  const [newEquipName, setNewEquipName] = useState('');
+  const [showNewEquipInput, setShowNewEquipInput] = useState(false);
+
   const [selectedSeasons, setSelectedSeasons] = useState(['Toutes']);
   const [category, setCategory] = useState('repas');
   const [url, setUrl] = useState('');
@@ -852,10 +830,6 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
   const [instructions, setInstructions] = useState('');
   const [ingredientsText, setIngredientsText] = useState('');
   
-  // État pour la modale d'ajout rapide d'appareil
-  const [showAddEquipmentModal, setShowAddEquipmentModal] = useState(false);
-  const [newEquipmentName, setNewEquipmentName] = useState('');
-
   useEffect(() => {
     if (editingRecipe) {
       setName(editingRecipe.name || '');
@@ -866,7 +840,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
         setCarb('Autre');
         setCustomCarb(editingRecipe.carb);
       }
-      setEquipment(editingRecipe.equipment || equipments[0] || 'Four');
+      setSelectedEquipments(editingRecipe.equipment || ['Four']);
       setCategory(editingRecipe.category || 'repas');
       setUrl(editingRecipe.url || '');
       setImage(editingRecipe.image || '');
@@ -889,25 +863,28 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
     }
   }, [editingRecipe]);
 
-  const handleEquipmentSelectChange = (e) => {
-    const val = e.target.value;
-    if (val === 'ADD_NEW_EQUIPMENT') {
-      setShowAddEquipmentModal(true);
+  const handleEquipmentToggle = (eq) => {
+    if (selectedEquipments.includes(eq)) {
+      if (selectedEquipments.length > 1) {
+        setSelectedEquipments(selectedEquipments.filter(item => item !== eq));
+      }
     } else {
-      setEquipment(val);
+      setSelectedEquipments([...selectedEquipments, eq]);
     }
   };
 
-  const handleSaveNewEquipment = (e) => {
+  const handleCreateNewEquipment = (e) => {
     e.preventDefault();
-    if (!newEquipmentName.trim()) return;
-    const trimmed = newEquipmentName.trim();
-    if (!equipments.includes(trimmed)) {
-      setEquipments([...equipments, trimmed]);
+    if (!newEquipName.trim()) return;
+    const trimmed = newEquipName.trim();
+    if (!equipmentsList.includes(trimmed)) {
+      setEquipmentsList([...equipmentsList, trimmed]);
     }
-    setEquipment(trimmed);
-    setNewEquipmentName('');
-    setShowAddEquipmentModal(false);
+    if (!selectedEquipments.includes(trimmed)) {
+      setSelectedEquipments([...selectedEquipments, trimmed]);
+    }
+    setNewEquipName('');
+    setShowNewEquipInput(false);
   };
 
   const handleSeasonCheckboxChange = (seasonOption) => {
@@ -956,7 +933,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
     const recipeData = {
       name,
       carb: finalCarb,
-      equipment,
+      equipment: selectedEquipments.length > 0 ? selectedEquipments : ['Four'],
       season: finalSeason,
       category,
       url,
@@ -1049,25 +1026,62 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
           )}
 
           <div className={category === 'gateau' ? 'col-span-full' : ''}>
-            <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Appareil utilisé</label>
-            <div className="flex gap-2">
-              <select 
-                value={equipment}
-                onChange={handleEquipmentSelectChange}
-                className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
-              >
-                {equipments.map(eq => <option key={eq} value={eq}>{eq}</option>)}
-                <option value="ADD_NEW_EQUIPMENT" className="font-bold text-indigo-600">+ Ajouter un nouvel appareil...</option>
-              </select>
-              <button
-                type="button"
-                onClick={() => setShowAddEquipmentModal(true)}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg text-sm flex items-center justify-center flex-shrink-0"
-                title="Ajouter un appareil"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
+            <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Appareil(s) utilisé(s) (Sélection multiple)</label>
+            <div className="bg-slate-50 border border-slate-300 rounded-lg p-3 space-y-2 max-h-40 overflow-y-auto">
+              <div className="flex flex-wrap gap-2">
+                {equipmentsList.map(eq => {
+                  const isSelected = selectedEquipments.includes(eq);
+                  return (
+                    <button
+                      type="button"
+                      key={eq}
+                      onClick={() => handleEquipmentToggle(eq)}
+                      className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors flex items-center gap-1.5
+                        ${isSelected ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'}
+                      `}
+                    >
+                      {isSelected && <Check className="w-3 h-3" />}
+                      {eq}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {!showNewEquipInput ? (
+                <button
+                  type="button"
+                  onClick={() => setShowNewEquipInput(true)}
+                  className="text-xs text-indigo-600 font-semibold hover:underline mt-1 flex items-center gap-1"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Créer un nouvel appareil
+                </button>
+              ) : (
+                <div className="flex gap-2 mt-2 pt-2 border-t border-slate-200">
+                  <input 
+                    type="text"
+                    placeholder="Nom du nouvel appareil..."
+                    value={newEquipName}
+                    onChange={(e) => setNewEquipName(e.target.value)}
+                    className="flex-1 bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs text-slate-900"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCreateNewEquipment}
+                    className="bg-indigo-600 text-white text-xs px-3 py-1 rounded-lg font-medium"
+                  >
+                    Ajouter
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowNewEquipInput(false)}
+                    className="bg-slate-200 text-slate-700 text-xs px-2 py-1 rounded-lg"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
             </div>
+            <p className="text-[11px] text-slate-500 mt-1">Sélectionnés : {selectedEquipments.join(', ')}</p>
           </div>
         </div>
 
@@ -1162,190 +1176,6 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
           {editingRecipe ? 'Mettre à jour la recette' : 'Enregistrer la recette'}
         </button>
       </form>
-
-      {/* Modale d'ajout rapide d'appareil */}
-      {showAddEquipmentModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-4">
-            <h3 className="font-bold text-slate-800 text-base">Ajouter un appareil</h3>
-            <form onSubmit={handleSaveNewEquipment} className="space-y-3">
-              <input 
-                type="text"
-                placeholder="Nom de l'appareil (ex: Plancha, Barbecue...)"
-                value={newEquipmentName}
-                onChange={(e) => setNewEquipmentName(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm"
-                autoFocus
-                required
-              />
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAddEquipmentModal(false)}
-                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg text-xs font-semibold"
-                >
-                  Annuler
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-xs font-semibold"
-                >
-                  Ajouter
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function SettingsView({ seasonDates, setSeasonDates, equipments, setEquipments, setActiveTab }) {
-  const [localDates, setLocalDates] = useState(seasonDates);
-  const [newEquip, setNewEquip] = useState('');
-
-  const months = [
-    { value: 1, label: 'Janvier' }, { value: 2, label: 'Février' }, { value: 3, label: 'Mars' },
-    { value: 4, label: 'Avril' }, { value: 5, label: 'Mai' }, { value: 6, label: 'Juin' },
-    { value: 7, label: 'Juillet' }, { value: 8, label: 'Août' }, { value: 9, label: 'Septembre' },
-    { value: 10, label: 'Octobre' }, { value: 11, label: 'Novembre' }, { value: 12, label: 'Décembre' }
-  ];
-
-  const handleDateChange = (season, field, value) => {
-    setLocalDates({
-      ...localDates,
-      [season]: {
-        ...localDates[season],
-        [field]: parseInt(value, 10)
-      }
-    });
-  };
-
-  const handleSaveSeasons = (e) => {
-    e.preventDefault();
-    setSeasonDates(localDates);
-    alert('Dates des saisons mises à jour avec succès !');
-    setActiveTab('menu');
-  };
-
-  const handleAddEquipment = (e) => {
-    e.preventDefault();
-    if (!newEquip.trim()) return;
-    const trimmed = newEquip.trim();
-    if (!equipments.includes(trimmed)) {
-      setEquipments([...equipments, trimmed]);
-    }
-    setNewEquip('');
-  };
-
-  const handleDeleteEquipment = (eqToDelete) => {
-    if (equipments.length <= 1) {
-      alert("Vous devez garder au moins un appareil.");
-      return;
-    }
-    setEquipments(equipments.filter(e => e !== eqToDelete));
-  };
-
-  return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 max-w-2xl mx-auto space-y-6">
-      <div>
-        <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2 mb-1">
-          <Settings className="w-5 h-5 text-indigo-600" /> Configuration des Saisons et Appareils
-        </h2>
-        <p className="text-xs text-slate-500">
-          Ajustez précisément les dates de début et de fin de chaque saison pour un filtrage au jour près, et gérez votre liste d'appareils de cuisson.
-        </p>
-      </div>
-
-      <form onSubmit={handleSaveSeasons} className="space-y-4 border-b border-slate-200 pb-6">
-        <h3 className="text-xs font-bold text-slate-700 uppercase">Dates des Saisons (au jour près)</h3>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {SEASONS_LIST.map(season => {
-            const bounds = localDates[season] || { startMonth: 1, startDay: 1, endMonth: 1, endDay: 1 };
-            return (
-              <div key={season} className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
-                <span className="font-bold text-xs text-indigo-700 uppercase block">{season}</span>
-                
-                <div className="text-[11px] text-slate-600 font-medium">Début :</div>
-                <div className="flex gap-2">
-                  <input 
-                    type="number" min="1" max="31" 
-                    value={bounds.startDay}
-                    onChange={(e) => handleDateChange(season, 'startDay', e.target.value)}
-                    className="w-16 bg-white border border-slate-300 rounded-lg p-1.5 text-xs text-center"
-                    placeholder="Jour"
-                  />
-                  <select
-                    value={bounds.startMonth}
-                    onChange={(e) => handleDateChange(season, 'startMonth', e.target.value)}
-                    className="flex-1 bg-white border border-slate-300 rounded-lg p-1.5 text-xs"
-                  >
-                    {months.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
-                  </select>
-                </div>
-
-                <div className="text-[11px] text-slate-600 font-medium pt-1">Fin :</div>
-                <div className="flex gap-2">
-                  <input 
-                    type="number" min="1" max="31" 
-                    value={bounds.endDay}
-                    onChange={(e) => handleDateChange(season, 'endDay', e.target.value)}
-                    className="w-16 bg-white border border-slate-300 rounded-lg p-1.5 text-xs text-center"
-                    placeholder="Jour"
-                  />
-                  <select
-                    value={bounds.endMonth}
-                    onChange={(e) => handleDateChange(season, 'endMonth', e.target.value)}
-                    className="flex-1 bg-white border border-slate-300 rounded-lg p-1.5 text-xs"
-                  >
-                    {months.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
-                  </select>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        <button 
-          type="submit"
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-xl text-xs transition-colors shadow-sm"
-        >
-          Enregistrer les dates des saisons
-        </button>
-      </form>
-
-      {/* Gestion globale des appareils */}
-      <div className="space-y-4">
-        <h3 className="text-xs font-bold text-slate-700 uppercase">Liste des Appareils disponibles</h3>
-        <form onSubmit={handleAddEquipment} className="flex gap-2">
-          <input 
-            type="text" 
-            placeholder="Nouvel appareil (ex: Pierre à pizza...)" 
-            value={newEquip}
-            onChange={(e) => setNewEquip(e.target.value)}
-            className="flex-1 bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm"
-          />
-          <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-1">
-            <Plus className="w-4 h-4" /> Ajouter
-          </button>
-        </form>
-
-        <div className="flex flex-wrap gap-2 pt-2">
-          {equipments.map(eq => (
-            <span key={eq} className="bg-slate-100 border border-slate-200 text-slate-800 text-xs px-3 py-1.5 rounded-lg font-medium flex items-center gap-2">
-              {eq}
-              <button 
-                type="button"
-                onClick={() => handleDeleteEquipment(eq)}
-                className="text-slate-400 hover:text-red-600"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </span>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
@@ -1620,12 +1450,12 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
         </button>
 
         <div>
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
             <span className="text-xs font-semibold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md border border-indigo-100">
               {recipe.category === 'gateau' ? '🍰 Gâteau' : recipe.carb}
             </span>
             <span className="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md font-medium">
-              {recipe.equipment}
+              {(recipe.equipment || []).join(', ')}
             </span>
             <span className="text-xs bg-amber-50 text-amber-700 px-2.5 py-1 rounded-md font-medium">
               {recipe.season}
@@ -1666,7 +1496,7 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
           <div>
             <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Ingrédients</h3>
             <ul className="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-1.5">
-              {recipe.ingredients.key ? null : recipe.ingredients.map((ing, idx) => (
+              {recipe.ingredients.map((ing, idx) => (
                 <li key={idx} className="text-sm text-slate-800 flex items-center gap-2 list-none">
                   <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full inline-block mr-2"></span>
                   {ing}
