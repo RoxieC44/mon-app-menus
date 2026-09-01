@@ -816,8 +816,8 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
   const [carb, setCarb] = useState('Plaisir');
   const [customCarb, setCustomCarb] = useState('');
   const [equipment, setEquipment] = useState(equipments[0] || 'Four');
-  const [showNewEquipInput, setShowNewEquipInput] = useState(false);
-  const [newEquipInput, setNewEquipInput] = useState('');
+  const [showNewEquipSelect, setShowNewEquipSelect] = useState(false);
+  const [additionalEquipment, setAdditionalEquipment] = useState('');
   const [selectedSeasons, setSelectedSeasons] = useState(['Toutes']);
   const [category, setCategory] = useState('repas');
   const [url, setUrl] = useState('');
@@ -837,11 +837,12 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
       }
       if (equipments.includes(editingRecipe.equipment)) {
         setEquipment(editingRecipe.equipment);
-        setShowNewEquipInput(false);
+        setShowNewEquipSelect(false);
+        setAdditionalEquipment('');
       } else if (editingRecipe.equipment) {
         setEquipment(equipments[0] || 'Four');
-        setShowNewEquipInput(true);
-        setNewEquipInput(editingRecipe.equipment);
+        setShowNewEquipSelect(true);
+        setAdditionalEquipment(editingRecipe.equipment);
       }
       setCategory(editingRecipe.category || 'repas');
       setUrl(editingRecipe.url || '');
@@ -896,25 +897,13 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
     }
   };
 
-  const handleAddCustomEquipment = () => {
-    const trimmed = newEquipInput.trim();
-    if (trimmed) {
-      if (!equipments.includes(trimmed)) {
-        setEquipments([...equipments, trimmed]);
-      }
-      setEquipment(trimmed);
-      setNewEquipInput('');
-      setShowNewEquipInput(false);
-    }
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!name.trim()) return;
 
     let finalEquipment = equipment;
-    if (showNewEquipInput) {
-      finalEquipment = newEquipInput.trim() || equipment;
+    if (showNewEquipSelect && additionalEquipment) {
+      finalEquipment = additionalEquipment;
     }
 
     const ingredients = ingredientsText
@@ -1024,16 +1013,21 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
             <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Appareil utilisé</label>
             <select 
               value={equipment}
-              onChange={(e) => setEquipment(e.target.value)}
+              onChange={(e) => {
+                setEquipment(e.target.value);
+                if (additionalEquipment === e.target.value) {
+                  setAdditionalEquipment('');
+                }
+              }}
               className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
             >
               {equipments.map(eq => <option key={eq} value={eq}>{eq}</option>)}
             </select>
 
-            {!showNewEquipInput ? (
+            {!showNewEquipSelect ? (
               <button
                 type="button"
-                onClick={() => setShowNewEquipInput(true)}
+                onClick={() => setShowNewEquipSelect(true)}
                 className="flex items-center gap-2 text-xs font-semibold text-indigo-600 hover:text-indigo-800 mt-1 transition-colors"
               >
                 <div className="w-5 h-5 rounded-full border border-indigo-600 flex items-center justify-center">
@@ -1042,28 +1036,30 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
                 Ajouter un autre appareil utilisé (facultatif)
               </button>
             ) : (
-              <div className="flex gap-2 mt-2">
-                <input 
-                  type="text"
-                  placeholder="Nom du nouvel appareil..."
-                  value={newEquipInput}
-                  onChange={(e) => setNewEquipInput(e.target.value)}
-                  className="flex-1 bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs text-slate-900 focus:ring-indigo-500"
-                />
-                <button
-                  type="button"
-                  onClick={handleAddCustomEquipment}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium"
+              <div className="space-y-2 mt-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-semibold text-slate-700">Second appareil :</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowNewEquipSelect(false);
+                      setAdditionalEquipment('');
+                    }}
+                    className="text-slate-400 hover:text-slate-700 text-xs"
+                  >
+                    ✕ Retirer
+                  </button>
+                </div>
+                <select 
+                  value={additionalEquipment}
+                  onChange={(e) => setAdditionalEquipment(e.target.value)}
+                  className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs text-slate-900 focus:ring-indigo-500"
                 >
-                  Valider
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowNewEquipInput(false)}
-                  className="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs px-2.5 py-1.5 rounded-lg"
-                >
-                  ✕
-                </button>
+                  <option value="">-- Choisir un autre appareil --</option>
+                  {equipments
+                    .filter(eq => eq !== equipment)
+                    .map(eq => <option key={eq} value={eq}>{eq}</option>)}
+                </select>
               </div>
             )}
           </div>
@@ -1343,7 +1339,7 @@ function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingCheck
     if (!found) return { status: 'A acheter', color: 'text-indigo-600 bg-indigo-50 border-indigo-200' };
     if (found.status === 'Plein') return { status: `En stock (${found.zone} - Plein)`, color: 'text-emerald-700 bg-emerald-50 border-emerald-200' };
     if (found.status === 'Entamé') return { status: `En stock (${found.zone} - Entamé)`, color: 'text-amber-700 bg-amber-50 border-amber-200' };
-    return { status: `Presque vide (${found.zone})`, color: 'text-red-700 bg-red-50 border-red-200' };
+    return { status: `Presque vide (${found.zone})`, color: 'text-red-700 bg-red-700 border-red-200' };
   };
 
   const toggleCheck = (ing) => {
