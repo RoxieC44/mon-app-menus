@@ -25,10 +25,17 @@ const SEASONS_LIST = ['Printemps', 'Été', 'Automne', 'Hiver'];
 const STORAGE_ZONES = ['Placard', 'Frigo', 'Congélateur'];
 
 const getCurrentSeason = () => {
-  const month = new Date().getMonth();
-  if (month >= 2 && month <= 4) return 'Printemps';
-  if (month >= 5 && month <= 7) return 'Été';
-  if (month >= 8 && month <= 10) return 'Automne';
+  const now = new Date();
+  const month = now.getMonth();
+  const day = now.getDate();
+
+  // Printemps : du 20 mars au 20 juin
+  if ((month === 2 && day >= 20) || (month > 2 && month < 5) || (month === 5 && day <= 20)) return 'Printemps';
+  // Été : du 21 juin au 21 septembre
+  if ((month === 5 && day >= 21) || (month > 5 && month < 8) || (month === 8 && day <= 21)) return 'Été';
+  // Automne : du 22 septembre au 20 décembre
+  if ((month === 8 && day >= 22) || (month > 8 && month < 11) || (month === 11 && day <= 20)) return 'Automne';
+  // Hiver : du 21 décembre au 19 mars
   return 'Hiver';
 };
 
@@ -50,7 +57,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   const [recipes, setRecipes] = useState(DEFAULT_RECIPES);
-  const [equipmentsList, setEquipmentsList] = useState(INITIAL_EQUIPMENTS);
+  const [equipments, setEquipments] = useState(INITIAL_EQUIPMENTS);
   const [menu, setMenu] = useState({
     mondayDinner: '', tuesdayDinner: '', wednesdayDinner: '', thursdayDinner: '', fridayDinner: '', saturdayDinner: '', sundayDinner: '',
     mondayLunch: 'restes', tuesdayLunch: 'restes', wednesdayLunch: '', thursdayLunch: 'restes', fridayLunch: 'restes', saturdayLunch: '', sundayLunch: ''
@@ -80,7 +87,7 @@ export default function App() {
       if (data && data.data) {
         const saved = data.data;
         if (saved.recipes) setRecipes(saved.recipes);
-        if (saved.equipmentsList) setEquipmentsList(saved.equipmentsList);
+        if (saved.equipments) setEquipments(saved.equipments);
         if (saved.menu) setMenu(saved.menu);
         if (saved.inventory) {
           const migrated = saved.inventory.map(item => ({
@@ -103,7 +110,7 @@ export default function App() {
     async function saveData() {
       const payload = {
         user_key: 'ma_famille',
-        data: { recipes, equipmentsList, menu, inventory, bakingItems, shoppingChecks }
+        data: { recipes, equipments, menu, inventory, bakingItems, shoppingChecks }
       };
 
       const { data: existing } = await supabase
@@ -126,7 +133,7 @@ export default function App() {
 
     const timer = setTimeout(saveData, 1000);
     return () => clearTimeout(timer);
-  }, [recipes, equipmentsList, menu, inventory, bakingItems, shoppingChecks]);
+  }, [recipes, equipments, menu, inventory, bakingItems, shoppingChecks]);
 
   const addRecipe = (newRecipe) => {
     setRecipes(prev => {
@@ -189,7 +196,8 @@ export default function App() {
             setEditingRecipe={setEditingRecipe}
             setActiveTab={setActiveTab}
             currentSeason={currentSeason} 
-            equipmentsList={equipmentsList}
+            equipments={equipments}
+            setEquipments={setEquipments}
           />
         )}
         {activeTab === 'baking' && (
@@ -204,20 +212,11 @@ export default function App() {
             setEditingRecipe={setEditingRecipe}
             setActiveTab={setActiveTab}
             currentSeason={currentSeason}
-            equipmentsList={equipmentsList}
+            equipments={equipments}
+            setEquipments={setEquipments}
           />
         )}
-        {activeTab === 'add' && (
-          <AddRecipeForm 
-            addRecipe={addRecipe} 
-            editingRecipe={editingRecipe} 
-            setEditingRecipe={setEditingRecipe} 
-            setActiveTab={setActiveTab} 
-            setSelectedImage={setSelectedImage} 
-            equipmentsList={equipmentsList}
-            setEquipmentsList={setEquipmentsList}
-          />
-        )}
+        {activeTab === 'add' && <AddRecipeForm addRecipe={addRecipe} editingRecipe={editingRecipe} setEditingRecipe={setEditingRecipe} setActiveTab={setActiveTab} setSelectedImage={setSelectedImage} equipments={equipments} setEquipments={setEquipments} />}
         {activeTab === 'inventory' && <InventoryManager inventory={inventory} setInventory={setInventory} />}
         {activeTab === 'shopping' && <ShoppingListView menu={menu} recipes={recipes} inventory={inventory} bakingItems={bakingItems} shoppingChecks={shoppingChecks} setShoppingChecks={setShoppingChecks} setActiveTab={setActiveTab} />}
       </main>
@@ -280,7 +279,7 @@ function NavButton({ active, onClick, icon, label }) {
   );
 }
 
-function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, deleteRecipe, setEditingRecipe, setActiveTab, setViewingRecipe, currentSeason, equipmentsList }) {
+function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, deleteRecipe, setEditingRecipe, setActiveTab, setViewingRecipe, currentSeason, equipments, setEquipments }) {
   const [subTab, setSubTab] = useState('planning');
 
   return (
@@ -314,7 +313,7 @@ function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, delete
           setActiveTab={setActiveTab}
           setViewingRecipe={setViewingRecipe} 
           currentSeason={currentSeason} 
-          equipmentsList={equipmentsList}
+          equipments={equipments}
         />
       ) : (
         <RecipeList 
@@ -325,15 +324,15 @@ function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, delete
           setEditingRecipe={setEditingRecipe}
           setActiveTab={setActiveTab}
           currentSeason={currentSeason}
-          equipmentsList={equipmentsList}
           title="Toutes les recettes de repas"
+          equipments={equipments}
         />
       )}
     </div>
   );
 }
 
-function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, equipmentsList }) {
+function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, equipments }) {
   const daysConfig = [
     { key: 'monday', label: 'Lundi', reqCarb: 'Blé' },
     { key: 'tuesday', label: 'Mardi', reqCarb: 'Semoule' },
@@ -579,7 +578,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
   );
 }
 
-function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, equipmentsList, title }) {
+function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, title, equipments }) {
   const [filterSeason, setFilterSeason] = useState('Tous');
   const [filterEquip, setFilterEquip] = useState('Tous');
 
@@ -621,7 +620,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
             className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800"
           >
             <option value="Tous">Tous les appareils</option>
-            {equipmentsList.map(eq => <option key={eq} value={eq}>{eq}</option>)}
+            {equipments.map(eq => <option key={eq} value={eq}>{eq}</option>)}
           </select>
         </div>
 
@@ -707,7 +706,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
   );
 }
 
-function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, setActiveTab, bakingRecipes, recipes, deleteRecipe, setViewingRecipe, currentSeason, equipmentsList }) {
+function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, setActiveTab, bakingRecipes, recipes, deleteRecipe, setViewingRecipe, currentSeason, equipments }) {
   const [subTab, setSubTab] = useState('planning');
 
   const updateBakingItem = (index, recipeId) => {
@@ -809,19 +808,19 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
           setEditingRecipe={setEditingRecipe}
           setActiveTab={setActiveTab}
           currentSeason={currentSeason}
-          equipmentsList={equipmentsList}
+          equipments={equipments}
         />
       )}
     </div>
   );
 }
 
-function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTab, setSelectedImage, equipmentsList, setEquipmentsList }) {
+function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTab, setSelectedImage, equipments, setEquipments }) {
   const [name, setName] = useState('');
   const [carb, setCarb] = useState('Plaisir');
   const [customCarb, setCustomCarb] = useState('');
-  const [equipment, setEquipment] = useState(equipmentsList[0] || 'Four');
-  const [newEquipmentInput, setNewEquipmentInput] = useState('');
+  const [equipment, setEquipment] = useState(equipments[0] || 'Four');
+  const [newEquipInput, setNewEquipInput] = useState('');
   const [selectedSeasons, setSelectedSeasons] = useState(['Toutes']);
   const [category, setCategory] = useState('repas');
   const [url, setUrl] = useState('');
@@ -839,7 +838,12 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
         setCarb('Autre');
         setCustomCarb(editingRecipe.carb);
       }
-      setEquipment(editingRecipe.equipment || equipmentsList[0] || 'Four');
+      if (equipments.includes(editingRecipe.equipment)) {
+        setEquipment(editingRecipe.equipment);
+      } else if (editingRecipe.equipment) {
+        setEquipment('__autre__');
+        setNewEquipInput(editingRecipe.equipment);
+      }
       setCategory(editingRecipe.category || 'repas');
       setUrl(editingRecipe.url || '');
       setImage(editingRecipe.image || '');
@@ -860,7 +864,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
         setSelectedSeasons(['Toutes']);
       }
     }
-  }, [editingRecipe, equipmentsList]);
+  }, [editingRecipe, equipments]);
 
   const handleSeasonCheckboxChange = (seasonOption) => {
     if (seasonOption === 'Toutes') {
@@ -898,13 +902,11 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
     if (!name.trim()) return;
 
     let finalEquipment = equipment;
-    if (equipment === '__AJOUTER_NOUVEAU__') {
-      const trimmedNewEq = newEquipmentInput.trim();
-      if (!trimmedNewEq) return;
-      if (!equipmentsList.includes(trimmedNewEq)) {
-        setEquipmentsList([...equipmentsList, trimmedNewEq]);
+    if (equipment === '__autre__') {
+      finalEquipment = newEquipInput.trim();
+      if (finalEquipment && !equipments.includes(finalEquipment)) {
+        setEquipments([...equipments, finalEquipment]);
       }
-      finalEquipment = trimmedNewEq;
     }
 
     const ingredients = ingredientsText
@@ -918,7 +920,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
     const recipeData = {
       name,
       carb: finalCarb,
-      equipment: finalEquipment,
+      equipment: finalEquipment || 'Autre',
       season: finalSeason,
       category,
       url,
@@ -1010,24 +1012,24 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
             </div>
           )}
 
-          <div className={category === 'gateau' ? 'col-span-full' : ''}>
+          <div className={category === 'gateau' ? 'col-span-full space-y-2' : 'space-y-2'}>
             <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Appareil utilisé</label>
             <select 
               value={equipment}
               onChange={(e) => setEquipment(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500 mb-2"
+              className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
             >
-              {equipmentsList.map(eq => <option key={eq} value={eq}>{eq}</option>)}
-              <option value="__AJOUTER_NOUVEAU__">➕ Ajouter un autre appareil...</option>
+              {equipments.map(eq => <option key={eq} value={eq}>{eq}</option>)}
+              <option value="__autre__">+ Ajouter un autre appareil...</option>
             </select>
 
-            {equipment === '__AJOUTER_NOUVEAU__' && (
+            {equipment === '__autre__' && (
               <input 
                 type="text"
-                placeholder="Nom du nouvel appareil (ex: Robot cuiseur, Blender...)"
-                value={newEquipmentInput}
-                onChange={(e) => setNewEquipmentInput(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
+                placeholder="Nom du nouvel appareil..."
+                value={newEquipInput}
+                onChange={(e) => setNewEquipInput(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs text-slate-900 focus:ring-indigo-500 mt-2"
                 required
               />
             )}
