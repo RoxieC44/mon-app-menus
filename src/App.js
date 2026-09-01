@@ -352,7 +352,12 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
     if (!val || val === 'restes') return;
     const r = recipes.find(x => x.id === val);
     if (r) {
-      equipmentCounts[r.equipment] = (equipmentCounts[r.equipment] || 0) + 1;
+      if (r.equipment) {
+        equipmentCounts[r.equipment] = (equipmentCounts[r.equipment] || 0) + 1;
+      }
+      if (r.additionalEquipment) {
+        equipmentCounts[r.additionalEquipment] = (equipmentCounts[r.additionalEquipment] || 0) + 1;
+      }
     }
   });
 
@@ -379,17 +384,23 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
       if (possibleRecipes.length === 0) return;
 
       possibleRecipes.sort((a, b) => {
-        const countA = tempEquipCounts[a.equipment] || 0;
-        const countB = tempEquipCounts[b.equipment] || 0;
+        const countA = (tempEquipCounts[a.equipment] || 0) + (tempEquipCounts[a.additionalEquipment] || 0);
+        const countB = (tempEquipCounts[b.equipment] || 0) + (tempEquipCounts[b.additionalEquipment] || 0);
         return countA - countB;
       });
 
-      const minUsage = tempEquipCounts[possibleRecipes[0].equipment] || 0;
-      const bestCandidates = possibleRecipes.filter(r => (tempEquipCounts[r.equipment] || 0) === minUsage);
+      const getRecipeCount = (r) => (tempEquipCounts[r.equipment] || 0) + (r.additionalEquipment ? (tempEquipCounts[r.additionalEquipment] || 0) : 0);
+      const minUsage = getRecipeCount(possibleRecipes[0]);
+      const bestCandidates = possibleRecipes.filter(r => getRecipeCount(r) === minUsage);
       const picked = bestCandidates[Math.floor(Math.random() * bestCandidates.length)];
       
       newMenu[day.key] = picked.id;
-      tempEquipCounts[picked.equipment] = (tempEquipCounts[picked.equipment] || 0) + 1;
+      if (picked.equipment) {
+        tempEquipCounts[picked.equipment] = (tempEquipCounts[picked.equipment] || 0) + 1;
+      }
+      if (picked.additionalEquipment) {
+        tempEquipCounts[picked.additionalEquipment] = (tempEquipCounts[picked.additionalEquipment] || 0) + 1;
+      }
     });
 
     setMenu(newMenu);
@@ -514,7 +525,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
             {lunchRecipe && (
               <div className="flex justify-between items-center pt-1">
                 <span className="text-[11px] text-slate-500 flex items-center gap-1 font-medium">
-                  <Settings className="w-3 h-3 text-slate-400" /> {lunchRecipe.equipment}
+                  <Settings className="w-3 h-3 text-slate-400" /> {lunchRecipe.equipment}{lunchRecipe.additionalEquipment ? ` + ${lunchRecipe.additionalEquipment}` : ''}
                 </span>
                 <button 
                   onClick={() => setViewingRecipe(lunchRecipe)}
@@ -557,7 +568,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
             {dinnerRecipe && (
               <div className="flex justify-between items-center pt-1">
                 <span className="text-[11px] text-slate-500 flex items-center gap-1 font-medium">
-                  <Settings className="w-3 h-3 text-slate-400" /> {dinnerRecipe.equipment}
+                  <Settings className="w-3 h-3 text-slate-400" /> {dinnerRecipe.equipment}{dinnerRecipe.additionalEquipment ? ` + ${dinnerRecipe.additionalEquipment}` : ''}
                 </span>
                 <button 
                   onClick={() => setViewingRecipe(dinnerRecipe)}
@@ -580,7 +591,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
 
   const filteredRecipes = recipes.filter(r => {
     if (filterSeason !== 'Tous' && !recipeMatchesSeason(r.season, filterSeason)) return false;
-    if (filterEquip !== 'Tous' && r.equipment !== filterEquip) return false;
+    if (filterEquip !== 'Tous' && r.equipment !== filterEquip && r.additionalEquipment !== filterEquip) return false;
     return true;
   });
 
@@ -644,7 +655,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
 
               <div className="flex flex-wrap gap-1.5 mb-3">
                 <span className="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded flex items-center gap-1 font-medium">
-                  <Settings className="w-3 h-3 text-slate-400" /> {recipe.equipment}
+                  <Settings className="w-3 h-3 text-slate-400" /> {recipe.equipment}{recipe.additionalEquipment ? ` + ${recipe.additionalEquipment}` : ''}
                 </span>
                 <span className={`text-[11px] px-2 py-0.5 rounded font-medium flex items-center gap-1
                   ${recipe.season === currentSeason ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-slate-100 text-slate-600'}
@@ -782,7 +793,7 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
 
                   {selectedRecipe && (
                     <div className="flex justify-between items-center pt-2 border-t border-slate-100">
-                      <span className="text-xs text-slate-600 font-medium">Appareil : {selectedRecipe.equipment}</span>
+                      <span className="text-xs text-slate-600 font-medium">Appareil : {selectedRecipe.equipment}{selectedRecipe.additionalEquipment ? ` + ${selectedRecipe.additionalEquipment}` : ''}</span>
                       <button 
                         onClick={() => setViewingRecipe(selectedRecipe)}
                         className="text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded transition-colors flex items-center gap-1"
@@ -837,12 +848,15 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
       }
       if (equipments.includes(editingRecipe.equipment)) {
         setEquipment(editingRecipe.equipment);
-        setShowNewEquipSelect(false);
-        setAdditionalEquipment('');
       } else if (editingRecipe.equipment) {
         setEquipment(equipments[0] || 'Four');
+      }
+      if (editingRecipe.additionalEquipment) {
         setShowNewEquipSelect(true);
-        setAdditionalEquipment(editingRecipe.equipment);
+        setAdditionalEquipment(editingRecipe.additionalEquipment);
+      } else {
+        setShowNewEquipSelect(false);
+        setAdditionalEquipment('');
       }
       setCategory(editingRecipe.category || 'repas');
       setUrl(editingRecipe.url || '');
@@ -901,9 +915,9 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
     e.preventDefault();
     if (!name.trim()) return;
 
-    let finalEquipment = equipment;
+    let finalAdditionalEquipment = '';
     if (showNewEquipSelect && additionalEquipment) {
-      finalEquipment = additionalEquipment;
+      finalAdditionalEquipment = additionalEquipment;
     }
 
     const ingredients = ingredientsText
@@ -917,7 +931,8 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
     const recipeData = {
       name,
       carb: finalCarb,
-      equipment: finalEquipment || 'Autre',
+      equipment: equipment || 'Autre',
+      additionalEquipment: finalAdditionalEquipment,
       season: finalSeason,
       category,
       url,
@@ -1435,7 +1450,7 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
               {recipe.category === 'gateau' ? '🍰 Gâteau' : recipe.carb}
             </span>
             <span className="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md font-medium">
-              {recipe.equipment}
+              {recipe.equipment}{recipe.additionalEquipment ? ` + ${recipe.additionalEquipment}` : ''}
             </span>
             <span className="text-xs bg-amber-50 text-amber-700 px-2.5 py-1 rounded-md font-medium">
               {recipe.season}
