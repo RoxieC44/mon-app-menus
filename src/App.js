@@ -20,19 +20,19 @@ const DEFAULT_RECIPES = [
 ];
 
 const INITIAL_EQUIPMENTS = [
-  'Thermomix', 
-  'Cookeo', 
-  'Poêle', 
-  'Four', 
-  'Casserole', 
-  'Airfryer', 
+  'Thermomix',
+  'Cookeo',
+  'Poêle',
+  'Four',
+  'Casserole',
+  'Airfryer',
   'Gaufrier - Croque-Monsieur - Panini',
   'Plancha',
   'Barbecue',
   'Crêpière - Mini woks - Grill',
-  'Raclette - Pierrade - Fondue'
+  'Raclette - Pierrade - Fondue',
+  'Sans Cuisson'
 ];
-
 const CARBS = ['Pâtes', 'Pommes de terre', 'Semoule', 'Riz', 'Blé', 'Plaisir', 'Autre'];
 const SEASONS_LIST = ['Printemps', 'Été', 'Automne', 'Hiver'];
 const STORAGE_ZONES = ['Placard', 'Frigo', 'Congélateur'];
@@ -944,7 +944,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
     const recipeData = {
       name,
       carb: finalCarb,
-      equipment: equipment || equipments[0],
+      equipment: equipment || 'Autre',
       additionalEquipment: finalAdditionalEquipment,
       season: finalSeason,
       category,
