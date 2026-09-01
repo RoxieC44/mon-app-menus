@@ -20,7 +20,7 @@ const DEFAULT_RECIPES = [
 ];
 
 const EQUIPMENTS = ['Thermomix', 'Cookeo', 'Poêle', 'Four', 'Casserole', 'Airfryer', 'Autre appareil', 'Sans Cuisson'];
-const CARBS = ['Pâtes', 'Pommes de terre', 'Semoule', 'Riz', 'Blé', 'Plaisir'];
+const CARBS = ['Pâtes', 'Pommes de terre', 'Semoule', 'Riz', 'Blé', 'Plaisir', 'Autre'];
 const SEASONS_LIST = ['Printemps', 'Été', 'Automne', 'Hiver'];
 const STORAGE_ZONES = ['Placard', 'Frigo', 'Congélateur'];
 
@@ -765,7 +765,7 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
                   >
                     <option value="">-- Choisir une recette de gâteau --</option>
                     {bakingRecipes.map(r => (
-                      <option key={r.id} value={r.id}>{r.name} - {r.equipment}</option>
+                      <option key={r.id} value={r.id}>{r.name}</option>
                     ))}
                   </select>
 
@@ -802,6 +802,7 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
 function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTab, setSelectedImage }) {
   const [name, setName] = useState('');
   const [carb, setCarb] = useState('Plaisir');
+  const [customCarb, setCustomCarb] = useState('');
   const [equipment, setEquipment] = useState('Four');
   const [selectedSeasons, setSelectedSeasons] = useState(['Toutes']);
   const [category, setCategory] = useState('repas');
@@ -813,7 +814,13 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
   useEffect(() => {
     if (editingRecipe) {
       setName(editingRecipe.name || '');
-      setCarb(editingRecipe.carb || 'Plaisir');
+      if (CARBS.includes(editingRecipe.carb)) {
+        setCarb(editingRecipe.carb || 'Plaisir');
+        setCustomCarb('');
+      } else if (editingRecipe.carb) {
+        setCarb('Autre');
+        setCustomCarb(editingRecipe.carb);
+      }
       setEquipment(editingRecipe.equipment || 'Four');
       setCategory(editingRecipe.category || 'repas');
       setUrl(editingRecipe.url || '');
@@ -878,10 +885,11 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
       .filter(i => i.length > 0);
 
     const finalSeason = selectedSeasons.includes('Toutes') ? 'Toutes' : selectedSeasons.join(', ');
+    const finalCarb = carb === 'Autre' ? (customCarb.trim() || 'Autre') : carb;
 
     const recipeData = {
       name,
-      carb,
+      carb: finalCarb,
       equipment,
       season: finalSeason,
       category,
@@ -951,7 +959,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {category === 'repas' && (
-            <div>
+            <div className="space-y-2">
               <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Féculent / Catégorie</label>
               <select 
                 value={carb}
@@ -960,6 +968,17 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
               >
                 {CARBS.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
+
+              {carb === 'Autre' && (
+                <input 
+                  type="text"
+                  placeholder="Précisez la catégorie..."
+                  value={customCarb}
+                  onChange={(e) => setCustomCarb(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs text-slate-900 focus:ring-indigo-500"
+                  required
+                />
+              )}
             </div>
           )}
 
