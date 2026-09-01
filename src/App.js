@@ -3,26 +3,26 @@ import { Plus, List, Calendar, Trash2, Utensils, Info, Tag, Sun, Settings, Link 
 import { supabase } from './supabaseClient';
 
 const DEFAULT_RECIPES = [
-  { id: '1', name: 'PoÃªlÃ©e de blÃ© faÃ§on risotto aux champignons', carb: 'BlÃ©', equipment: 'PoÃªle', season: 'Toutes', type: 'text', instructions: 'Faire revenir les champignons. Ajouter le blÃ©, puis le bouillon louche par louche jusqu\'Ã  absorption.', ingredients: ['250g de blÃ©', '500g de champignons', '1 oignon', 'Bouillon de volaille', 'CrÃ¨me liquide'], category: 'repas' },
-  { id: '2', name: 'Couscous express aux lÃ©gumes et pois chiches', carb: 'Semoule', equipment: 'Cookeo', season: 'Toutes', type: 'text', instructions: 'Mettre les lÃ©gumes coupÃ©s, les pois chiches, les Ã©pices et l\'eau. Cuisson sous pression 10 min. PrÃ©parer la semoule Ã  part.', ingredients: ['300g de semoule', '1 boÃ®te de pois chiches', '3 carottes', '2 courgettes', 'Ã‰pices Ã  couscous'], category: 'repas' },
+  { id: '1', name: 'Poêlée de blé façon risotto aux champignons', carb: 'Blé', equipment: 'Poêle', season: 'Toutes', type: 'text', instructions: 'Faire revenir les champignons. Ajouter le blé, puis le bouillon louche par louche jusqu\'à absorption.', ingredients: ['250g de blé', '500g de champignons', '1 oignon', 'Bouillon de volaille', 'Crème liquide'], category: 'repas' },
+  { id: '2', name: 'Couscous express aux légumes et pois chiches', carb: 'Semoule', equipment: 'Cookeo', season: 'Toutes', type: 'text', instructions: 'Mettre les légumes coupés, les pois chiches, les épices et l\'eau. Cuisson sous pression 10 min. Préparer la semoule à part.', ingredients: ['300g de semoule', '1 boîte de pois chiches', '3 carottes', '2 courgettes', 'Épices à couscous'], category: 'repas' },
   { id: '3', name: 'Dhal de lentilles et riz basmati', carb: 'Riz', equipment: 'Casserole', season: 'Toutes', type: 'link', url: 'https://www.marmiton.org/recettes/recette_dhal-de-lentilles-corail_345759.aspx', ingredients: ['250g de lentilles corail', '200g de riz basmati', '400ml de lait de coco', 'Curry', '1 oignon'], category: 'repas' },
-  { id: '4', name: 'Pommes de terre rÃ´ties et poisson', carb: 'Pommes de terre', equipment: 'Airfryer', season: 'Toutes', type: 'text', instructions: 'Couper les pdt en dÃ©s, filet d\'huile, 20 min Ã  200Â°C Ã  l\'Airfryer. Ajouter le poisson les 8 derniÃ¨res minutes.', ingredients: ['800g de pommes de terre', '4 filets de poisson blanc', 'Huile d\'olive', 'Herbes de Provence'], category: 'repas' },
-  { id: '5', name: 'PÃ¢tes au pesto et tomates cerises', carb: 'PÃ¢tes', equipment: 'Casserole', season: 'Ã‰tÃ©', type: 'text', instructions: 'Cuire les pÃ¢tes. MÃ©langer avec le pesto et des tomates cerises coupÃ©es en deux.', ingredients: ['400g de pÃ¢tes', '1 pot de pesto', '250g de tomates cerises', 'Parmesan'], category: 'repas' },
-  { id: '6', name: 'Pizza Maison Reine', carb: 'Plaisir', equipment: 'Four', season: 'Toutes', type: 'text', instructions: 'Ã‰taler la pÃ¢te, sauce tomate, jambon, mozza, champignons. Cuire 15 min Ã  220Â°C.', ingredients: ['1 pÃ¢te Ã  pizza', 'Sauce tomate', '4 tranches de jambon', '2 boules de mozzarella', 'Champignons de Paris'], category: 'repas' },
+  { id: '4', name: 'Pommes de terre rôties et poisson', carb: 'Pommes de terre', equipment: 'Airfryer', season: 'Toutes', type: 'text', instructions: 'Couper les pdt en dés, filet d\'huile, 20 min à 200°C à l\'Airfryer. Ajouter le poisson les 8 dernières minutes.', ingredients: ['800g de pommes de terre', '4 filets de poisson blanc', 'Huile d\'olive', 'Herbes de Provence'], category: 'repas' },
+  { id: '5', name: 'Pâtes au pesto et tomates cerises', carb: 'Pâtes', equipment: 'Casserole', season: 'Été', type: 'text', instructions: 'Cuire les pâtes. Mélanger avec le pesto et des tomates cerises coupées en deux.', ingredients: ['400g de pâtes', '1 pot de pesto', '250g de tomates cerises', 'Parmesan'], category: 'repas' },
+  { id: '6', name: 'Pizza Maison Reine', carb: 'Plaisir', equipment: 'Four', season: 'Toutes', type: 'text', instructions: 'Étaler la pâte, sauce tomate, jambon, mozza, champignons. Cuire 15 min à 220°C.', ingredients: ['1 pâte à pizza', 'Sauce tomate', '4 tranches de jambon', '2 boules de mozzarella', 'Champignons de Paris'], category: 'repas' },
   { id: '7', name: 'Poulet coco et riz', carb: 'Riz', equipment: 'Cookeo', season: 'Toutes', type: 'text', instructions: 'Faire dorer le poulet. Ajouter lait de coco et curry. Cuisson 8 min.', ingredients: ['4 blancs de poulet', '250g de riz', '400ml de lait de coco', 'Curry en poudre'], category: 'repas' },
-  { id: '8', name: 'Gratin de potiron / chou-fleur', carb: 'Pommes de terre', equipment: 'Four', season: 'Hiver', type: 'text', instructions: 'Cuire le chou-fleur ou potiron. MÃ©langer crÃ¨me, muscade, gruyÃ¨re. Cuire 30 min au four.', ingredients: ['1 chou-fleur ou potiron', '50cl de crÃ¨me liquide', 'GruyÃ¨re rÃ¢pÃ©', 'Muscade'], category: 'repas' },
-  { id: '9', name: 'Tian de courgettes et tomates', carb: 'Plaisir', equipment: 'Four', season: 'Ã‰tÃ©', type: 'text', instructions: 'Trancher courgettes et tomates en rondelles, alterner dans un plat, herbes de Provence, huile d\'olive, 45 min au four.', ingredients: ['3 courgettes', '4 tomates', 'Huile d\'olive', 'Herbes de Provence', 'Ail'], category: 'repas' },
+  { id: '8', name: 'Gratin de potiron / chou-fleur', carb: 'Pommes de terre', equipment: 'Four', season: 'Hiver', type: 'text', instructions: 'Cuire le chou-fleur ou potiron. Mélanger crème, muscade, gruyère. Cuire 30 min au four.', ingredients: ['1 chou-fleur ou potiron', '50cl de crème liquide', 'Gruyère râpé', 'Muscade'], category: 'repas' },
+  { id: '9', name: 'Tian de courgettes et tomates', carb: 'Plaisir', equipment: 'Four', season: 'Été', type: 'text', instructions: 'Trancher courgettes et tomates en rondelles, alterner dans un plat, herbes de Provence, huile d\'olive, 45 min au four.', ingredients: ['3 courgettes', '4 tomates', 'Huile d\'olive', 'Herbes de Provence', 'Ail'], category: 'repas' },
   { id: '10', name: 'Soupe de chou et lardons', carb: 'Pommes de terre', equipment: 'Casserole', season: 'Hiver', type: 'text', instructions: 'Faire bouillir le chou, les pommes de terre et des lardons. Mixer ou servir tel quel.', ingredients: ['1/2 chou vert', '4 pommes de terre', '100g de lardons', 'Bouillon'], category: 'repas' },
-  { id: '11', name: 'Gnocchis Saucisse', carb: 'PÃ¢tes', equipment: 'PoÃªle', season: 'Toutes', type: 'text', instructions: 'Faire poÃªler les gnocchis avec les saucisses coupÃ©es en morceaux jusqu\'Ã  dorage.', ingredients: ['500g de gnocchis', '4 saucisses', '1 filet d\'huile d\'olive'], category: 'repas' },
-  { id: '12', name: 'Cordon bleu et Pommes de terre', carb: 'Pommes de terre', equipment: 'PoÃªle', season: 'Toutes', type: 'text', instructions: 'Cuire les cordons bleus Ã  la poÃªle et accompagner de pommes de terre sautÃ©es.', ingredients: ['4 cordons bleus', '600g de pommes de terre cuites', 'Beurre'], category: 'repas' },
-  { id: '13', name: 'GÃ¢teau au yaourt moelleux', carb: 'Plaisir', equipment: 'Four', season: 'Toutes', type: 'text', instructions: 'MÃ©langer un pot de yaourt, 2 pots de sucre, 3 pots de farine, 1/2 pot d\'huile, 3 Å“ufs et de la levure. Cuire 35 min Ã  180Â°C.', ingredients: ['1 yaourt nature', '3 pots de farine', '2 pots de sucre', '1/2 pot d\'huile', '3 Å“ufs', '1 sachet de levure'], category: 'gateau' },
-  { id: '14', name: 'Cookies pÃ©pites de chocolat', carb: 'Plaisir', equipment: 'Four', season: 'Toutes', type: 'text', instructions: 'MÃ©langer beurre mou, sucre, sucre vanillÃ©, Å“uf, farine et pÃ©pites. Faire des boules et cuire 10 min Ã  180Â°C.', ingredients: ['150g de beurre', '100g de sucre', '1 Å“uf', '220g de farine', '100g de pÃ©pites de chocolat'], category: 'gateau' },
+  { id: '11', name: 'Gnocchis Saucisse', carb: 'Pâtes', equipment: 'Poêle', season: 'Toutes', type: 'text', instructions: 'Faire poêler les gnocchis avec les saucisses coupées en morceaux jusqu\'à dorage.', ingredients: ['500g de gnocchis', '4 saucisses', '1 filet d\'huile d\'olive'], category: 'repas' },
+  { id: '12', name: 'Cordon bleu et Pommes de terre', carb: 'Pommes de terre', equipment: 'Poêle', season: 'Toutes', type: 'text', instructions: 'Cuire les cordons bleus à la poêle et accompagner de pommes de terre sautées.', ingredients: ['4 cordons bleus', '600g de pommes de terre cuites', 'Beurre'], category: 'repas' },
+  { id: '13', name: 'Gâteau au yaourt moelleux', carb: 'Plaisir', equipment: 'Four', season: 'Toutes', type: 'text', instructions: 'Mélanger un pot de yaourt, 2 pots de sucre, 3 pots de farine, 1/2 pot d\'huile, 3 œufs et de la levure. Cuire 35 min à 180°C.', ingredients: ['1 yaourt nature', '3 pots de farine', '2 pots de sucre', '1/2 pot d\'huile', '3 œufs', '1 sachet de levure'], category: 'gateau' },
+  { id: '14', name: 'Cookies pépites de chocolat', carb: 'Plaisir', equipment: 'Four', season: 'Toutes', type: 'text', instructions: 'Mélanger beurre mou, sucre, sucre vanillé, œuf, farine et pépites. Faire des boules et cuire 10 min à 180°C.', ingredients: ['150g de beurre', '100g de sucre', '1 œuf', '220g de farine', '100g de pépites de chocolat'], category: 'gateau' },
 ];
 
-const INITIAL_EQUIPMENTS = ['Thermomix', 'Cookeo', 'PoÃªle', 'Four', 'Casserole', 'Airfryer', 'Autre appareil', 'Sans Cuisson'];
-const CARBS = ['PÃ¢tes', 'Pommes de terre', 'Semoule', 'Riz', 'BlÃ©', 'Plaisir', 'Autre'];
-const SEASONS_LIST = ['Printemps', 'Ã‰tÃ©', 'Automne', 'Hiver'];
-const STORAGE_ZONES = ['Placard', 'Frigo', 'CongÃ©lateur'];
+const INITIAL_EQUIPMENTS = ['Thermomix', 'Cookeo', 'Poêle', 'Four', 'Casserole', 'Airfryer', 'Autre appareil', 'Sans Cuisson'];
+const CARBS = ['Pâtes', 'Pommes de terre', 'Semoule', 'Riz', 'Blé', 'Plaisir', 'Autre'];
+const SEASONS_LIST = ['Printemps', 'Été', 'Automne', 'Hiver'];
+const STORAGE_ZONES = ['Placard', 'Frigo', 'Congélateur'];
 
 const getCurrentSeason = () => {
   const now = new Date();
@@ -30,7 +30,7 @@ const getCurrentSeason = () => {
   const day = now.getDate();
 
   if ((month === 2 && day >= 20) || (month > 2 && month < 5) || (month === 5 && day <= 20)) return 'Printemps';
-  if ((month === 5 && day >= 21) || (month > 5 && month < 8) || (month === 8 && day <= 21)) return 'Ã‰tÃ©';
+  if ((month === 5 && day >= 21) || (month > 5 && month < 8) || (month === 8 && day <= 21)) return 'Été';
   if ((month === 8 && day >= 22) || (month > 8 && month < 11) || (month === 11 && day <= 20)) return 'Automne';
   return 'Hiver';
 };
@@ -62,8 +62,8 @@ export default function App() {
     { name: 'Sel', status: 'Plein', zone: 'Placard' },
     { name: 'Poivre', status: 'Plein', zone: 'Placard' },
     { name: "Huile d'olive", status: 'Plein', zone: 'Placard' },
-    { name: 'Beurre', status: 'EntamÃ©', zone: 'Frigo' },
-    { name: 'PÃ¢tes', status: 'EntamÃ©', zone: 'Placard' },
+    { name: 'Beurre', status: 'Entamé', zone: 'Frigo' },
+    { name: 'Pâtes', status: 'Entamé', zone: 'Placard' },
     { name: 'Riz', status: 'Presque vide', zone: 'Placard' },
     { name: 'Oignons', status: 'Plein', zone: 'Placard' },
     { name: 'Ail', status: 'Plein', zone: 'Placard' }
@@ -164,7 +164,7 @@ export default function App() {
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <h1 className="text-xl font-bold flex items-center gap-2">
             <Utensils className="w-6 h-6" />
-            Mon Menu OrganisÃ©
+            Mon Menu Organisé
           </h1>
           
           <div className="flex items-center gap-2">
@@ -236,7 +236,7 @@ export default function App() {
               onClick={() => setSelectedImage(null)}
               className="absolute top-2 right-2 text-white bg-black bg-opacity-50 rounded-full w-8 h-8 flex items-center justify-center hover:bg-opacity-75 font-bold"
             >
-              âœ•
+              ✕
             </button>
           </div>
         </div>
@@ -245,7 +245,7 @@ export default function App() {
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-40 px-4 py-2 shadow-[0_-10px_25px_-3px_rgb(0,0,0,0.1)]">
         <div className="max-w-md mx-auto flex justify-between items-center relative">
           <NavButton active={activeTab === 'menu'} onClick={() => setActiveTab('menu')} icon={<Calendar />} label="Menus" />
-          <NavButton active={activeTab === 'baking'} onClick={() => setActiveTab('baking')} icon={<Cake />} label="GÃ¢teaux" />
+          <NavButton active={activeTab === 'baking'} onClick={() => setActiveTab('baking')} icon={<Cake />} label="Gâteaux" />
           
           <button
             onClick={() => { setEditingRecipe(null); setActiveTab('add'); }}
@@ -330,13 +330,13 @@ function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, delete
 
 function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, equipments }) {
   const daysConfig = [
-    { key: 'monday', label: 'Lundi', reqCarb: 'BlÃ©' },
+    { key: 'monday', label: 'Lundi', reqCarb: 'Blé' },
     { key: 'tuesday', label: 'Mardi', reqCarb: 'Semoule' },
     { key: 'wednesday', label: 'Mercredi', reqCarb: '' },
     { key: 'thursday', label: 'Jeudi', reqCarb: 'Riz' },
     { key: 'friday', label: 'Vendredi', reqCarb: 'Pommes de terre' },
     { key: 'saturday', label: 'Samedi', reqCarb: 'Plaisir' },
-    { key: 'sunday', label: 'Dimanche', reqCarb: 'PÃ¢tes' },
+    { key: 'sunday', label: 'Dimanche', reqCarb: 'Pâtes' },
   ];
 
   const getEligibleRecipes = (reqCarb) => {
@@ -366,13 +366,13 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
     let tempEquipCounts = {};
     
     const eveningDays = [
-      { key: 'mondayDinner', reqCarb: 'BlÃ©' },
+      { key: 'mondayDinner', reqCarb: 'Blé' },
       { key: 'tuesdayDinner', reqCarb: 'Semoule' },
       { key: 'wednesdayDinner', reqCarb: '' },
       { key: 'thursdayDinner', reqCarb: 'Riz' },
       { key: 'fridayDinner', reqCarb: 'Pommes de terre' },
       { key: 'saturdayDinner', reqCarb: 'Plaisir' },
-      { key: 'sundayDinner', reqCarb: 'PÃ¢tes' },
+      { key: 'sundayDinner', reqCarb: 'Pâtes' },
     ];
 
     eveningDays.forEach(day => {
@@ -415,10 +415,10 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
           <div>
             <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-indigo-600" />
-              GÃ©nÃ©rateur Intelligent
+              Générateur Intelligent
             </h2>
             <p className="text-xs text-slate-500">
-              Suggestions automatiques basÃ©es sur la saison actuelle ({currentSeason}).
+              Suggestions automatiques basées sur la saison actuelle ({currentSeason}).
             </p>
           </div>
           <button 
@@ -426,7 +426,7 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
             className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl font-medium transition-colors text-sm shadow-sm"
           >
             <RefreshCw className="w-4 h-4" />
-            GÃ©nÃ©rer un menu Ã©quilibrÃ©
+            Générer un menu équilibré
           </button>
         </div>
         
@@ -443,7 +443,7 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
         </div>
         {hasImbalance && (
           <p className="text-xs text-orange-600 mt-2 flex items-center gap-1 font-medium">
-            <AlertTriangle className="w-4 h-4" /> Attention, vous utilisez le mÃªme appareil plus de 2 fois dans la semaine !
+            <AlertTriangle className="w-4 h-4" /> Attention, vous utilisez le même appareil plus de 2 fois dans la semaine !
           </p>
         )}
       </div>
@@ -514,7 +514,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
               className="w-full bg-white border border-slate-300 text-slate-900 text-xs rounded-lg focus:ring-indigo-500 p-2"
             >
               <option value="">-- Choisir le midi --</option>
-              <option value="restes">ðŸ” Restes de la veille</option>
+              <option value="restes">🔁 Restes de la veille</option>
               {anyRecipes.map(r => (
                 <option key={r.id} value={r.id}>
                   {r.name}
@@ -548,7 +548,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
               </div>
             ) : dinnerRecipes.length === 0 ? (
               <div className="text-xs text-amber-700 bg-amber-50 p-2.5 rounded-lg border border-amber-200">
-                Aucune recette de {currentSeason} pour ce fÃ©culent.
+                Aucune recette de {currentSeason} pour ce féculent.
               </div>
             ) : (
               <select
@@ -632,7 +632,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
         </div>
 
         <div className="text-xs text-slate-500 font-medium">
-          {filteredRecipes.length} affichÃ©e(s)
+          {filteredRecipes.length} affichée(s)
         </div>
       </div>
 
@@ -666,7 +666,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
 
               {recipe.ingredients && recipe.ingredients.length > 0 && (
                 <p className="text-xs text-slate-500 line-clamp-2 mb-3">
-                  <span className="font-medium text-slate-700">IngrÃ©dients : </span>
+                  <span className="font-medium text-slate-700">Ingrédients : </span>
                   {recipe.ingredients.join(', ')}
                 </p>
               )}
@@ -705,7 +705,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
         ))}
         {filteredRecipes.length === 0 && (
           <div className="col-span-full py-12 text-center text-slate-400 text-sm bg-white rounded-xl border border-slate-200">
-            Aucune recette ne correspond Ã  ces filtres.
+            Aucune recette ne correspond à ces filtres.
           </div>
         )}
       </div>
@@ -749,7 +749,7 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
             ${subTab === 'list' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
           `}
         >
-          <Cake className="w-4 h-4" /> Catalogue GÃ¢teaux ({bakingRecipes.length})
+          <Cake className="w-4 h-4" /> Catalogue Gâteaux ({bakingRecipes.length})
         </button>
       </div>
 
@@ -758,16 +758,16 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="font-bold text-slate-800 text-base flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-indigo-600" /> GÃ¢teaux & GoÃ»ters de la semaine
+                <Sparkles className="w-5 h-5 text-indigo-600" /> Gâteaux & Goûters de la semaine
               </h2>
-              <p className="text-xs text-slate-500">SÃ©lectionnez ou gÃ©nÃ©rez vos pÃ¢tisseries de la semaine.</p>
+              <p className="text-xs text-slate-500">Sélectionnez ou générez vos pâtisseries de la semaine.</p>
             </div>
             <button 
               onClick={generateSmartBaking}
               className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl font-medium transition-colors text-sm shadow-sm"
             >
               <RefreshCw className="w-4 h-4" />
-              GÃ©nÃ©rer les gÃ¢teaux
+              Générer les gâteaux
             </button>
           </div>
 
@@ -778,14 +778,14 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
               return (
                 <div key={idx} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-slate-700 uppercase">Choix nÂ°{idx + 1}</span>
+                    <span className="text-xs font-bold text-slate-700 uppercase">Choix n°{idx + 1}</span>
                   </div>
                   <select
                     value={selectedId}
                     onChange={(e) => updateBakingItem(idx, e.target.value)}
                     className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg p-2.5"
                   >
-                    <option value="">-- Choisir une recette de gÃ¢teau --</option>
+                    <option value="">-- Choisir une recette de gâteau --</option>
                     {bakingRecipes.map(r => (
                       <option key={r.id} value={r.id}>{r.name}</option>
                     ))}
@@ -922,7 +922,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
 
     const ingredients = ingredientsText
       .split('\n')
-      .map(i => i.trim().replace(/^[-*â€¢]\s*/, ''))
+      .map(i => i.trim().replace(/^[-*•]\s*/, ''))
       .filter(i => i.length > 0);
 
     const finalSeason = selectedSeasons.includes('Toutes') ? 'Toutes' : selectedSeasons.join(', ');
@@ -963,7 +963,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
             onClick={() => { setEditingRecipe(null); setActiveTab('menu'); }}
             className="text-xs text-slate-500 hover:text-slate-800 underline"
           >
-            Annuler l'Ã©dition
+            Annuler l'édition
           </button>
         )}
       </div>
@@ -975,14 +975,14 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
             <label className={`flex-1 p-3 rounded-xl border flex items-center justify-center gap-2 cursor-pointer transition-all
               ${category === 'repas' ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'bg-slate-50 border-slate-300 text-slate-700'}`}
             >
-              <input type="radio" name="recipeCat" checked={category === 'repas'} onChange={() => { setCategory('repas'); setCarb('PÃ¢tes'); }} className="hidden" />
-              ðŸ½ï¸ Plat / Repas
+              <input type="radio" name="recipeCat" checked={category === 'repas'} onChange={() => { setCategory('repas'); setCarb('Pâtes'); }} className="hidden" />
+              🍽️ Plat / Repas
             </label>
             <label className={`flex-1 p-3 rounded-xl border flex items-center justify-center gap-2 cursor-pointer transition-all
               ${category === 'gateau' ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'bg-slate-50 border-slate-300 text-slate-700'}`}
             >
               <input type="radio" name="recipeCat" checked={category === 'gateau'} onChange={() => { setCategory('gateau'); setCarb('Plaisir'); }} className="hidden" />
-              ðŸ° GÃ¢teau / GoÃ»ter
+              🍰 Gâteau / Goûter
             </label>
           </div>
         </div>
@@ -994,7 +994,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder={category === 'gateau' ? "Ex: GÃ¢teau au chocolat moelleux..." : "Ex: Gratin de courgettes au chÃ¨vre..."}
+            placeholder={category === 'gateau' ? "Ex: Gâteau au chocolat moelleux..." : "Ex: Gratin de courgettes au chèvre..."}
             className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
           />
         </div>
@@ -1002,7 +1002,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {category === 'repas' && (
             <div className="space-y-2">
-              <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">FÃ©culent / CatÃ©gorie</label>
+              <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Féculent / Catégorie</label>
               <select 
                 value={carb}
                 onChange={(e) => setCarb(e.target.value)}
@@ -1014,7 +1014,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
               {carb === 'Autre' && (
                 <input 
                   type="text"
-                  placeholder="PrÃ©cisez la catÃ©gorie..."
+                  placeholder="Précisez la catégorie..."
                   value={customCarb}
                   onChange={(e) => setCustomCarb(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs text-slate-900 focus:ring-indigo-500"
@@ -1025,7 +1025,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
           )}
 
           <div className={category === 'gateau' ? 'col-span-full space-y-2' : 'space-y-2'}>
-            <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Appareil utilisÃ©</label>
+            <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Appareil utilisé</label>
             <select 
               value={equipment}
               onChange={(e) => {
@@ -1048,7 +1048,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
                 <div className="w-5 h-5 rounded-full border border-indigo-600 flex items-center justify-center">
                   <Plus className="w-3.5 h-3.5" />
                 </div>
-                Ajouter un autre appareil utilisÃ© (facultatif)
+                Ajouter un autre appareil utilisé (facultatif)
               </button>
             ) : (
               <div className="space-y-2 mt-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
@@ -1062,7 +1062,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
                     }}
                     className="text-slate-400 hover:text-slate-700 text-xs"
                   >
-                    âœ• Retirer
+                    ✕ Retirer
                   </button>
                 </div>
                 <select 
@@ -1081,7 +1081,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-700 uppercase mb-2">Saison(s) idÃ©ale(s)</label>
+          <label className="block text-xs font-semibold text-slate-700 uppercase mb-2">Saison(s) idéale(s)</label>
           <div className="flex flex-wrap gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
             <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
               <input 
@@ -1130,7 +1130,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
 
         {image && (
           <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-slate-200">
-            <img src={image} alt="AperÃ§u" onClick={() => setSelectedImage(image)} className="w-full h-full object-cover cursor-pointer hover:opacity-95 transition" />
+            <img src={image} alt="Aperçu" onClick={() => setSelectedImage(image)} className="w-full h-full object-cover cursor-pointer hover:opacity-95 transition" />
             <button 
               type="button" 
               onClick={() => setImage('')}
@@ -1142,7 +1142,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
         )}
 
         <div>
-          <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">IngrÃ©dients (1 par ligne)</label>
+          <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Ingrédients (1 par ligne)</label>
           <textarea 
             rows={3}
             value={ingredientsText}
@@ -1154,12 +1154,12 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Instructions de prÃ©paration</label>
+          <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Instructions de préparation</label>
           <textarea 
             rows={3}
             value={instructions}
             onChange={(e) => setInstructions(e.target.value)}
-            placeholder="MÃ©langer tous les ingrÃ©dients..."
+            placeholder="Mélanger tous les ingrédients..."
             className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
           />
         </div>
@@ -1168,7 +1168,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
           type="submit"
           className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-xl transition-colors shadow-sm text-sm"
         >
-          {editingRecipe ? 'Mettre Ã  jour la recette' : 'Enregistrer la recette'}
+          {editingRecipe ? 'Mettre à jour la recette' : 'Enregistrer la recette'}
         </button>
       </form>
     </div>
@@ -1216,7 +1216,7 @@ function InventoryManager({ inventory, setInventory }) {
           <Package className="w-5 h-5 text-indigo-600" /> Gestion des Provisions
         </h2>
         <p className="text-xs text-slate-500">
-          Rangez vos provisions par zone (Placard, Frigo, CongÃ©lateur) pour suivre vos stocks.
+          Rangez vos provisions par zone (Placard, Frigo, Congélateur) pour suivre vos stocks.
         </p>
       </div>
 
@@ -1243,7 +1243,7 @@ function InventoryManager({ inventory, setInventory }) {
             className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700"
           >
             <option value="Plein">Plein</option>
-            <option value="EntamÃ©">EntamÃ©</option>
+            <option value="Entamé">Entamé</option>
             <option value="Presque vide">Presque vide</option>
           </select>
           <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
@@ -1295,18 +1295,18 @@ function InventoryManager({ inventory, setInventory }) {
                   onChange={(e) => updateStatus(originalIndex, e.target.value)}
                   className={`text-xs font-semibold rounded-md px-2 py-1 border
                     ${item.status === 'Plein' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : ''}
-                    ${item.status === 'EntamÃ©' ? 'bg-amber-50 text-amber-700 border-amber-200' : ''}
+                    ${item.status === 'Entamé' ? 'bg-amber-50 text-amber-700 border-amber-200' : ''}
                     ${item.status === 'Presque vide' ? 'bg-red-50 text-red-700 border-red-200' : ''}
                   `}
                 >
                   <option value="Plein">Plein</option>
-                  <option value="EntamÃ©">EntamÃ©</option>
+                  <option value="Entamé">Entamé</option>
                   <option value="Presque vide">Presque vide</option>
                 </select>
 
                 <button 
                   onClick={() => {
-                    if (window.confirm("Supprimer cet Ã©lÃ©ment ?")) {
+                    if (window.confirm("Supprimer cet élément ?")) {
                       removeItem(originalIndex);
                     }
                   }}
@@ -1320,7 +1320,7 @@ function InventoryManager({ inventory, setInventory }) {
           );
         })}
         {filteredInventory.length === 0 && (
-          <div className="p-8 text-center text-slate-400 text-sm">Aucun Ã©lÃ©ment dans cette catÃ©gorie.</div>
+          <div className="p-8 text-center text-slate-400 text-sm">Aucun élément dans cette catégorie.</div>
         )}
       </div>
     </div>
@@ -1353,7 +1353,7 @@ function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingCheck
     const found = inventory.find(i => ingName.toLowerCase().includes(i.name.toLowerCase()));
     if (!found) return { status: 'A acheter', color: 'text-indigo-600 bg-indigo-50 border-indigo-200' };
     if (found.status === 'Plein') return { status: `En stock (${found.zone} - Plein)`, color: 'text-emerald-700 bg-emerald-50 border-emerald-200' };
-    if (found.status === 'EntamÃ©') return { status: `En stock (${found.zone} - EntamÃ©)`, color: 'text-amber-700 bg-amber-50 border-amber-200' };
+    if (found.status === 'Entamé') return { status: `En stock (${found.zone} - Entamé)`, color: 'text-amber-700 bg-amber-50 border-amber-200' };
     return { status: `Presque vide (${found.zone})`, color: 'text-red-700 bg-red-700 border-red-200' };
   };
 
@@ -1375,7 +1375,7 @@ function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingCheck
           <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2">
             <ShoppingBag className="w-5 h-5 text-indigo-600" /> Liste de Courses Intelligente
           </h2>
-          <p className="text-xs text-slate-500">BasÃ©e sur les menus, gÃ¢teaux et l'Ã©tat de vos provisions.</p>
+          <p className="text-xs text-slate-500">Basée sur les menus, gâteaux et l'état de vos provisions.</p>
         </div>
         {rawList.length > 0 && (
           <button 
@@ -1383,14 +1383,14 @@ function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingCheck
             className="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg transition-colors"
           >
             {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
-            {copied ? 'CopiÃ© !' : 'Copier la liste'}
+            {copied ? 'Copié !' : 'Copier la liste'}
           </button>
         )}
       </div>
 
       {rawList.length === 0 ? (
         <div className="text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-300">
-          <p className="text-slate-500 text-sm mb-2">Aucun menu ou gÃ¢teau planifiÃ© pour l'instant.</p>
+          <p className="text-slate-500 text-sm mb-2">Aucun menu ou gâteau planifié pour l'instant.</p>
           <button 
             onClick={() => setActiveTab('menu')}
             className="text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-lg transition-colors"
@@ -1447,7 +1447,7 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="text-xs font-semibold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md border border-indigo-100">
-              {recipe.category === 'gateau' ? 'ðŸ° GÃ¢teau' : recipe.carb}
+              {recipe.category === 'gateau' ? '🍰 Gâteau' : recipe.carb}
             </span>
             <span className="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md font-medium">
               {recipe.equipment}{recipe.additionalEquipment ? ` + ${recipe.additionalEquipment}` : ''}
@@ -1489,7 +1489,7 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
 
         {recipe.ingredients && recipe.ingredients.length > 0 && (
           <div>
-            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">IngrÃ©dients</h3>
+            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Ingrédients</h3>
             <ul className="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-1.5">
               {recipe.ingredients.map((ing, idx) => (
                 <li key={idx} className="text-sm text-slate-800 flex items-center gap-2 list-none">
@@ -1503,7 +1503,7 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
 
         {recipe.instructions && (
           <div>
-            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">PrÃ©paration</h3>
+            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Préparation</h3>
             <p className="text-sm text-slate-700 leading-relaxed bg-slate-50 rounded-xl p-4 border border-slate-200 whitespace-pre-line">
               {recipe.instructions}
             </p>
