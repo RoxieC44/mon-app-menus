@@ -81,7 +81,6 @@ export default function App() {
         if (saved.recipes) setRecipes(saved.recipes);
         if (saved.menu) setMenu(saved.menu);
         if (saved.inventory) {
-          // Migration rétrocompatible si les anciens éléments n'ont pas de zone
           const migrated = saved.inventory.map(item => ({
             ...item,
             zone: item.zone || 'Placard'
@@ -766,7 +765,7 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
                   >
                     <option value="">-- Choisir une recette de gâteau --</option>
                     {bakingRecipes.map(r => (
-                      <option key={r.id} value={r.id}>{r.name} ({r.equipment})</option>
+                      <option key={r.id} value={r.id}>{r.name} - {r.equipment}</option>
                     ))}
                   </select>
 
@@ -1416,4 +1415,3 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
     </div>
   );
 }
-
