@@ -29,13 +29,9 @@ const getCurrentSeason = () => {
   const month = now.getMonth();
   const day = now.getDate();
 
-  // Printemps : du 20 mars au 20 juin
   if ((month === 2 && day >= 20) || (month > 2 && month < 5) || (month === 5 && day <= 20)) return 'Printemps';
-  // Été : du 21 juin au 21 septembre
   if ((month === 5 && day >= 21) || (month > 5 && month < 8) || (month === 8 && day <= 21)) return 'Été';
-  // Automne : du 22 septembre au 20 décembre
   if ((month === 8 && day >= 22) || (month > 8 && month < 11) || (month === 11 && day <= 20)) return 'Automne';
-  // Hiver : du 21 décembre au 19 mars
   return 'Hiver';
 };
 
@@ -820,6 +816,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
   const [carb, setCarb] = useState('Plaisir');
   const [customCarb, setCustomCarb] = useState('');
   const [equipment, setEquipment] = useState(equipments[0] || 'Four');
+  const [showNewEquipInput, setShowNewEquipInput] = useState(false);
   const [newEquipInput, setNewEquipInput] = useState('');
   const [selectedSeasons, setSelectedSeasons] = useState(['Toutes']);
   const [category, setCategory] = useState('repas');
@@ -840,8 +837,10 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
       }
       if (equipments.includes(editingRecipe.equipment)) {
         setEquipment(editingRecipe.equipment);
+        setShowNewEquipInput(false);
       } else if (editingRecipe.equipment) {
-        setEquipment('__autre__');
+        setEquipment(equipments[0] || 'Four');
+        setShowNewEquipInput(true);
         setNewEquipInput(editingRecipe.equipment);
       }
       setCategory(editingRecipe.category || 'repas');
@@ -897,16 +896,25 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
     }
   };
 
+  const handleAddCustomEquipment = () => {
+    const trimmed = newEquipInput.trim();
+    if (trimmed) {
+      if (!equipments.includes(trimmed)) {
+        setEquipments([...equipments, trimmed]);
+      }
+      setEquipment(trimmed);
+      setNewEquipInput('');
+      setShowNewEquipInput(false);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!name.trim()) return;
 
     let finalEquipment = equipment;
-    if (equipment === '__autre__') {
-      finalEquipment = newEquipInput.trim();
-      if (finalEquipment && !equipments.includes(finalEquipment)) {
-        setEquipments([...equipments, finalEquipment]);
-      }
+    if (showNewEquipInput) {
+      finalEquipment = newEquipInput.trim() || equipment;
     }
 
     const ingredients = ingredientsText
@@ -1020,18 +1028,43 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
               className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
             >
               {equipments.map(eq => <option key={eq} value={eq}>{eq}</option>)}
-              <option value="__autre__">+ Ajouter un autre appareil...</option>
             </select>
 
-            {equipment === '__autre__' && (
-              <input 
-                type="text"
-                placeholder="Nom du nouvel appareil..."
-                value={newEquipInput}
-                onChange={(e) => setNewEquipInput(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs text-slate-900 focus:ring-indigo-500 mt-2"
-                required
-              />
+            {!showNewEquipInput ? (
+              <button
+                type="button"
+                onClick={() => setShowNewEquipInput(true)}
+                className="flex items-center gap-2 text-xs font-semibold text-indigo-600 hover:text-indigo-800 mt-1 transition-colors"
+              >
+                <div className="w-5 h-5 rounded-full border border-indigo-600 flex items-center justify-center">
+                  <Plus className="w-3.5 h-3.5" />
+                </div>
+                Ajouter un autre appareil utilisé (facultatif)
+              </button>
+            ) : (
+              <div className="flex gap-2 mt-2">
+                <input 
+                  type="text"
+                  placeholder="Nom du nouvel appareil..."
+                  value={newEquipInput}
+                  onChange={(e) => setNewEquipInput(e.target.value)}
+                  className="flex-1 bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs text-slate-900 focus:ring-indigo-500"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddCustomEquipment}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium"
+                >
+                  Valider
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowNewEquipInput(false)}
+                  className="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs px-2.5 py-1.5 rounded-lg"
+                >
+                  ✕
+                </button>
+              </div>
             )}
           </div>
         </div>
