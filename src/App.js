@@ -30,9 +30,7 @@ const INITIAL_EQUIPMENTS = [
   'Plancha',
   'Barbecue',
   'Crêpière - Mini woks - Grill',
-  'Raclette - Pierrade - Fondue',
-  'Autre appareil', 
-  'Sans Cuisson'
+  'Raclette - Pierrade - Fondue'
 ];
 
 const CARBS = ['Pâtes', 'Pommes de terre', 'Semoule', 'Riz', 'Blé', 'Plaisir', 'Autre'];
@@ -946,7 +944,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
     const recipeData = {
       name,
       carb: finalCarb,
-      equipment: equipment || 'Autre',
+      equipment: equipment || equipments[0],
       additionalEquipment: finalAdditionalEquipment,
       season: finalSeason,
       category,
