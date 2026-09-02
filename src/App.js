@@ -533,7 +533,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
             </div>
             {day.key === 'wednesday' ? (
               <div className="w-full bg-slate-100 border border-slate-300 text-slate-800 text-xs rounded-lg p-2 font-medium flex items-center justify-between">
-                <span>Cordon bleu et Pommes de terre</span>
+                <span>Gnocchis, saucisses, cordons bleus et pommes de terre</span>
                 <span className="text-[10px] bg-slate-200 px-2 py-0.5 rounded text-slate-600">Fixe</span>
               </div>
             ) : dinnerRecipes.length === 0 ? (
@@ -1372,7 +1372,7 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
             ${subTab === 'carbs' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
           `}
         >
-          <Tag className="w-4 h-4" /> Catégories ({carbsList.length})
+          <Tag className="w-4 h-4" /> Féculents ({carbsList.length})
         </button>
       </div>
 
