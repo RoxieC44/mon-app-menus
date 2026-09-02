@@ -19,7 +19,7 @@ const DEFAULT_RECIPES = [
   { id: '14', name: 'Cookies pépites de chocolat', carb: 'Plaisir', equipment: 'Four', season: 'Toutes', type: 'text', instructions: 'Mélanger beurre mou, sucre, sucre vanillé, œuf, farine et pépites. Faire des boules et cuire 10 min à 180°C.', ingredients: ['150g de beurre', '100g de sucre', '1 œuf', '220g de farine', '100g de pépites de chocolat'], category: 'gateau' },
 ];
 
-const INITIAL_EQUIPMENTS = ['Thermomix', 'Cookeo', 'Poêle', 'Four', 'Casserole', 'Airfryer', 'Autre appareil', 'Sans Cuisson'];
+const INITIAL_EQUIPMENTS = ['Thermomix', 'Cookeo', 'Poêle', 'Four', 'Casserole', 'Airfryer', 'Gaufrier - Croque-Monsieur - Panini', 'Crêpière - Mini woks - Grill', 'Raclette - Pierrade - Fondue', 'Plancha', 'Barbecue', 'Sans Cuisson'];
 const CARBS = ['Pâtes', 'Pommes de terre', 'Semoule', 'Riz', 'Blé', 'Plaisir', 'Autre'];
 const SEASONS_LIST = ['Printemps', 'Été', 'Automne', 'Hiver'];
 const STORAGE_ZONES = ['Placard', 'Frigo', 'Congélateur'];
@@ -83,7 +83,7 @@ export default function App() {
       if (data && data.data) {
         const saved = data.data;
         if (saved.recipes) setRecipes(saved.recipes);
-        if (saved.equipments) setEquipments(saved.equipments);
+        if (saved.equipments && Array.isArray(saved.equipments)) setEquipments(saved.equipments);
         if (saved.menu) setMenu(saved.menu);
         if (saved.inventory) {
           const migrated = saved.inventory.map(item => ({
@@ -213,7 +213,7 @@ export default function App() {
           />
         )}
         {activeTab === 'add' && <AddRecipeForm addRecipe={addRecipe} editingRecipe={editingRecipe} setEditingRecipe={setEditingRecipe} setActiveTab={setActiveTab} setSelectedImage={setSelectedImage} equipments={equipments} setEquipments={setEquipments} />}
-        {activeTab === 'inventory' && <InventoryManager inventory={inventory} setInventory={setInventory} />}
+        {activeTab === 'inventory' && <InventoryManager inventory={inventory} setInventory={setInventory} equipments={equipments} setEquipments={setEquipments} />}
         {activeTab === 'shopping' && <ShoppingListView menu={menu} recipes={recipes} inventory={inventory} bakingItems={bakingItems} shoppingChecks={shoppingChecks} setShoppingChecks={setShoppingChecks} setActiveTab={setActiveTab} />}
       </main>
 
@@ -827,6 +827,8 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
   const [carb, setCarb] = useState('Plaisir');
   const [customCarb, setCustomCarb] = useState('');
   const [equipment, setEquipment] = useState(equipments[0] || 'Four');
+  const [showNewEquipInput, setShowNewEquipInput] = useState(false);
+  const [newEquipName, setNewEquipName] = useState('');
   const [showNewEquipSelect, setShowNewEquipSelect] = useState(false);
   const [additionalEquipment, setAdditionalEquipment] = useState('');
   const [selectedSeasons, setSelectedSeasons] = useState(['Toutes']);
@@ -879,6 +881,18 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
       }
     }
   }, [editingRecipe, equipments]);
+
+  const handleAddNewEquipmentQuick = (e) => {
+    e.preventDefault();
+    const trimmed = newEquipName.trim();
+    if (!trimmed) return;
+    if (!equipments.some(eq => eq.toLowerCase() === trimmed.toLowerCase())) {
+      setEquipments([...equipments, trimmed]);
+    }
+    setEquipment(trimmed);
+    setNewEquipName('');
+    setShowNewEquipInput(false);
+  };
 
   const handleSeasonCheckboxChange = (seasonOption) => {
     if (seasonOption === 'Toutes') {
@@ -1025,19 +1039,57 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
           )}
 
           <div className={category === 'gateau' ? 'col-span-full space-y-2' : 'space-y-2'}>
-            <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Appareil utilisé</label>
-            <select 
-              value={equipment}
-              onChange={(e) => {
-                setEquipment(e.target.value);
-                if (additionalEquipment === e.target.value) {
-                  setAdditionalEquipment('');
-                }
-              }}
-              className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
-            >
-              {equipments.map(eq => <option key={eq} value={eq}>{eq}</option>)}
-            </select>
+            <div className="flex justify-between items-center mb-1">
+              <label className="block text-xs font-semibold text-slate-700 uppercase">Appareil utilisé</label>
+              {!showNewEquipInput && (
+                <button
+                  type="button"
+                  onClick={() => setShowNewEquipInput(true)}
+                  className="text-xs font-semibold text-indigo-600 hover:text-indigo-800"
+                >
+                  + Nouvel appareil
+                </button>
+              )}
+            </div>
+
+            {showNewEquipInput ? (
+              <div className="flex gap-2">
+                <input 
+                  type="text"
+                  placeholder="Nom du nouvel appareil..."
+                  value={newEquipName}
+                  onChange={(e) => setNewEquipName(e.target.value)}
+                  className="flex-1 bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs text-slate-900"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddNewEquipmentQuick}
+                  className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium"
+                >
+                  Ajouter
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowNewEquipInput(false)}
+                  className="text-slate-400 hover:text-slate-600 text-xs px-1"
+                >
+                  ✕
+                </button>
+              </div>
+            ) : (
+              <select 
+                value={equipment}
+                onChange={(e) => {
+                  setEquipment(e.target.value);
+                  if (additionalEquipment === e.target.value) {
+                    setAdditionalEquipment('');
+                  }
+                }}
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
+              >
+                {equipments.map(eq => <option key={eq} value={eq}>{eq}</option>)}
+              </select>
+            )}
 
             {!showNewEquipSelect ? (
               <button
@@ -1175,11 +1227,13 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
   );
 }
 
-function InventoryManager({ inventory, setInventory }) {
+function InventoryManager({ inventory, setInventory, equipments, setEquipments }) {
+  const [subTab, setSubTab] = useState('inventory');
   const [newItemName, setNewItemName] = useState('');
   const [newItemStatus, setNewItemStatus] = useState('Plein');
   const [newItemZone, setNewItemZone] = useState('Placard');
   const [filterZone, setFilterZone] = useState('Tous');
+  const [newEquipName, setNewEquipName] = useState('');
 
   const addItem = (e) => {
     e.preventDefault();
@@ -1204,6 +1258,28 @@ function InventoryManager({ inventory, setInventory }) {
     setInventory(inventory.filter((_, i) => i !== index));
   };
 
+  const addEquipment = (e) => {
+    e.preventDefault();
+    const trimmed = newEquipName.trim();
+    if (!trimmed) return;
+    if (equipments.some(eq => eq.toLowerCase() === trimmed.toLowerCase())) {
+      alert("Cet appareil existe déjà !");
+      return;
+    }
+    setEquipments([...equipments, trimmed]);
+    setNewEquipName('');
+  };
+
+  const removeEquipment = (eqToDelete) => {
+    if (equipments.length <= 1) {
+      alert("Vous devez garder au moins un appareil.");
+      return;
+    }
+    if (window.confirm(`Supprimer l'appareil "${eqToDelete}" ?`)) {
+      setEquipments(equipments.filter(eq => eq !== eqToDelete));
+    }
+  };
+
   const filteredInventory = inventory.filter(item => {
     if (filterZone === 'Tous') return true;
     return item.zone === filterZone;
@@ -1211,118 +1287,184 @@ function InventoryManager({ inventory, setInventory }) {
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 max-w-2xl mx-auto space-y-6">
-      <div>
-        <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2 mb-1">
-          <Package className="w-5 h-5 text-indigo-600" /> Gestion des Provisions
-        </h2>
-        <p className="text-xs text-slate-500">
-          Rangez vos provisions par zone (Placard, Frigo, Congélateur) pour suivre vos stocks.
-        </p>
-      </div>
-
-      <form onSubmit={addItem} className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-        <h3 className="text-xs font-bold text-slate-700 uppercase">Ajouter un article</h3>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <input 
-            type="text" 
-            placeholder="Nom (ex: Lait, Farine, Steaks...)" 
-            value={newItemName}
-            onChange={(e) => setNewItemName(e.target.value)}
-            className="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm"
-          />
-          <select 
-            value={newItemZone}
-            onChange={(e) => setNewItemZone(e.target.value)}
-            className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700"
-          >
-            {STORAGE_ZONES.map(z => <option key={z} value={z}>{z}</option>)}
-          </select>
-          <select 
-            value={newItemStatus}
-            onChange={(e) => setNewItemStatus(e.target.value)}
-            className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700"
-          >
-            <option value="Plein">Plein</option>
-            <option value="Entamé">Entamé</option>
-            <option value="Presque vide">Presque vide</option>
-          </select>
-          <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
-            Ajouter
-          </button>
-        </div>
-      </form>
-
       <div className="flex bg-slate-200/70 p-1 rounded-xl">
         <button 
-          onClick={() => setFilterZone('Tous')}
-          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all
-            ${filterZone === 'Tous' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
+          onClick={() => setSubTab('inventory')}
+          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2
+            ${subTab === 'inventory' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
           `}
         >
-          Tout ({inventory.length})
+          <Package className="w-4 h-4" /> Provisions ({inventory.length})
         </button>
-        {STORAGE_ZONES.map(z => (
-          <button 
-            key={z}
-            onClick={() => setFilterZone(z)}
-            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all
-              ${filterZone === z ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
-            `}
-          >
-            {z} ({inventory.filter(i => i.zone === z).length})
-          </button>
-        ))}
+        <button 
+          onClick={() => setSubTab('equipments')}
+          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2
+            ${subTab === 'equipments' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
+          `}
+        >
+          <Settings className="w-4 h-4" /> Appareils ({equipments.length})
+        </button>
       </div>
 
-      <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
-        {filteredInventory.map((item, index) => {
-          const originalIndex = inventory.findIndex(i => i === item);
+      {subTab === 'inventory' ? (
+        <div className="space-y-6">
+          <div>
+            <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2 mb-1">
+              <Package className="w-5 h-5 text-indigo-600" /> Gestion des Provisions
+            </h2>
+            <p className="text-xs text-slate-500">
+              Rangez vos provisions par zone (Placard, Frigo, Congélateur) pour suivre vos stocks.
+            </p>
+          </div>
 
-          return (
-            <div key={originalIndex} className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-white hover:bg-slate-50 transition-colors gap-2">
-              <span className="font-medium text-slate-800 text-sm">{item.name}</span>
-              <div className="flex items-center gap-2 flex-wrap justify-end">
-                <select 
-                  value={item.zone || 'Placard'} 
-                  onChange={(e) => updateZone(originalIndex, e.target.value)}
-                  className="text-xs font-semibold rounded-md px-2 py-1 border bg-slate-50 text-slate-700 border-slate-200"
-                >
-                  {STORAGE_ZONES.map(z => <option key={z} value={z}>{z}</option>)}
-                </select>
+          <form onSubmit={addItem} className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+            <h3 className="text-xs font-bold text-slate-700 uppercase">Ajouter un article</h3>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input 
+                type="text" 
+                placeholder="Nom (ex: Lait, Farine, Steaks...)" 
+                value={newItemName}
+                onChange={(e) => setNewItemName(e.target.value)}
+                className="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm"
+              />
+              <select 
+                value={newItemZone}
+                onChange={(e) => setNewItemZone(e.target.value)}
+                className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700"
+              >
+                {STORAGE_ZONES.map(z => <option key={z} value={z}>{z}</option>)}
+              </select>
+              <select 
+                value={newItemStatus}
+                onChange={(e) => setNewItemStatus(e.target.value)}
+                className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700"
+              >
+                <option value="Plein">Plein</option>
+                <option value="Entamé">Entamé</option>
+                <option value="Presque vide">Presque vide</option>
+              </select>
+              <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                Ajouter
+              </button>
+            </div>
+          </form>
 
-                <select 
-                  value={item.status} 
-                  onChange={(e) => updateStatus(originalIndex, e.target.value)}
-                  className={`text-xs font-semibold rounded-md px-2 py-1 border
-                    ${item.status === 'Plein' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : ''}
-                    ${item.status === 'Entamé' ? 'bg-amber-50 text-amber-700 border-amber-200' : ''}
-                    ${item.status === 'Presque vide' ? 'bg-red-50 text-red-700 border-red-200' : ''}
-                  `}
-                >
-                  <option value="Plein">Plein</option>
-                  <option value="Entamé">Entamé</option>
-                  <option value="Presque vide">Presque vide</option>
-                </select>
+          <div className="flex bg-slate-100 p-1 rounded-xl">
+            <button 
+              onClick={() => setFilterZone('Tous')}
+              className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all
+                ${filterZone === 'Tous' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600'}
+              `}
+            >
+              Tout ({inventory.length})
+            </button>
+            {STORAGE_ZONES.map(z => (
+              <button 
+                key={z}
+                onClick={() => setFilterZone(z)}
+                className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all
+                  ${filterZone === z ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600'}
+                `}
+              >
+                {z} ({inventory.filter(i => i.zone === z).length})
+              </button>
+            ))}
+          </div>
 
+          <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
+            {filteredInventory.map((item, index) => {
+              const originalIndex = inventory.findIndex(i => i === item);
+
+              return (
+                <div key={originalIndex} className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-white hover:bg-slate-50 transition-colors gap-2">
+                  <span className="font-medium text-slate-800 text-sm">{item.name}</span>
+                  <div className="flex items-center gap-2 flex-wrap justify-end">
+                    <select 
+                      value={item.zone || 'Placard'} 
+                      onChange={(e) => updateZone(originalIndex, e.target.value)}
+                      className="text-xs font-semibold rounded-md px-2 py-1 border bg-slate-50 text-slate-700 border-slate-200"
+                    >
+                      {STORAGE_ZONES.map(z => <option key={z} value={z}>{z}</option>)}
+                    </select>
+
+                    <select 
+                      value={item.status} 
+                      onChange={(e) => updateStatus(originalIndex, e.target.value)}
+                      className={`text-xs font-semibold rounded-md px-2 py-1 border
+                        ${item.status === 'Plein' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : ''}
+                        ${item.status === 'Entamé' ? 'bg-amber-50 text-amber-700 border-amber-200' : ''}
+                        ${item.status === 'Presque vide' ? 'bg-red-50 text-red-700 border-red-200' : ''}
+                      `}
+                    >
+                      <option value="Plein">Plein</option>
+                      <option value="Entamé">Entamé</option>
+                      <option value="Presque vide">Presque vide</option>
+                    </select>
+
+                    <button 
+                      onClick={() => {
+                        if (window.confirm("Supprimer cet élément ?")) {
+                          removeItem(originalIndex);
+                        }
+                      }}
+                      className="text-slate-400 hover:text-red-600 p-1"
+                      title="Supprimer"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+            {filteredInventory.length === 0 && (
+              <div className="p-8 text-center text-slate-400 text-sm">Aucun élément dans cette catégorie.</div>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          <div>
+            <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2 mb-1">
+              <Settings className="w-5 h-5 text-indigo-600" /> Gestion des Appareils de Cuisson
+            </h2>
+            <p className="text-xs text-slate-500">
+              Ajoutez ou supprimez les appareils disponibles pour vos recettes (Thermomix, Cookeo, Airfryer...).
+            </p>
+          </div>
+
+          <form onSubmit={addEquipment} className="flex gap-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <input 
+              type="text" 
+              placeholder="Nouvel appareil (ex: Machine à pain)..." 
+              value={newEquipName}
+              onChange={(e) => setNewEquipName(e.target.value)}
+              className="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm"
+            />
+            <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+              Ajouter
+            </button>
+          </form>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {equipments.map(eq => (
+              <div key={eq} className="bg-white border border-slate-200 text-slate-800 text-xs p-3 rounded-xl flex items-center justify-between shadow-sm font-medium">
+                <span className="flex items-center gap-2">
+                  <Settings className="w-4 h-4 text-indigo-600" />
+                  {eq}
+                </span>
                 <button 
-                  onClick={() => {
-                    if (window.confirm("Supprimer cet élément ?")) {
-                      removeItem(originalIndex);
-                    }
-                  }}
-                  className="text-slate-400 hover:text-red-600 p-1"
+                  type="button" 
+                  onClick={() => removeEquipment(eq)}
+                  className="text-slate-400 hover:text-red-600 p-1 transition-colors"
                   title="Supprimer"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-            </div>
-          );
-        })}
-        {filteredInventory.length === 0 && (
-          <div className="p-8 text-center text-slate-400 text-sm">Aucun élément dans cette catégorie.</div>
-        )}
-      </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1353,8 +1495,8 @@ function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingCheck
     const found = inventory.find(i => ingName.toLowerCase().includes(i.name.toLowerCase()));
     if (!found) return { status: 'A acheter', color: 'text-indigo-600 bg-indigo-50 border-indigo-200' };
     if (found.status === 'Plein') return { status: `En stock (${found.zone} - Plein)`, color: 'text-emerald-700 bg-emerald-50 border-emerald-200' };
-    if (found.status === 'Entamé') return { status: `En stock (${found.zone} - Entamé)`, color: 'text-amber-700 bg-amber-50 border-amber-200' };
-    return { status: `Presque vide (${found.zone})`, color: 'text-red-700 bg-red-700 border-red-200' };
+    if (found.status === 'Entamé') return { status: `En stock (${found.zone} - Entamé)`, color: 'text-amber-700 bg-amber-700 border-amber-200' };
+    return { status: `Presque vide (${found.zone})`, color: 'text-red-700 bg-red-50 border-red-200' };
   };
 
   const toggleCheck = (ing) => {
@@ -1520,4 +1662,3 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
     </div>
   );
 }
-
