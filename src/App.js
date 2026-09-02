@@ -618,7 +618,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
             onChange={(e) => setFilterCarb(e.target.value)}
             className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800"
           >
-            <option value="Tous">Tous les féculents</option>
+            <option value="Tous">Toutes les catégories</option>
             {carbsList.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
 
