@@ -19,7 +19,20 @@ const DEFAULT_RECIPES = [
   { id: '14', name: 'Cookies pépites de chocolat', carb: 'Plaisir', equipment: 'Four', season: 'Toutes', type: 'text', instructions: 'Mélanger beurre mou, sucre, sucre vanillé, œuf, farine et pépites. Faire des boules et cuire 10 min à 180°C.', ingredients: ['150g de beurre', '100g de sucre', '1 œuf', '220g de farine', '100g de pépites de chocolat'], category: 'gateau' },
 ];
 
-const INITIAL_EQUIPMENTS = ['Thermomix', 'Cookeo', 'Poêle', 'Four', 'Casserole', 'Airfryer', 'Autre appareil', 'Sans Cuisson'];
+const INITIAL_EQUIPMENTS = [
+  'Thermomix', 
+  'Cookeo', 
+  'Poêle', 
+  'Four', 
+  'Casserole', 
+  'Airfryer', 
+  'Gaufrier - Croque-Monsieur - Panini', 
+  'Crêpière - Mini woks - Grill', 
+  'Raclette - Pierrade - Fondue', 
+  'Plancha', 
+  'Barbecue'
+];
+
 const CARBS = ['Pâtes', 'Pommes de terre', 'Semoule', 'Riz', 'Blé', 'Plaisir', 'Autre'];
 const SEASONS_LIST = ['Printemps', 'Été', 'Automne', 'Hiver'];
 const STORAGE_ZONES = ['Placard', 'Frigo', 'Congélateur'];
@@ -588,10 +601,12 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
 function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, title, equipments }) {
   const [filterSeason, setFilterSeason] = useState('Tous');
   const [filterEquip, setFilterEquip] = useState('Tous');
+  const [filterCarb, setFilterCarb] = useState('Tous');
 
   const filteredRecipes = recipes.filter(r => {
     if (filterSeason !== 'Tous' && !recipeMatchesSeason(r.season, filterSeason)) return false;
     if (filterEquip !== 'Tous' && r.equipment !== filterEquip && r.additionalEquipment !== filterEquip) return false;
+    if (filterCarb !== 'Tous' && r.carb !== filterCarb) return false;
     return true;
   });
 
@@ -619,6 +634,15 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
           >
             <option value="Tous">Toutes les saisons</option>
             {SEASONS_LIST.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+
+          <select 
+            value={filterCarb} 
+            onChange={(e) => setFilterCarb(e.target.value)}
+            className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800"
+          >
+            <option value="Tous">Toutes les catégories (Féculents)</option>
+            {CARBS.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
 
           <select 
@@ -1491,12 +1515,12 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
           <div>
             <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Ingrédients</h3>
             <ul className="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-1.5">
-              {recipe.ingredients.map((ing, idx) => (
+              {recipe.ingredients.let(ing, idx) => (
                 <li key={idx} className="text-sm text-slate-800 flex items-center gap-2 list-none">
                   <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full inline-block mr-2"></span>
                   {ing}
                 </li>
-              ))}
+              )}
             </ul>
           </div>
         )}
@@ -1520,4 +1544,3 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
     </div>
   );
 }
-
