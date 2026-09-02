@@ -1372,7 +1372,7 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
             ${subTab === 'carbs' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
           `}
         >
-          <Tag className="w-4 h-4" /> Féculents ({carbsList.length})
+          <Tag className="w-4 h-4" /> Catégories ({carbsList.length})
         </button>
       </div>
 
