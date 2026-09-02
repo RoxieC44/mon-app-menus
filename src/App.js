@@ -20,7 +20,15 @@ const DEFAULT_RECIPES = [
 ];
 
 const INITIAL_EQUIPMENTS = ['Thermomix', 'Cookeo', 'Poêle', 'Four', 'Casserole', 'Airfryer', 'Gaufrier - Croque-Monsieur - Panini', 'Crêpière - Mini woks - Grill', 'Raclette - Pierrade - Fondue', 'Plancha', 'Barbecue', 'Sans Cuisson'];
-const CARBS = ['Pâtes', 'Pommes de terre', 'Semoule', 'Riz', 'Blé', 'Plaisir', 'Autre'];
+const CARBS = [
+  'Blé',
+  'Pâtes',
+  'Riz',
+  'Pommes de terre',
+  'Semoule',
+  'Plaisir',
+  'Autre'
+];
 const SEASONS_LIST = ['Printemps', 'Été', 'Automne', 'Hiver'];
 const STORAGE_ZONES = ['Placard', 'Frigo', 'Congélateur'];
 
