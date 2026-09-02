@@ -1255,9 +1255,9 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
           />
         </div>
 
-        <button 
+          <button 
           type="submit"
-          className="w-vfull bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-xl transition-colors shadow-sm text-sm"
+          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-xl transition-colors shadow-sm text-sm"
         >
           {editingRecipe ? 'Mettre à jour la recette' : 'Enregistrer la recette'}
         </button>
