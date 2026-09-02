@@ -30,6 +30,8 @@ const recipeMatchesSeason = (seasonValue, targetSeason) => {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('menu');
+  const [menuSubTab, setMenuSubTab] = useState('planning');
+  const [bakingSubTab, setBakingSubTab] = useState('planning');
   const [viewingRecipe, setViewingRecipe] = useState(null);
   const [editingRecipe, setEditingRecipe] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -126,7 +128,13 @@ export default function App() {
       }
       return [...prev, { ...newRecipe, id: Date.now().toString() }];
     });
-    setActiveTab(newRecipe.category === 'gateau' ? 'baking' : 'menu');
+    if (newRecipe.category === 'gateau') {
+      setBakingSubTab('list');
+      setActiveTab('baking');
+    } else {
+      setMenuSubTab('catalog');
+      setActiveTab('menu');
+    }
   };
 
   const deleteRecipe = (id) => {
@@ -182,6 +190,8 @@ export default function App() {
             equipments={equipments}
             setEquipments={setEquipments}
             carbsList={carbsList}
+            subTab={menuSubTab}
+            setSubTab={setMenuSubTab}
           />
         )}
         {activeTab === 'baking' && (
@@ -199,6 +209,8 @@ export default function App() {
             equipments={equipments}
             setEquipments={setEquipments}
             carbsList={carbsList}
+            subTab={bakingSubTab}
+            setSubTab={setBakingSubTab}
           />
         )}
         {activeTab === 'add' && <AddRecipeForm addRecipe={addRecipe} editingRecipe={editingRecipe} setEditingRecipe={setEditingRecipe} setActiveTab={setActiveTab} setSelectedImage={setSelectedImage} equipments={equipments} setEquipments={setEquipments} carbsList={carbsList} setCarbsList={setCarbsList} />}
@@ -264,9 +276,7 @@ function NavButton({ active, onClick, icon, label }) {
   );
 }
 
-function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, deleteRecipe, setEditingRecipe, setActiveTab, setViewingRecipe, currentSeason, equipments, setEquipments, carbsList }) {
-  const [subTab, setSubTab] = useState('planning');
-
+function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, deleteRecipe, setEditingRecipe, setActiveTab, setViewingRecipe, currentSeason, equipments, setEquipments, carbsList, subTab, setSubTab }) {
   return (
     <div className="space-y-6">
       <div className="flex bg-slate-200/70 p-1 rounded-xl max-w-md mx-auto">
@@ -714,9 +724,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
   );
 }
 
-function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, setActiveTab, bakingRecipes, recipes, deleteRecipe, setViewingRecipe, currentSeason, equipments, carbsList }) {
-  const [subTab, setSubTab] = useState('planning');
-
+function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, setActiveTab, bakingRecipes, recipes, deleteRecipe, setViewingRecipe, currentSeason, equipments, carbsList, subTab, setSubTab }) {
   const updateBakingItem = (index, recipeId) => {
     const updated = [...bakingItems];
     updated[index] = recipeId;
@@ -973,8 +981,6 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
     } else {
       addRecipe(recipeData);
     }
-
-    setActiveTab(category === 'gateau' ? 'baking' : 'menu');
   };
 
   return (
