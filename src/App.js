@@ -62,11 +62,15 @@ export default function App() {
   useEffect(() => {
     async function loadData() {
       setLoading(true);
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('stockage_donnees')
         .select('data')
         .eq('user_key', 'ma_famille')
         .maybeSingle();
+
+      if (error) {
+        console.error('Erreur lors du chargement des données :', error.message);
+      }
 
       if (data && data.data) {
         const saved = data.data;
@@ -98,27 +102,19 @@ export default function App() {
         data: { recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks }
       };
 
-      const { data: existing } = await supabase
+      // Utilisation de upsert pour gérer l'insertion ou la mise à jour proprement
+      const { error } = await supabase
         .from('stockage_donnees')
-        .select('id')
-        .eq('user_key', 'ma_famille')
-        .maybeSingle();
+        .upsert(payload, { onConflict: 'user_key' });
 
-      if (existing) {
-        await supabase
-          .from('stockage_donnees')
-          .update(payload)
-          .eq('user_key', 'ma_famille');
-      } else {
-        await supabase
-          .from('stockage_donnees')
-          .insert([payload]);
+      if (error) {
+        console.error('Erreur lors de la sauvegarde des données :', error.message);
       }
     }
 
     const timer = setTimeout(saveData, 1000);
     return () => clearTimeout(timer);
-  }, [recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks]);
+  }, [recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks, loading]);
 
   const addRecipe = (newRecipe) => {
     setRecipes(prev => {
