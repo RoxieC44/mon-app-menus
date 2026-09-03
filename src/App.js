@@ -89,37 +89,27 @@ export default function App() {
     loadData();
   }, []);
 
-  useEffect(() => {
+ useEffect(() => {
     if (loading) return;
 
     async function saveData() {
-      const payload = {
-        user_key: 'ma_famille',
-        data: { recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks }
-      };
-
-      const { data: existing } = await supabase
+      // On met à jour directement la ligne où user_key vaut 'ma_famille'
+      const { error } = await supabase
         .from('stockage_donnees')
-        .select('id')
-        .eq('user_key', 'ma_famille')
-        .maybeSingle();
+        .update({ 
+          data: { recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks } 
+        })
+        .eq('user_key', 'ma_famille');
 
-      if (existing) {
-        await supabase
-          .from('stockage_donnees')
-          .update(payload)
-          .eq('user_key', 'ma_famille');
-      } else {
-        await supabase
-          .from('stockage_donnees')
-          .insert([payload]);
+      if (error) {
+        console.error('Erreur lors de la sauvegarde des données :', error.message);
       }
     }
 
     const timer = setTimeout(saveData, 1000);
     return () => clearTimeout(timer);
-  }, [recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks]);
-
+  }, [recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks, loading]);
+  
   const addRecipe = (newRecipe) => {
     setRecipes(prev => {
       const exists = prev.some(r => r.id === newRecipe.id);
