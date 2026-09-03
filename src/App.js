@@ -2,21 +2,33 @@ import React, { useState, useEffect } from 'react';
 import { Plus, List, Calendar, Trash2, Utensils, Info, Tag, Sun, Settings, Link as LinkIcon, Pencil, Camera, RefreshCw, AlertTriangle, Eye, X, Image as ImageIcon, ShoppingBag, Package, Check, Copy, Sparkles, Filter, Cake } from 'lucide-react';
 import { supabase } from './supabaseClient';
 
-const DEFAULT_RECIPES = [];
+const DEFAULT_RECIPES = [
+  { id: '1', name: 'Poêlée de blé façon risotto aux champignons', carb: 'Blé', equipment: 'Poêle', season: 'Toutes', type: 'text', instructions: 'Faire revenir les champignons. Ajouter le blé, puis le bouillon louche par louche jusqu\'à absorption.', ingredients: ['250g de blé', '500g de champignons', '1 oignon', 'Bouillon de volaille', 'Crème liquide'], category: 'repas' },
+  { id: '2', name: 'Couscous express aux légumes et pois chiches', carb: 'Semoule', equipment: 'Cookeo', season: 'Toutes', type: 'text', instructions: 'Mettre les légumes coupés, les pois chiches, les épices et l\'eau. Cuisson sous pression 10 min. Préparer la semoule à part.', ingredients: ['300g de semoule', '1 boîte de pois chiches', '3 carottes', '2 courgettes', 'Épices à couscous'], category: 'repas' },
+  { id: '3', name: 'Dhal de lentilles et riz basmati', carb: 'Riz', equipment: 'Casserole', season: 'Toutes', type: 'link', url: 'https://www.marmiton.org/recettes/recette_dhal-de-lentilles-corail_345759.aspx', ingredients: ['250g de lentilles corail', '200g de riz basmati', '400ml de lait de coco', 'Curry', '1 oignon'], category: 'repas' },
+  { id: '4', name: 'Pommes de terre rôties et poisson', carb: 'Pommes de terre', equipment: 'Airfryer', season: 'Toutes', type: 'text', instructions: 'Couper les pdt en dés, filet d\'huile, 20 min à 200°C à l\'Airfryer. Ajouter le poisson les 8 dernières minutes.', ingredients: ['800g de pommes de terre', '4 filets de poisson blanc', 'Huile d\'olive', 'Herbes de Provence'], category: 'repas' },
+  { id: '5', name: 'Pâtes au pesto et tomates cerises', carb: 'Pâtes', equipment: 'Casserole', season: 'Été', type: 'text', instructions: 'Cuire les pâtes. Mélanger avec le pesto et des tomates cerises coupées en deux.', ingredients: ['400g de pâtes', '1 pot de pesto', '250g de tomates cerises', 'Parmesan'], category: 'repas' },
+  { id: '6', name: 'Pizza Maison Reine', carb: 'Plaisir', equipment: 'Four', season: 'Toutes', type: 'text', instructions: 'Étaler la pâte, sauce tomate, jambon, mozza, champignons. Cuire 15 min à 220°C.', ingredients: ['1 pâte à pizza', 'Sauce tomate', '4 tranches de jambon', '2 boules de mozzarella', 'Champignons de Paris'], category: 'repas' },
+  { id: '7', name: 'Poulet coco et riz', carb: 'Riz', equipment: 'Cookeo', season: 'Toutes', type: 'text', instructions: 'Faire dorer le poulet. Ajouter lait de coco et curry. Cuisson 8 min.', ingredients: ['4 blancs de poulet', '250g de riz', '400ml de lait de coco', 'Curry en poudre'], category: 'repas' },
+  { id: '8', name: 'Gratin de potiron / chou-fleur', carb: 'Pommes de terre', equipment: 'Four', season: 'Hiver', type: 'text', instructions: 'Cuire le chou-fleur ou potiron. Mélanger crème, muscade, gruyère. Cuire 30 min au four.', ingredients: ['1 chou-fleur ou potiron', '50cl de crème liquide', 'Gruyère râpé', 'Muscade'], category: 'repas' },
+  { id: '9', name: 'Tian de courgettes et tomates', carb: 'Plaisir', equipment: 'Four', season: 'Été', type: 'text', instructions: 'Trancher courgettes et tomates en rondelles, alterner dans un plat, herbes de Provence, huile d\'olive, 45 min au four.', ingredients: ['3 courgettes', '4 tomates', 'Huile d\'olive', 'Herbes de Provence', 'Ail'], category: 'repas' },
+  { id: '10', name: 'Soupe de chou et lardons', carb: 'Pommes de terre', equipment: 'Casserole', season: 'Hiver', type: 'text', instructions: 'Faire bouillir le chou, les pommes de terre et des lardons. Mixer ou servir tel quel.', ingredients: ['1/2 chou vert', '4 pommes de terre', '100g de lardons', 'Bouillon'], category: 'repas' },
+  { id: '11', name: 'Gnocchis Saucisse', carb: 'Pâtes', equipment: 'Poêle', season: 'Toutes', type: 'text', instructions: 'Faire poêler les gnocchis avec les saucisses coupées en morceaux jusqu\'à dorage.', ingredients: ['500g de gnocchis', '4 saucisses', '1 filet d\'huile d\'olive'], category: 'repas' },
+  { id: '12', name: 'Cordon bleu et Pommes de terre', carb: 'Pommes de terre', equipment: 'Poêle', season: 'Toutes', type: 'text', instructions: 'Cuire les cordons bleus à la poêle et accompagner de pommes de terre sautées.', ingredients: ['4 cordons bleus', '600g de pommes de terre cuites', 'Beurre'], category: 'repas' },
+  { id: '13', name: 'Gâteau au yaourt moelleux', carb: 'Plaisir', equipment: 'Four', season: 'Toutes', type: 'text', instructions: 'Mélanger un pot de yaourt, 2 pots de sucre, 3 pots de farine, 1/2 pot d\'huile, 3 œufs et de la levure. Cuire 35 min à 180°C.', ingredients: ['1 yaourt nature', '3 pots de farine', '2 pots de sucre', '1/2 pot d\'huile', '3 œufs', '1 sachet de levure'], category: 'gateau' },
+  { id: '14', name: 'Cookies pépites de chocolat', carb: 'Plaisir', equipment: 'Four', season: 'Toutes', type: 'text', instructions: 'Mélanger beurre mou, sucre, sucre vanillé, œuf, farine et pépites. Faire des boules et cuire 10 min à 180°C.', ingredients: ['150g de beurre', '100g de sucre', '1 œuf', '220g de farine', '100g de pépites de chocolat'], category: 'gateau' },
+];
 
-const INITIAL_EQUIPMENTS = ['Thermomix', 'Cookeo', 'Ninja Double Stack', 'Poêle', 'Four', 'Casserole', 'Airfryer', 'Gaufrier - Croque-Monsieur - Panini', 'Crêpière - Mini woks - Grill', 'Raclette - Pierrade - Fondue', 'Plancha', 'Barbecue', 'Sans Cuisson'];
-const INITIAL_CARBS = ['Pâtes', 'Pommes de terre', 'Semoule', 'Riz', 'Blé', 'Plaisir'];
+const EQUIPMENTS = ['Thermomix', 'Cookeo', 'Poêle', 'Four', 'Casserole', 'Airfryer', 'Autre appareil', 'Sans Cuisson'];
+const CARBS = ['Pâtes', 'Pommes de terre', 'Semoule', 'Riz', 'Blé', 'Plaisir'];
 const SEASONS_LIST = ['Printemps', 'Été', 'Automne', 'Hiver'];
 const STORAGE_ZONES = ['Placard', 'Frigo', 'Congélateur'];
 
 const getCurrentSeason = () => {
-  const now = new Date();
-  const month = now.getMonth();
-  const day = now.getDate();
-
-  if ((month === 2 && day >= 20) || (month > 2 && month < 5) || (month === 5 && day <= 20)) return 'Printemps';
-  if ((month === 5 && day >= 21) || (month > 5 && month < 8) || (month === 8 && day <= 21)) return 'Été';
-  if ((month === 8 && day >= 22) || (month > 8 && month < 11) || (month === 11 && day <= 20)) return 'Automne';
+  const month = new Date().getMonth();
+  if (month >= 2 && month <= 4) return 'Printemps';
+  if (month >= 5 && month <= 7) return 'Été';
+  if (month >= 8 && month <= 10) return 'Automne';
   return 'Hiver';
 };
 
@@ -30,8 +42,6 @@ const recipeMatchesSeason = (seasonValue, targetSeason) => {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('menu');
-  const [menuSubTab, setMenuSubTab] = useState('planning');
-  const [bakingSubTab, setBakingSubTab] = useState('planning');
   const [viewingRecipe, setViewingRecipe] = useState(null);
   const [editingRecipe, setEditingRecipe] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -40,8 +50,6 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   const [recipes, setRecipes] = useState(DEFAULT_RECIPES);
-  const [equipments, setEquipments] = useState(INITIAL_EQUIPMENTS);
-  const [carbsList, setCarbsList] = useState(INITIAL_CARBS);
   const [menu, setMenu] = useState({
     mondayDinner: '', tuesdayDinner: '', wednesdayDinner: '', thursdayDinner: '', fridayDinner: '', saturdayDinner: '', sundayDinner: '',
     mondayLunch: 'restes', tuesdayLunch: 'restes', wednesdayLunch: '', thursdayLunch: 'restes', fridayLunch: 'restes', saturdayLunch: '', sundayLunch: ''
@@ -71,10 +79,9 @@ export default function App() {
       if (data && data.data) {
         const saved = data.data;
         if (saved.recipes) setRecipes(saved.recipes);
-        if (saved.equipments && Array.isArray(saved.equipments)) setEquipments(saved.equipments);
-        if (saved.carbsList && Array.isArray(saved.carbsList)) setCarbsList(saved.carbsList);
         if (saved.menu) setMenu(saved.menu);
         if (saved.inventory) {
+          // Migration rétrocompatible si les anciens éléments n'ont pas de zone
           const migrated = saved.inventory.map(item => ({
             ...item,
             zone: item.zone || 'Placard'
@@ -95,18 +102,30 @@ export default function App() {
     async function saveData() {
       const payload = {
         user_key: 'ma_famille',
-        data: { recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks }
+        data: { recipes, menu, inventory, bakingItems, shoppingChecks }
       };
 
-      // Utilisation d'un upsert propre basé sur la contrainte d'unicité de user_key
-      await supabase
+      const { data: existing } = await supabase
         .from('stockage_donnees')
-        .upsert(payload, { onConflict: 'user_key' });
+        .select('id')
+        .eq('user_key', 'ma_famille')
+        .maybeSingle();
+
+      if (existing) {
+        await supabase
+          .from('stockage_donnees')
+          .update(payload)
+          .eq('user_key', 'ma_famille');
+      } else {
+        await supabase
+          .from('stockage_donnees')
+          .insert([payload]);
+      }
     }
 
     const timer = setTimeout(saveData, 1000);
     return () => clearTimeout(timer);
-  }, [recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks]);
+  }, [recipes, menu, inventory, bakingItems, shoppingChecks]);
 
   const addRecipe = (newRecipe) => {
     setRecipes(prev => {
@@ -116,13 +135,7 @@ export default function App() {
       }
       return [...prev, { ...newRecipe, id: Date.now().toString() }];
     });
-    if (newRecipe.category === 'gateau') {
-      setBakingSubTab('list');
-      setActiveTab('baking');
-    } else {
-      setMenuSubTab('catalog');
-      setActiveTab('menu');
-    }
+    setActiveTab(newRecipe.category === 'gateau' ? 'baking' : 'menu');
   };
 
   const deleteRecipe = (id) => {
@@ -175,11 +188,6 @@ export default function App() {
             setEditingRecipe={setEditingRecipe}
             setActiveTab={setActiveTab}
             currentSeason={currentSeason} 
-            equipments={equipments}
-            setEquipments={setEquipments}
-            carbsList={carbsList}
-            subTab={menuSubTab}
-            setSubTab={setMenuSubTab}
           />
         )}
         {activeTab === 'baking' && (
@@ -194,15 +202,10 @@ export default function App() {
             setEditingRecipe={setEditingRecipe}
             setActiveTab={setActiveTab}
             currentSeason={currentSeason}
-            equipments={equipments}
-            setEquipments={setEquipments}
-            carbsList={carbsList}
-            subTab={bakingSubTab}
-            setSubTab={setBakingSubTab}
           />
         )}
-        {activeTab === 'add' && <AddRecipeForm addRecipe={addRecipe} editingRecipe={editingRecipe} setEditingRecipe={setEditingRecipe} setActiveTab={setActiveTab} setSelectedImage={setSelectedImage} equipments={equipments} setEquipments={setEquipments} carbsList={carbsList} setCarbsList={setCarbsList} />}
-        {activeTab === 'inventory' && <InventoryManager inventory={inventory} setInventory={setInventory} equipments={equipments} setEquipments={setEquipments} carbsList={carbsList} setCarbsList={setCarbsList} />}
+        {activeTab === 'add' && <AddRecipeForm addRecipe={addRecipe} editingRecipe={editingRecipe} setEditingRecipe={setEditingRecipe} setActiveTab={setActiveTab} setSelectedImage={setSelectedImage} />}
+        {activeTab === 'inventory' && <InventoryManager inventory={inventory} setInventory={setInventory} />}
         {activeTab === 'shopping' && <ShoppingListView menu={menu} recipes={recipes} inventory={inventory} bakingItems={bakingItems} shoppingChecks={shoppingChecks} setShoppingChecks={setShoppingChecks} setActiveTab={setActiveTab} />}
       </main>
 
@@ -264,7 +267,9 @@ function NavButton({ active, onClick, icon, label }) {
   );
 }
 
-function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, deleteRecipe, setEditingRecipe, setActiveTab, setViewingRecipe, currentSeason, equipments, setEquipments, carbsList, subTab, setSubTab }) {
+function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, deleteRecipe, setEditingRecipe, setActiveTab, setViewingRecipe, currentSeason }) {
+  const [subTab, setSubTab] = useState('planning');
+
   return (
     <div className="space-y-6">
       <div className="flex bg-slate-200/70 p-1 rounded-xl max-w-md mx-auto">
@@ -296,7 +301,6 @@ function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, delete
           setActiveTab={setActiveTab}
           setViewingRecipe={setViewingRecipe} 
           currentSeason={currentSeason} 
-          equipments={equipments}
         />
       ) : (
         <RecipeList 
@@ -308,15 +312,13 @@ function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, delete
           setActiveTab={setActiveTab}
           currentSeason={currentSeason}
           title="Toutes les recettes de repas"
-          equipments={equipments}
-          carbsList={carbsList}
         />
       )}
     </div>
   );
 }
 
-function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, equipments }) {
+function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason }) {
   const daysConfig = [
     { key: 'monday', label: 'Lundi', reqCarb: 'Blé' },
     { key: 'tuesday', label: 'Mardi', reqCarb: 'Semoule' },
@@ -340,12 +342,7 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
     if (!val || val === 'restes') return;
     const r = recipes.find(x => x.id === val);
     if (r) {
-      if (r.equipment) {
-        equipmentCounts[r.equipment] = (equipmentCounts[r.equipment] || 0) + 1;
-      }
-      if (r.additionalEquipment) {
-        equipmentCounts[r.additionalEquipment] = (equipmentCounts[r.additionalEquipment] || 0) + 1;
-      }
+      equipmentCounts[r.equipment] = (equipmentCounts[r.equipment] || 0) + 1;
     }
   });
 
@@ -372,23 +369,17 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
       if (possibleRecipes.length === 0) return;
 
       possibleRecipes.sort((a, b) => {
-        const countA = (tempEquipCounts[a.equipment] || 0) + (tempEquipCounts[a.additionalEquipment] || 0);
-        const countB = (tempEquipCounts[b.equipment] || 0) + (tempEquipCounts[b.additionalEquipment] || 0);
+        const countA = tempEquipCounts[a.equipment] || 0;
+        const countB = tempEquipCounts[b.equipment] || 0;
         return countA - countB;
       });
 
-      const getRecipeCount = (r) => (tempEquipCounts[r.equipment] || 0) + (r.additionalEquipment ? (tempEquipCounts[r.additionalEquipment] || 0) : 0);
-      const minUsage = getRecipeCount(possibleRecipes[0]);
-      const bestCandidates = possibleRecipes.filter(r => getRecipeCount(r) === minUsage);
+      const minUsage = tempEquipCounts[possibleRecipes[0].equipment] || 0;
+      const bestCandidates = possibleRecipes.filter(r => (tempEquipCounts[r.equipment] || 0) === minUsage);
       const picked = bestCandidates[Math.floor(Math.random() * bestCandidates.length)];
       
       newMenu[day.key] = picked.id;
-      if (picked.equipment) {
-        tempEquipCounts[picked.equipment] = (tempEquipCounts[picked.equipment] || 0) + 1;
-      }
-      if (picked.additionalEquipment) {
-        tempEquipCounts[picked.additionalEquipment] = (tempEquipCounts[picked.additionalEquipment] || 0) + 1;
-      }
+      tempEquipCounts[picked.equipment] = (tempEquipCounts[picked.equipment] || 0) + 1;
     });
 
     setMenu(newMenu);
@@ -513,7 +504,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
             {lunchRecipe && (
               <div className="flex justify-between items-center pt-1">
                 <span className="text-[11px] text-slate-500 flex items-center gap-1 font-medium">
-                  <Settings className="w-3 h-3 text-slate-400" /> {lunchRecipe.equipment}{lunchRecipe.additionalEquipment ? ` + ${lunchRecipe.additionalEquipment}` : ''}
+                  <Settings className="w-3 h-3 text-slate-400" /> {lunchRecipe.equipment}
                 </span>
                 <button 
                   onClick={() => setViewingRecipe(lunchRecipe)}
@@ -531,7 +522,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
             </div>
             {day.key === 'wednesday' ? (
               <div className="w-full bg-slate-100 border border-slate-300 text-slate-800 text-xs rounded-lg p-2 font-medium flex items-center justify-between">
-                <span>Gnocchis, saucisses, cordons bleus et pommes de terre</span>
+                <span>Cordon bleu et Pommes de terre</span>
                 <span className="text-[10px] bg-slate-200 px-2 py-0.5 rounded text-slate-600">Fixe</span>
               </div>
             ) : dinnerRecipes.length === 0 ? (
@@ -556,7 +547,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
             {dinnerRecipe && (
               <div className="flex justify-between items-center pt-1">
                 <span className="text-[11px] text-slate-500 flex items-center gap-1 font-medium">
-                  <Settings className="w-3 h-3 text-slate-400" /> {dinnerRecipe.equipment}{dinnerRecipe.additionalEquipment ? ` + ${dinnerRecipe.additionalEquipment}` : ''}
+                  <Settings className="w-3 h-3 text-slate-400" /> {dinnerRecipe.equipment}
                 </span>
                 <button 
                   onClick={() => setViewingRecipe(dinnerRecipe)}
@@ -573,15 +564,13 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
   );
 }
 
-function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, title, equipments, carbsList }) {
+function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, title }) {
   const [filterSeason, setFilterSeason] = useState('Tous');
   const [filterEquip, setFilterEquip] = useState('Tous');
-  const [filterCarb, setFilterCarb] = useState('Tous');
 
   const filteredRecipes = recipes.filter(r => {
     if (filterSeason !== 'Tous' && !recipeMatchesSeason(r.season, filterSeason)) return false;
-    if (filterEquip !== 'Tous' && r.equipment !== filterEquip && r.additionalEquipment !== filterEquip) return false;
-    if (filterCarb !== 'Tous' && r.carb !== filterCarb) return false;
+    if (filterEquip !== 'Tous' && r.equipment !== filterEquip) return false;
     return true;
   });
 
@@ -612,21 +601,12 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
           </select>
 
           <select 
-            value={filterCarb} 
-            onChange={(e) => setFilterCarb(e.target.value)}
-            className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800"
-          >
-            <option value="Tous">Toutes les catégories</option>
-            {carbsList.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
-
-          <select 
             value={filterEquip} 
             onChange={(e) => setFilterEquip(e.target.value)}
             className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800"
           >
             <option value="Tous">Tous les appareils</option>
-            {equipments.map(eq => <option key={eq} value={eq}>{eq}</option>)}
+            {EQUIPMENTS.map(eq => <option key={eq} value={eq}>{eq}</option>)}
           </select>
         </div>
 
@@ -654,7 +634,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
 
               <div className="flex flex-wrap gap-1.5 mb-3">
                 <span className="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded flex items-center gap-1 font-medium">
-                  <Settings className="w-3 h-3 text-slate-400" /> {recipe.equipment}{recipe.additionalEquipment ? ` + ${recipe.additionalEquipment}` : ''}
+                  <Settings className="w-3 h-3 text-slate-400" /> {recipe.equipment}
                 </span>
                 <span className={`text-[11px] px-2 py-0.5 rounded font-medium flex items-center gap-1
                   ${recipe.season === currentSeason ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-slate-100 text-slate-600'}
@@ -712,7 +692,9 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
   );
 }
 
-function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, setActiveTab, bakingRecipes, recipes, deleteRecipe, setViewingRecipe, currentSeason, equipments, carbsList, subTab, setSubTab }) {
+function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, setActiveTab, bakingRecipes, recipes, deleteRecipe, setViewingRecipe, currentSeason }) {
+  const [subTab, setSubTab] = useState('planning');
+
   const updateBakingItem = (index, recipeId) => {
     const updated = [...bakingItems];
     updated[index] = recipeId;
@@ -784,13 +766,13 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
                   >
                     <option value="">-- Choisir une recette de gâteau --</option>
                     {bakingRecipes.map(r => (
-                      <option key={r.id} value={r.id}>{r.name}</option>
+                      <option key={r.id} value={r.id}>{r.name} ({r.equipment})</option>
                     ))}
                   </select>
 
                   {selectedRecipe && (
                     <div className="flex justify-between items-center pt-2 border-t border-slate-100">
-                      <span className="text-xs text-slate-600 font-medium">Appareil : {selectedRecipe.equipment}{selectedRecipe.additionalEquipment ? ` + ${selectedRecipe.additionalEquipment}` : ''}</span>
+                      <span className="text-xs text-slate-600 font-medium">Appareil : {selectedRecipe.equipment}</span>
                       <button 
                         onClick={() => setViewingRecipe(selectedRecipe)}
                         className="text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded transition-colors flex items-center gap-1"
@@ -812,24 +794,16 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
           setEditingRecipe={setEditingRecipe}
           setActiveTab={setActiveTab}
           currentSeason={currentSeason}
-          equipments={equipments}
-          carbsList={carbsList}
         />
       )}
     </div>
   );
 }
 
-function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTab, setSelectedImage, equipments, setEquipments, carbsList, setCarbsList }) {
+function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTab, setSelectedImage }) {
   const [name, setName] = useState('');
-  const [carb, setCarb] = useState(carbsList[0] || 'Plaisir');
-  const [showNewCarbInput, setShowNewCarbInput] = useState(false);
-  const [newCarbName, setNewCarbName] = useState('');
-  const [equipment, setEquipment] = useState(equipments[0] || 'Four');
-  const [showNewEquipInput, setShowNewEquipInput] = useState(false);
-  const [newEquipName, setNewEquipName] = useState('');
-  const [showNewEquipSelect, setShowNewEquipSelect] = useState(false);
-  const [additionalEquipment, setAdditionalEquipment] = useState('');
+  const [carb, setCarb] = useState('Plaisir');
+  const [equipment, setEquipment] = useState('Four');
   const [selectedSeasons, setSelectedSeasons] = useState(['Toutes']);
   const [category, setCategory] = useState('repas');
   const [url, setUrl] = useState('');
@@ -840,23 +814,8 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
   useEffect(() => {
     if (editingRecipe) {
       setName(editingRecipe.name || '');
-      if (carbsList.includes(editingRecipe.carb)) {
-        setCarb(editingRecipe.carb);
-      } else if (editingRecipe.carb) {
-        setCarb(carbsList[0] || 'Plaisir');
-      }
-      if (equipments.includes(editingRecipe.equipment)) {
-        setEquipment(editingRecipe.equipment);
-      } else if (editingRecipe.equipment) {
-        setEquipment(equipments[0] || 'Four');
-      }
-      if (editingRecipe.additionalEquipment) {
-        setShowNewEquipSelect(true);
-        setAdditionalEquipment(editingRecipe.additionalEquipment);
-      } else {
-        setShowNewEquipSelect(false);
-        setAdditionalEquipment('');
-      }
+      setCarb(editingRecipe.carb || 'Plaisir');
+      setEquipment(editingRecipe.equipment || 'Four');
       setCategory(editingRecipe.category || 'repas');
       setUrl(editingRecipe.url || '');
       setImage(editingRecipe.image || '');
@@ -877,31 +836,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
         setSelectedSeasons(['Toutes']);
       }
     }
-  }, [editingRecipe, equipments, carbsList]);
-
-  const handleAddNewCarbQuick = (e) => {
-    e.preventDefault();
-    const trimmed = newCarbName.trim();
-    if (!trimmed) return;
-    if (!carbsList.some(c => c.toLowerCase() === trimmed.toLowerCase())) {
-      setCarbsList([...carbsList, trimmed]);
-    }
-    setCarb(trimmed);
-    setNewCarbName('');
-    setShowNewCarbInput(false);
-  };
-
-  const handleAddNewEquipmentQuick = (e) => {
-    e.preventDefault();
-    const trimmed = newEquipName.trim();
-    if (!trimmed) return;
-    if (!equipments.some(eq => eq.toLowerCase() === trimmed.toLowerCase())) {
-      setEquipments([...equipments, trimmed]);
-    }
-    setEquipment(trimmed);
-    setNewEquipName('');
-    setShowNewEquipInput(false);
-  };
+  }, [editingRecipe]);
 
   const handleSeasonCheckboxChange = (seasonOption) => {
     if (seasonOption === 'Toutes') {
@@ -938,11 +873,6 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
     e.preventDefault();
     if (!name.trim()) return;
 
-    let finalAdditionalEquipment = '';
-    if (showNewEquipSelect && additionalEquipment) {
-      finalAdditionalEquipment = additionalEquipment;
-    }
-
     const ingredients = ingredientsText
       .split('\n')
       .map(i => i.trim().replace(/^[-*•]\s*/, ''))
@@ -953,8 +883,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
     const recipeData = {
       name,
       carb,
-      equipment: equipment || 'Autre',
-      additionalEquipment: finalAdditionalEquipment,
+      equipment,
       season: finalSeason,
       category,
       url,
@@ -969,6 +898,8 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
     } else {
       addRecipe(recipeData);
     }
+
+    setActiveTab(category === 'gateau' ? 'baking' : 'menu');
   };
 
   return (
@@ -1021,147 +952,27 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {category === 'repas' && (
-            <div className="space-y-2">
-              <div className="flex justify-between items-center mb-1">
-                <label className="block text-xs font-semibold text-slate-700 uppercase">Féculent / Catégorie</label>
-                {!showNewCarbInput && (
-                  <button
-                    type="button"
-                    onClick={() => setShowNewCarbInput(true)}
-                    className="text-xs font-semibold text-indigo-600 hover:text-indigo-800"
-                  >
-                    + Nouvelle catégorie
-                  </button>
-                )}
-              </div>
-
-              {showNewCarbInput ? (
-                <div className="flex gap-2">
-                  <input 
-                    type="text"
-                    placeholder="Nom de la catégorie..."
-                    value={newCarbName}
-                    onChange={(e) => setNewCarbName(e.target.value)}
-                    className="flex-1 bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs text-slate-900"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleAddNewCarbQuick}
-                    className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium"
-                  >
-                    Ajouter
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowNewCarbInput(false)}
-                    className="text-slate-400 hover:text-slate-600 text-xs px-1"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ) : (
-                <select 
-                  value={carb}
-                  onChange={(e) => setCarb(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
-                >
-                  {carbsList.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              )}
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Féculent / Catégorie</label>
+              <select 
+                value={carb}
+                onChange={(e) => setCarb(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
+              >
+                {CARBS.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
             </div>
           )}
 
-          <div className={category === 'gateau' ? 'col-span-full space-y-2' : 'space-y-2'}>
-            <div className="flex justify-between items-center mb-1">
-              <label className="block text-xs font-semibold text-slate-700 uppercase">Appareil utilisé</label>
-              {!showNewEquipInput && (
-                <button
-                  type="button"
-                  onClick={() => setShowNewEquipInput(true)}
-                  className="text-xs font-semibold text-indigo-600 hover:text-indigo-800"
-                >
-                  + Nouvel appareil
-                </button>
-              )}
-            </div>
-
-            {showNewEquipInput ? (
-              <div className="flex gap-2">
-                <input 
-                  type="text"
-                  placeholder="Nom du nouvel appareil..."
-                  value={newEquipName}
-                  onChange={(e) => setNewEquipName(e.target.value)}
-                  className="flex-1 bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs text-slate-900"
-                />
-                <button
-                  type="button"
-                  onClick={handleAddNewEquipmentQuick}
-                  className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium"
-                >
-                  Ajouter
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowNewEquipInput(false)}
-                  className="text-slate-400 hover:text-slate-600 text-xs px-1"
-                >
-                  ✕
-                </button>
-              </div>
-            ) : (
-              <select 
-                value={equipment}
-                onChange={(e) => {
-                  setEquipment(e.target.value);
-                  if (additionalEquipment === e.target.value) {
-                    setAdditionalEquipment('');
-                  }
-                }}
-                className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
-              >
-                {equipments.map(eq => <option key={eq} value={eq}>{eq}</option>)}
-              </select>
-            )}
-
-            {!showNewEquipSelect ? (
-              <button
-                type="button"
-                onClick={() => setShowNewEquipSelect(true)}
-                className="flex items-center gap-2 text-xs font-semibold text-indigo-600 hover:text-indigo-800 mt-1 transition-colors"
-              >
-                <div className="w-5 h-5 rounded-full border border-indigo-600 flex items-center justify-center">
-                  <Plus className="w-3.5 h-3.5" />
-                </div>
-                Ajouter un autre appareil utilisé (facultatif)
-              </button>
-            ) : (
-              <div className="space-y-2 mt-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs font-semibold text-slate-700">Second appareil :</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowNewEquipSelect(false);
-                      setAdditionalEquipment('');
-                    }}
-                    className="text-slate-400 hover:text-slate-700 text-xs"
-                  >
-                    ✕ Retirer
-                  </button>
-                </div>
-                <select 
-                  value={additionalEquipment}
-                  onChange={(e) => setAdditionalEquipment(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs text-slate-900 focus:ring-indigo-500"
-                >
-                  <option value="">-- Choisir un autre appareil --</option>
-                  {equipments
-                    .filter(eq => eq !== equipment)
-                    .map(eq => <option key={eq} value={eq}>{eq}</option>)}
-                </select>
-              </div>
-            )}
+          <div className={category === 'gateau' ? 'col-span-full' : ''}>
+            <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Appareil utilisé</label>
+            <select 
+              value={equipment}
+              onChange={(e) => setEquipment(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
+            >
+              {EQUIPMENTS.map(eq => <option key={eq} value={eq}>{eq}</option>)}
+            </select>
           </div>
         </div>
 
@@ -1249,7 +1060,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
           />
         </div>
 
-          <button 
+        <button 
           type="submit"
           className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-xl transition-colors shadow-sm text-sm"
         >
@@ -1260,14 +1071,11 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
   );
 }
 
-function InventoryManager({ inventory, setInventory, equipments, setEquipments, carbsList, setCarbsList }) {
-  const [subTab, setSubTab] = useState('inventory');
+function InventoryManager({ inventory, setInventory }) {
   const [newItemName, setNewItemName] = useState('');
   const [newItemStatus, setNewItemStatus] = useState('Plein');
   const [newItemZone, setNewItemZone] = useState('Placard');
   const [filterZone, setFilterZone] = useState('Tous');
-  const [newEquipName, setNewEquipName] = useState('');
-  const [newCarbName, setNewCarbName] = useState('');
 
   const addItem = (e) => {
     e.preventDefault();
@@ -1292,50 +1100,6 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
     setInventory(inventory.filter((_, i) => i !== index));
   };
 
-  const addEquipment = (e) => {
-    e.preventDefault();
-    const trimmed = newEquipName.trim();
-    if (!trimmed) return;
-    if (equipments.some(eq => eq.toLowerCase() === trimmed.toLowerCase())) {
-      alert("Cet appareil existe déjà !");
-      return;
-    }
-    setEquipments([...equipments, trimmed]);
-    setNewEquipName('');
-  };
-
-  const removeEquipment = (eqToDelete) => {
-    if (equipments.length <= 1) {
-      alert("Vous devez garder au moins un appareil.");
-      return;
-    }
-    if (window.confirm(`Supprimer l'appareil "${eqToDelete}" ?`)) {
-      setEquipments(equipments.filter(eq => eq !== eqToDelete));
-    }
-  };
-
-  const addCarb = (e) => {
-    e.preventDefault();
-    const trimmed = newCarbName.trim();
-    if (!trimmed) return;
-    if (carbsList.some(c => c.toLowerCase() === trimmed.toLowerCase())) {
-      alert("Cette catégorie existe déjà !");
-      return;
-    }
-    setCarbsList([...carbsList, trimmed]);
-    setNewCarbName('');
-  };
-
-  const removeCarb = (carbToDelete) => {
-    if (carbsList.length <= 1) {
-      alert("Vous devez garder au moins une catégorie.");
-      return;
-    }
-    if (window.confirm(`Supprimer la catégorie "${carbToDelete}" ?`)) {
-      setCarbsList(carbsList.filter(c => c !== carbToDelete));
-    }
-  };
-
   const filteredInventory = inventory.filter(item => {
     if (filterZone === 'Tous') return true;
     return item.zone === filterZone;
@@ -1343,235 +1107,118 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 max-w-2xl mx-auto space-y-6">
-      <div className="flex bg-slate-200/70 p-1 rounded-xl">
-        <button 
-          onClick={() => setSubTab('inventory')}
-          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2
-            ${subTab === 'inventory' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
-          `}
-        >
-          <Package className="w-4 h-4" /> Provisions ({inventory.length})
-        </button>
-        <button 
-          onClick={() => setSubTab('equipments')}
-          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2
-            ${subTab === 'equipments' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
-          `}
-        >
-          <Settings className="w-4 h-4" /> Appareils ({equipments.length})
-        </button>
-        <button 
-          onClick={() => setSubTab('carbs')}
-          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2
-            ${subTab === 'carbs' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
-          `}
-        >
-          <Tag className="w-4 h-4" /> Féculents ({carbsList.length})
-        </button>
+      <div>
+        <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2 mb-1">
+          <Package className="w-5 h-5 text-indigo-600" /> Gestion des Provisions
+        </h2>
+        <p className="text-xs text-slate-500">
+          Rangez vos provisions par zone (Placard, Frigo, Congélateur) pour suivre vos stocks.
+        </p>
       </div>
 
-      {subTab === 'inventory' ? (
-        <div className="space-y-6">
-          <div>
-            <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2 mb-1">
-              <Package className="w-5 h-5 text-indigo-600" /> Gestion des Provisions
-            </h2>
-            <p className="text-xs text-slate-500">
-              Rangez vos provisions par zone (Placard, Frigo, Congélateur) pour suivre vos stocks.
-            </p>
-          </div>
+      <form onSubmit={addItem} className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+        <h3 className="text-xs font-bold text-slate-700 uppercase">Ajouter un article</h3>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input 
+            type="text" 
+            placeholder="Nom (ex: Lait, Farine, Steaks...)" 
+            value={newItemName}
+            onChange={(e) => setNewItemName(e.target.value)}
+            className="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm"
+          />
+          <select 
+            value={newItemZone}
+            onChange={(e) => setNewItemZone(e.target.value)}
+            className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700"
+          >
+            {STORAGE_ZONES.map(z => <option key={z} value={z}>{z}</option>)}
+          </select>
+          <select 
+            value={newItemStatus}
+            onChange={(e) => setNewItemStatus(e.target.value)}
+            className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700"
+          >
+            <option value="Plein">Plein</option>
+            <option value="Entamé">Entamé</option>
+            <option value="Presque vide">Presque vide</option>
+          </select>
+          <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+            Ajouter
+          </button>
+        </div>
+      </form>
 
-          <form onSubmit={addItem} className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-            <h3 className="text-xs font-bold text-slate-700 uppercase">Ajouter un article</h3>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <input 
-                type="text" 
-                placeholder="Nom (ex: Lait, Farine, Steaks...)" 
-                value={newItemName}
-                onChange={(e) => setNewItemName(e.target.value)}
-                className="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm"
-              />
-              <select 
-                value={newItemZone}
-                onChange={(e) => setNewItemZone(e.target.value)}
-                className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700"
-              >
-                {STORAGE_ZONES.map(z => <option key={z} value={z}>{z}</option>)}
-              </select>
-              <select 
-                value={newItemStatus}
-                onChange={(e) => setNewItemStatus(e.target.value)}
-                className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700"
-              >
-                <option value="Plein">Plein</option>
-                <option value="Entamé">Entamé</option>
-                <option value="Presque vide">Presque vide</option>
-              </select>
-              <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
-                Ajouter
-              </button>
+      <div className="flex bg-slate-200/70 p-1 rounded-xl">
+        <button 
+          onClick={() => setFilterZone('Tous')}
+          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all
+            ${filterZone === 'Tous' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
+          `}
+        >
+          Tout ({inventory.length})
+        </button>
+        {STORAGE_ZONES.map(z => (
+          <button 
+            key={z}
+            onClick={() => setFilterZone(z)}
+            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all
+              ${filterZone === z ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
+            `}
+          >
+            {z} ({inventory.filter(i => i.zone === z).length})
+          </button>
+        ))}
+      </div>
+
+      <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
+        {filteredInventory.map((item, index) => {
+          const originalIndex = inventory.findIndex(i => i === item);
+
+          return (
+            <div key={originalIndex} className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-white hover:bg-slate-50 transition-colors gap-2">
+              <span className="font-medium text-slate-800 text-sm">{item.name}</span>
+              <div className="flex items-center gap-2 flex-wrap justify-end">
+                <select 
+                  value={item.zone || 'Placard'} 
+                  onChange={(e) => updateZone(originalIndex, e.target.value)}
+                  className="text-xs font-semibold rounded-md px-2 py-1 border bg-slate-50 text-slate-700 border-slate-200"
+                >
+                  {STORAGE_ZONES.map(z => <option key={z} value={z}>{z}</option>)}
+                </select>
+
+                <select 
+                  value={item.status} 
+                  onChange={(e) => updateStatus(originalIndex, e.target.value)}
+                  className={`text-xs font-semibold rounded-md px-2 py-1 border
+                    ${item.status === 'Plein' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : ''}
+                    ${item.status === 'Entamé' ? 'bg-amber-50 text-amber-700 border-amber-200' : ''}
+                    ${item.status === 'Presque vide' ? 'bg-red-50 text-red-700 border-red-200' : ''}
+                  `}
+                >
+                  <option value="Plein">Plein</option>
+                  <option value="Entamé">Entamé</option>
+                  <option value="Presque vide">Presque vide</option>
+                </select>
+
+                <button 
+                  onClick={() => {
+                    if (window.confirm("Supprimer cet élément ?")) {
+                      removeItem(originalIndex);
+                    }
+                  }}
+                  className="text-slate-400 hover:text-red-600 p-1"
+                  title="Supprimer"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
             </div>
-          </form>
-
-          <div className="flex bg-slate-100 p-1 rounded-xl">
-            <button 
-              onClick={() => setFilterZone('Tous')}
-              className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all
-                ${filterZone === 'Tous' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600'}
-              `}
-            >
-              Tout ({inventory.length})
-            </button>
-            {STORAGE_ZONES.map(z => (
-              <button 
-                key={z}
-                onClick={() => setFilterZone(z)}
-                className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all
-                  ${filterZone === z ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600'}
-                `}
-              >
-                {z} ({inventory.filter(i => i.zone === z).length})
-              </button>
-            ))}
-          </div>
-
-          <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
-            {filteredInventory.map((item, index) => {
-              const originalIndex = inventory.findIndex(i => i === item);
-
-              return (
-                <div key={originalIndex} className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-white hover:bg-slate-50 transition-colors gap-2">
-                  <span className="font-medium text-slate-800 text-sm">{item.name}</span>
-                  <div className="flex items-center gap-2 flex-wrap justify-end">
-                    <select 
-                      value={item.zone || 'Placard'} 
-                      onChange={(e) => updateZone(originalIndex, e.target.value)}
-                      className="text-xs font-semibold rounded-md px-2 py-1 border bg-slate-50 text-slate-700 border-slate-200"
-                    >
-                      {STORAGE_ZONES.map(z => <option key={z} value={z}>{z}</option>)}
-                    </select>
-
-                    <select 
-                      value={item.status} 
-                      onChange={(e) => updateStatus(originalIndex, e.target.value)}
-                      className={`text-xs font-semibold rounded-md px-2 py-1 border
-                        ${item.status === 'Plein' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : ''}
-                        ${item.status === 'Entamé' ? 'bg-amber-50 text-amber-700 border-amber-200' : ''}
-                        ${item.status === 'Presque vide' ? 'bg-red-50 text-red-700 border-red-200' : ''}
-                      `}
-                    >
-                      <option value="Plein">Plein</option>
-                      <option value="Entamé">Entamé</option>
-                      <option value="Presque vide">Presque vide</option>
-                    </select>
-
-                    <button 
-                      onClick={() => {
-                        if (window.confirm("Supprimer cet élément ?")) {
-                          removeItem(originalIndex);
-                        }
-                      }}
-                      className="text-slate-400 hover:text-red-600 p-1"
-                      title="Supprimer"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-            {filteredInventory.length === 0 && (
-              <div className="p-8 text-center text-slate-400 text-sm">Aucun élément dans cette catégorie.</div>
-            )}
-          </div>
-        </div>
-      ) : subTab === 'equipments' ? (
-        <div className="space-y-6">
-          <div>
-            <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2 mb-1">
-              <Settings className="w-5 h-5 text-indigo-600" /> Gestion des Appareils de Cuisson
-            </h2>
-            <p className="text-xs text-slate-500">
-              Ajoutez ou supprimez les appareils disponibles pour vos recettes (Thermomix, Cookeo, Airfryer...).
-            </p>
-          </div>
-
-          <form onSubmit={addEquipment} className="flex gap-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
-            <input 
-              type="text" 
-              placeholder="Nouvel appareil (ex: Machine à pain)..." 
-              value={newEquipName}
-              onChange={(e) => setNewEquipName(e.target.value)}
-              className="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm"
-            />
-            <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
-              Ajouter
-            </button>
-          </form>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {equipments.map(eq => (
-              <div key={eq} className="bg-white border border-slate-200 text-slate-800 text-xs p-3 rounded-xl flex items-center justify-between shadow-sm font-medium">
-                <span className="flex items-center gap-2">
-                  <Settings className="w-4 h-4 text-indigo-600" />
-                  {eq}
-                </span>
-                <button 
-                  type="button" 
-                  onClick={() => removeEquipment(eq)}
-                  className="text-slate-400 hover:text-red-600 p-1 transition-colors"
-                  title="Supprimer"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          <div>
-            <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2 mb-1">
-              <Tag className="w-5 h-5 text-indigo-600" /> Gestion des Féculents / Catégories
-            </h2>
-            <p className="text-xs text-slate-500">
-              Ajoutez ou supprimez les catégories de féculents disponibles pour vos recettes.
-            </p>
-          </div>
-
-          <form onSubmit={addCarb} className="flex gap-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
-            <input 
-              type="text" 
-              placeholder="Nouvelle catégorie (ex: Polenta, Quinoa)..." 
-              value={newCarbName}
-              onChange={(e) => setNewCarbName(e.target.value)}
-              className="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm"
-            />
-            <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
-              Ajouter
-            </button>
-          </form>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {carbsList.map(c => (
-              <div key={c} className="bg-white border border-slate-200 text-slate-800 text-xs p-3 rounded-xl flex items-center justify-between shadow-sm font-medium">
-                <span className="flex items-center gap-2">
-                  <Tag className="w-4 h-4 text-indigo-600" />
-                  {c}
-                </span>
-                <button 
-                  type="button" 
-                  onClick={() => removeCarb(c)}
-                  className="text-slate-400 hover:text-red-600 p-1 transition-colors"
-                  title="Supprimer"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+          );
+        })}
+        {filteredInventory.length === 0 && (
+          <div className="p-8 text-center text-slate-400 text-sm">Aucun élément dans cette catégorie.</div>
+        )}
+      </div>
     </div>
   );
 }
@@ -1602,7 +1249,7 @@ function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingCheck
     const found = inventory.find(i => ingName.toLowerCase().includes(i.name.toLowerCase()));
     if (!found) return { status: 'A acheter', color: 'text-indigo-600 bg-indigo-50 border-indigo-200' };
     if (found.status === 'Plein') return { status: `En stock (${found.zone} - Plein)`, color: 'text-emerald-700 bg-emerald-50 border-emerald-200' };
-    if (found.status === 'Entamé') return { status: `En stock (${found.zone} - Entamé)`, color: 'text-amber-700 bg-amber-700 border-amber-200' };
+    if (found.status === 'Entamé') return { status: `En stock (${found.zone} - Entamé)`, color: 'text-amber-700 bg-amber-50 border-amber-200' };
     return { status: `Presque vide (${found.zone})`, color: 'text-red-700 bg-red-50 border-red-200' };
   };
 
@@ -1699,7 +1346,7 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
               {recipe.category === 'gateau' ? '🍰 Gâteau' : recipe.carb}
             </span>
             <span className="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md font-medium">
-              {recipe.equipment}{recipe.additionalEquipment ? ` + ${recipe.additionalEquipment}` : ''}
+              {recipe.equipment}
             </span>
             <span className="text-xs bg-amber-50 text-amber-700 px-2.5 py-1 rounded-md font-medium">
               {recipe.season}
@@ -1709,18 +1356,40 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
         </div>
 
         {recipe.image && (
-          <div className="h-48 w-full overflow-hidden rounded-xl border border-slate-200">
-            <img src={recipe.image} alt={recipe.name} onClick={() => setSelectedImage(recipe.image)} className="w-full h-full object-cover cursor-pointer hover:opacity-95 transition" />
+          <div className="w-full bg-slate-900 rounded-xl overflow-hidden border border-slate-200 flex items-center justify-center">
+            <img 
+              src={recipe.image} 
+              alt={recipe.name} 
+              onClick={() => setSelectedImage(recipe.image)}
+              className="w-full h-auto max-h-[350px] object-contain cursor-pointer hover:opacity-95 transition" 
+            />
+          </div>
+        )}
+
+        {recipe.url && (
+          <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex items-center justify-between">
+            <div>
+              <h4 className="font-semibold text-indigo-900 text-sm">Recette sur le web</h4>
+              <p className="text-xs text-indigo-700 truncate max-w-[250px]">{recipe.url}</p>
+            </div>
+            <a 
+              href={recipe.url} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5"
+            >
+              <LinkIcon className="w-3.5 h-3.5" /> Ouvrir le lien
+            </a>
           </div>
         )}
 
         {recipe.ingredients && recipe.ingredients.length > 0 && (
-          <div className="space-y-2">
-            <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Ingrédients</h3>
-            <ul className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1.5 text-sm">
+          <div>
+            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Ingrédients</h3>
+            <ul className="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-1.5">
               {recipe.ingredients.map((ing, idx) => (
-                <li key={idx} className="flex items-center gap-2 text-slate-700">
-                  <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full"></span>
+                <li key={idx} className="text-sm text-slate-800 flex items-center gap-2 list-none">
+                  <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full inline-block mr-2"></span>
                   {ing}
                 </li>
               ))}
@@ -1729,27 +1398,22 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
         )}
 
         {recipe.instructions && (
-          <div className="space-y-2">
-            <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Préparation</h3>
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm text-slate-700 whitespace-pre-line leading-relaxed">
+          <div>
+            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Préparation</h3>
+            <p className="text-sm text-slate-700 leading-relaxed bg-slate-50 rounded-xl p-4 border border-slate-200 whitespace-pre-line">
               {recipe.instructions}
-            </div>
+            </p>
           </div>
         )}
 
-        {recipe.url && (
-          <div>
-            <a 
-              href={recipe.url} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="inline-flex items-center gap-2 text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-4 py-2.5 rounded-xl border border-indigo-100 transition-colors"
-            >
-              <LinkIcon className="w-4 h-4" /> Voir la source originale
-            </a>
-          </div>
-        )}
+        <button 
+          onClick={onClose}
+          className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 rounded-xl transition-colors text-sm"
+        >
+          Fermer
+        </button>
       </div>
     </div>
   );
 }
+
