@@ -98,22 +98,10 @@ export default function App() {
         data: { recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks }
       };
 
-      const { data: existing } = await supabase
+      // Utilisation d'un upsert propre basé sur la contrainte d'unicité de user_key
+      await supabase
         .from('stockage_donnees')
-        .select('id')
-        .eq('user_key', 'ma_famille')
-        .maybeSingle();
-
-      if (existing) {
-        await supabase
-          .from('stockage_donnees')
-          .update(payload)
-          .eq('user_key', 'ma_famille');
-      } else {
-        await supabase
-          .from('stockage_donnees')
-          .insert([payload]);
-      }
+        .upsert(payload, { onConflict: 'user_key' });
     }
 
     const timer = setTimeout(saveData, 1000);
@@ -543,7 +531,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
             </div>
             {day.key === 'wednesday' ? (
               <div className="w-full bg-slate-100 border border-slate-300 text-slate-800 text-xs rounded-lg p-2 font-medium flex items-center justify-between">
-                <span>Cordons bleus et pommes de terre</span>
+                <span>Gnocchis, saucisses, cordons bleus et pommes de terre</span>
                 <span className="text-[10px] bg-slate-200 px-2 py-0.5 rounded text-slate-600">Fixe</span>
               </div>
             ) : dinnerRecipes.length === 0 ? (
@@ -1721,40 +1709,18 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
         </div>
 
         {recipe.image && (
-          <div className="w-full bg-slate-900 rounded-xl overflow-hidden border border-slate-200 flex items-center justify-center">
-            <img 
-              src={recipe.image} 
-              alt={recipe.name} 
-              onClick={() => setSelectedImage(recipe.image)}
-              className="w-full h-auto max-h-[350px] object-contain cursor-pointer hover:opacity-95 transition" 
-            />
-          </div>
-        )}
-
-        {recipe.url && (
-          <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex items-center justify-between">
-            <div>
-              <h4 className="font-semibold text-indigo-900 text-sm">Recette sur le web</h4>
-              <p className="text-xs text-indigo-700 truncate max-w-[250px]">{recipe.url}</p>
-            </div>
-            <a 
-              href={recipe.url} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5"
-            >
-              <LinkIcon className="w-3.5 h-3.5" /> Ouvrir le lien
-            </a>
+          <div className="h-48 w-full overflow-hidden rounded-xl border border-slate-200">
+            <img src={recipe.image} alt={recipe.name} onClick={() => setSelectedImage(recipe.image)} className="w-full h-full object-cover cursor-pointer hover:opacity-95 transition" />
           </div>
         )}
 
         {recipe.ingredients && recipe.ingredients.length > 0 && (
-          <div>
-            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Ingrédients</h3>
-            <ul className="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-1.5">
+          <div className="space-y-2">
+            <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Ingrédients</h3>
+            <ul className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1.5 text-sm">
               {recipe.ingredients.map((ing, idx) => (
-                <li key={idx} className="text-sm text-slate-800 flex items-center gap-2 list-none">
-                  <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full inline-block mr-2"></span>
+                <li key={idx} className="flex items-center gap-2 text-slate-700">
+                  <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full"></span>
                   {ing}
                 </li>
               ))}
@@ -1763,22 +1729,27 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
         )}
 
         {recipe.instructions && (
-          <div>
-            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Préparation</h3>
-            <p className="text-sm text-slate-700 leading-relaxed bg-slate-50 rounded-xl p-4 border border-slate-200 whitespace-pre-line">
+          <div className="space-y-2">
+            <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Préparation</h3>
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm text-slate-700 whitespace-pre-line leading-relaxed">
               {recipe.instructions}
-            </p>
+            </div>
           </div>
         )}
 
-        <button 
-          onClick={onClose}
-          className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 rounded-xl transition-colors text-sm"
-        >
-          Fermer
-        </button>
+        {recipe.url && (
+          <div>
+            <a 
+              href={recipe.url} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="inline-flex items-center gap-2 text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-4 py-2.5 rounded-xl border border-indigo-100 transition-colors"
+            >
+              <LinkIcon className="w-4 h-4" /> Voir la source originale
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );
 }
-
