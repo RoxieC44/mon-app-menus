@@ -1,4 +1,4 @@
-import React, { localStorage, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, List, Calendar, Trash2, Utensils, Info, Tag, Sun, Settings, Link as LinkIcon, Pencil, Camera, RefreshCw, AlertTriangle, Eye, X, Image as ImageIcon, ShoppingBag, Package, Check, Copy, Sparkles, Filter, Cake } from 'lucide-react';
 import { supabase } from './supabaseClient';
 
@@ -29,24 +29,24 @@ const recipeMatchesSeason = (seasonValue, targetSeason) => {
 };
 
 export default function App() {
-  const [activeTab, setActiveTab] = localStorage('menu');
-  const [menuSubTab, setMenuSubTab] = localStorage('planning');
-  const [bakingSubTab, setBakingSubTab] = localStorage('planning');
-  const [viewingRecipe, setViewingRecipe] = localStorage(null);
-  const [editingRecipe, setEditingRecipe] = localStorage(null);
-  const [selectedImage, setSelectedImage] = localStorage(null);
+  const [activeTab, setActiveTab] = ('menu');
+  const [menuSubTab, setMenuSubTab] = ('planning');
+  const [bakingSubTab, setBakingSubTab] = ('planning');
+  const [viewingRecipe, setViewingRecipe] = (null);
+  const [editingRecipe, setEditingRecipe] = (null);
+  const [selectedImage, setSelectedImage] = (null);
   const currentSeason = getCurrentSeason();
 
-  const [loading, setLoading] = localStorage(true);
+  const [loading, setLoading] = (true);
 
-  const [recipes, setRecipes] = localStorage(DEFAULT_RECIPES);
-  const [equipments, setEquipments] = localStorage(INITIAL_EQUIPMENTS);
-  const [carbsList, setCarbsList] = localStorage(INITIAL_CARBS);
-  const [menu, setMenu] = localStorage({
+  const [recipes, setRecipes] = (DEFAULT_RECIPES);
+  const [equipments, setEquipments] = (INITIAL_EQUIPMENTS);
+  const [carbsList, setCarbsList] = (INITIAL_CARBS);
+  const [menu, setMenu] = ({
     mondayDinner: '', tuesdayDinner: '', wednesdayDinner: '', thursdayDinner: '', fridayDinner: '', saturdayDinner: '', sundayDinner: '',
     mondayLunch: 'restes', tuesdayLunch: 'restes', wednesdayLunch: '', thursdayLunch: 'restes', fridayLunch: 'restes', saturdayLunch: '', sundayLunch: ''
   });
-  const [inventory, setInventory] = localStorage([
+  const [inventory, setInventory] = useState([
     { name: 'Sel', status: 'Plein', zone: 'Placard' },
     { name: 'Poivre', status: 'Plein', zone: 'Placard' },
     { name: "Huile d'olive", status: 'Plein', zone: 'Placard' },
@@ -56,8 +56,8 @@ export default function App() {
     { name: 'Oignons', status: 'Plein', zone: 'Placard' },
     { name: 'Ail', status: 'Plein', zone: 'Placard' }
   ]);
-  const [bakingItems, setBakingItems] = localStorage(['', '']);
-  const [shoppingChecks, setShoppingChecks] = localStorage({});
+  const [bakingItems, setBakingItems] = useState(['', '']);
+  const [shoppingChecks, setShoppingChecks] = useState({});
 
   useEffect(() => {
     async function loadData() {
@@ -543,7 +543,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
             </div>
             {day.key === 'wednesday' ? (
               <div className="w-full bg-slate-100 border border-slate-300 text-slate-800 text-xs rounded-lg p-2 font-medium flex items-center justify-between">
-                <span>Cordons bleus et pommes de terre</span>
+                <span>Gnocchis, saucisses, cordons bleus et pommes de terre</span>
                 <span className="text-[10px] bg-slate-200 px-2 py-0.5 rounded text-slate-600">Fixe</span>
               </div>
             ) : dinnerRecipes.length === 0 ? (
@@ -586,9 +586,9 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
 }
 
 function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, title, equipments, carbsList }) {
-  const [filterSeason, setFilterSeason] = localStorage('Tous');
-  const [filterEquip, setFilterEquip] = localStorage('Tous');
-  const [filterCarb, setFilterCarb] = localStorage('Tous');
+  const [filterSeason, setFilterSeason] = useState('Tous');
+  const [filterEquip, setFilterEquip] = useState('Tous');
+  const [filterCarb, setFilterCarb] = useState('Tous');
 
   const filteredRecipes = recipes.filter(r => {
     if (filterSeason !== 'Tous' && !recipeMatchesSeason(r.season, filterSeason)) return false;
@@ -833,21 +833,21 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
 }
 
 function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTab, setSelectedImage, equipments, setEquipments, carbsList, setCarbsList }) {
-  const [name, setName] = localStorage('');
-  const [carb, setCarb] = localStorage(carbsList[0] || 'Plaisir');
-  const [showNewCarbInput, setShowNewCarbInput] = localStorage(false);
-  const [newCarbName, setNewCarbName] = localStorage('');
-  const [equipment, setEquipment] = localStorage(equipments[0] || 'Four');
-  const [showNewEquipInput, setShowNewEquipInput] = localStorage(false);
-  const [newEquipName, setNewEquipName] = localStorage('');
-  const [showNewEquipSelect, setShowNewEquipSelect] = localStorage(false);
-  const [additionalEquipment, setAdditionalEquipment] = localStorage('');
-  const [selectedSeasons, setSelectedSeasons] = localStorage(['Toutes']);
-  const [category, setCategory] = localStorage('repas');
-  const [url, setUrl] = localStorage('');
-  const [image, setImage] = localStorage('');
-  const [instructions, setInstructions] = localStorage('');
-  const [ingredientsText, setIngredientsText] = localStorage('');
+  const [name, setName] = useState('');
+  const [carb, setCarb] = useState(carbsList[0] || 'Plaisir');
+  const [showNewCarbInput, setShowNewCarbInput] = useState(false);
+  const [newCarbName, setNewCarbName] = useState('');
+  const [equipment, setEquipment] = useState(equipments[0] || 'Four');
+  const [showNewEquipInput, setShowNewEquipInput] = useState(false);
+  const [newEquipName, setNewEquipName] = useState('');
+  const [showNewEquipSelect, setShowNewEquipSelect] = useState(false);
+  const [additionalEquipment, setAdditionalEquipment] = useState('');
+  const [selectedSeasons, setSelectedSeasons] = useState(['Toutes']);
+  const [category, setCategory] = useState('repas');
+  const [url, setUrl] = useState('');
+  const [image, setImage] = useState('');
+  const [instructions, setInstructions] = useState('');
+  const [ingredientsText, setIngredientsText] = useState('');
   
   useEffect(() => {
     if (editingRecipe) {
@@ -1273,13 +1273,13 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
 }
 
 function InventoryManager({ inventory, setInventory, equipments, setEquipments, carbsList, setCarbsList }) {
-  const [subTab, setSubTab] = localStorage('inventory');
-  const [newItemName, setNewItemName] = localStorage('');
-  const [newItemStatus, setNewItemStatus] = localStorage('Plein');
-  const [newItemZone, setNewItemZone] = localStorage('Placard');
-  const [filterZone, setFilterZone] = localStorage('Tous');
-  const [newEquipName, setNewEquipName] = localStorage('');
-  const [newCarbName, setNewCarbName] = localStorage('');
+  const [subTab, setSubTab] = useState('inventory');
+  const [newItemName, setNewItemName] = useState('');
+  const [newItemStatus, setNewItemStatus] = useState('Plein');
+  const [newItemZone, setNewItemZone] = useState('Placard');
+  const [filterZone, setFilterZone] = useState('Tous');
+  const [newEquipName, setNewEquipName] = useState('');
+  const [newCarbName, setNewCarbName] = useState('');
 
   const addItem = (e) => {
     e.preventDefault();
@@ -1589,7 +1589,7 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
 }
 
 function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingChecks, setShoppingChecks, setActiveTab }) {
-  const [copied, setCopied] = localStorage(false);
+  const [copied, setCopied] = useState(false);
 
   const activeRecipeIds = [
     ...Object.values(menu).filter(val => val && val !== 'restes'),
@@ -1781,4 +1781,3 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
     </div>
   );
 }
-
