@@ -29,20 +29,20 @@ const recipeMatchesSeason = (seasonValue, targetSeason) => {
 };
 
 export default function App() {
-  const [activeTab, setActiveTab] = ('menu');
-  const [menuSubTab, setMenuSubTab] = ('planning');
-  const [bakingSubTab, setBakingSubTab] = ('planning');
-  const [viewingRecipe, setViewingRecipe] = (null);
-  const [editingRecipe, setEditingRecipe] = (null);
-  const [selectedImage, setSelectedImage] = (null);
+  const [activeTab, setActiveTab] = useState('menu');
+  const [menuSubTab, setMenuSubTab] = useState('planning');
+  const [bakingSubTab, setBakingSubTab] = useState('planning');
+  const [viewingRecipe, setViewingRecipe] = useState(null);
+  const [editingRecipe, setEditingRecipe] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
   const currentSeason = getCurrentSeason();
 
-  const [loading, setLoading] = (true);
+  const [loading, setLoading] = useState(true);
 
-  const [recipes, setRecipes] = (DEFAULT_RECIPES);
-  const [equipments, setEquipments] = (INITIAL_EQUIPMENTS);
-  const [carbsList, setCarbsList] = (INITIAL_CARBS);
-  const [menu, setMenu] = ({
+  const [recipes, setRecipes] = useState(DEFAULT_RECIPES);
+  const [equipments, setEquipments] = useState(INITIAL_EQUIPMENTS);
+  const [carbsList, setCarbsList] = useState(INITIAL_CARBS);
+  const [menu, setMenu] = useState({
     mondayDinner: '', tuesdayDinner: '', wednesdayDinner: '', thursdayDinner: '', fridayDinner: '', saturdayDinner: '', sundayDinner: '',
     mondayLunch: 'restes', tuesdayLunch: 'restes', wednesdayLunch: '', thursdayLunch: 'restes', fridayLunch: 'restes', saturdayLunch: '', sundayLunch: ''
   });
@@ -62,15 +62,11 @@ export default function App() {
   useEffect(() => {
     async function loadData() {
       setLoading(true);
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('stockage_donnees')
         .select('data')
         .eq('user_key', 'ma_famille')
         .maybeSingle();
-
-      if (error) {
-        console.error('Erreur lors du chargement des données :', error.message);
-      }
 
       if (data && data.data) {
         const saved = data.data;
@@ -102,19 +98,27 @@ export default function App() {
         data: { recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks }
       };
 
-      // Utilisation de upsert pour gérer l'insertion ou la mise à jour proprement
-      const { error } = await supabase
+      const { data: existing } = await supabase
         .from('stockage_donnees')
-        .upsert(payload, { onConflict: 'user_key' });
+        .select('id')
+        .eq('user_key', 'ma_famille')
+        .maybeSingle();
 
-      if (error) {
-        console.error('Erreur lors de la sauvegarde des données :', error.message);
+      if (existing) {
+        await supabase
+          .from('stockage_donnees')
+          .update(payload)
+          .eq('user_key', 'ma_famille');
+      } else {
+        await supabase
+          .from('stockage_donnees')
+          .insert([payload]);
       }
     }
 
     const timer = setTimeout(saveData, 1000);
     return () => clearTimeout(timer);
-  }, [recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks, loading]);
+  }, [recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks]);
 
   const addRecipe = (newRecipe) => {
     setRecipes(prev => {
@@ -539,7 +543,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
             </div>
             {day.key === 'wednesday' ? (
               <div className="w-full bg-slate-100 border border-slate-300 text-slate-800 text-xs rounded-lg p-2 font-medium flex items-center justify-between">
-                <span>Gnocchis, saucisses, cordons bleus et pommes de terre</span>
+                <span>Cordons bleus et pommes de terre</span>
                 <span className="text-[10px] bg-slate-200 px-2 py-0.5 rounded text-slate-600">Fixe</span>
               </div>
             ) : dinnerRecipes.length === 0 ? (
@@ -1777,3 +1781,6 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
     </div>
   );
 }
+
+
+
