@@ -4,7 +4,7 @@ import { supabase } from './supabaseClient';
 
 const DEFAULT_RECIPES = [];
 
-const INITIAL_EQUIPMENTS = ['Thermomix', 'Cookeo', 'Poêle', 'Four', 'Casserole', 'Airfryer', 'Gaufrier - Croque-Monsieur - Panini', 'Crêpière - Mini woks - Grill', 'Raclette - Pierrade - Fondue', 'Plancha', 'Barbecue', 'Sans Cuisson'];
+const INITIAL_EQUIPMENTS = ['Thermomix', 'Cookeo', 'Ninja Double Stack', 'Poêle', 'Four', 'Casserole', 'Airfryer', 'Gaufrier - Croque-Monsieur - Panini', 'Crêpière - Mini woks - Grill', 'Raclette - Pierrade - Fondue', 'Plancha', 'Barbecue', 'Sans Cuisson'];
 const INITIAL_CARBS = ['Pâtes', 'Pommes de terre', 'Semoule', 'Riz', 'Blé', 'Plaisir'];
 const SEASONS_LIST = ['Printemps', 'Été', 'Automne', 'Hiver'];
 const STORAGE_ZONES = ['Placard', 'Frigo', 'Congélateur'];
@@ -89,27 +89,37 @@ export default function App() {
     loadData();
   }, []);
 
- useEffect(() => {
+  useEffect(() => {
     if (loading) return;
 
     async function saveData() {
-      // On met à jour directement la ligne où user_key vaut 'ma_famille'
-      const { error } = await supabase
-        .from('stockage_donnees')
-        .update({ 
-          data: { recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks } 
-        })
-        .eq('user_key', 'ma_famille');
+      const payload = {
+        user_key: 'ma_famille',
+        data: { recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks }
+      };
 
-      if (error) {
-        console.error('Erreur lors de la sauvegarde des données :', error.message);
+      const { data: existing } = await supabase
+        .from('stockage_donnees')
+        .select('id')
+        .eq('user_key', 'ma_famille')
+        .maybeSingle();
+
+      if (existing) {
+        await supabase
+          .from('stockage_donnees')
+          .update(payload)
+          .eq('user_key', 'ma_famille');
+      } else {
+        await supabase
+          .from('stockage_donnees')
+          .insert([payload]);
       }
     }
 
     const timer = setTimeout(saveData, 1000);
     return () => clearTimeout(timer);
-  }, [recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks, loading]);
-  
+  }, [recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks]);
+
   const addRecipe = (newRecipe) => {
     setRecipes(prev => {
       const exists = prev.some(r => r.id === newRecipe.id);
