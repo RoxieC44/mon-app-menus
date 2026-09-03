@@ -98,21 +98,12 @@ export default function App() {
         data: { recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks }
       };
 
-      const { data: existing } = await supabase
+      const { error } = await supabase
         .from('stockage_donnees')
-        .select('id')
-        .eq('user_key', 'ma_famille')
-        .maybeSingle();
+        .upsert(payload, { onConflict: 'user_key' });
 
-      if (existing) {
-        await supabase
-          .from('stockage_donnees')
-          .update(payload)
-          .eq('user_key', 'ma_famille');
-      } else {
-        await supabase
-          .from('stockage_donnees')
-          .insert([payload]);
+      if (error) {
+        console.error("Erreur lors de la sauvegarde Supabase :", error.message);
       }
     }
 
