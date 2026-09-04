@@ -89,10 +89,12 @@ export default function App() {
     loadData();
   }, []);
 
-  useEffect(() => {
+ useEffect(() => {
     if (loading) return;
 
     async function saveData() {
+      console.log("Tentative de sauvegarde lancée...");
+      
       const payload = {
         user_key: 'ma_famille',
         data: { recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks }
@@ -104,18 +106,27 @@ export default function App() {
         .eq('user_key', 'ma_famille')
         .maybeSingle();
 
-     if (existing) {
-      await supabase
-        .from('stockage_donnees')
-        .update({ data: payload.data })
-        .eq('user_key', 'ma_famille');
-    } else {
-      await supabase
-        .from('stockage_donnees')
-        .insert([payload]);
-    }
+      if (existing) {
+        const { error } = await supabase
+          .from('stockage_donnees')
+          .update({ data: payload.data })
+          .eq('user_key', 'ma_famille');
+
+        if (error) console.error("Erreur UPDATE :", error);
+        else console.log("Sauvegarde réussie (UPDATE) !");
+      } else {
+        const { error } = await supabase
+          .from('stockage_donnees')
+          .insert([payload]);
+
+        if (error) console.error("Erreur INSERT :", error);
+        else console.log("Sauvegarde réussie (INSERT) !");
+      }
     }
 
+    const timer = setTimeout(saveData, 1000);
+    return () => clearTimeout(timer);
+  }, [recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks, loading]);
     const timer = setTimeout(saveData, 1000);
     return () => clearTimeout(timer);
   }, [recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks]);
