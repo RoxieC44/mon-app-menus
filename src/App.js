@@ -128,8 +128,6 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks, loading]);
     const timer = setTimeout(saveData, 1000);
-    return () => clearTimeout(timer);
-  }, [recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks]);
 
   const addRecipe = (newRecipe) => {
     setRecipes(prev => {
