@@ -62,14 +62,14 @@ export default function App() {
   useEffect(() => {
     async function loadData() {
       setLoading(true);
-    const response = await supabase
-      .from('stockage_donnees')
-      .select('data')
-      .eq('user_key', 'ma_famille')
-      .maybeSingle();
+      const { data } = await supabase
+        .from('stockage_donnees')
+        .select('data')
+        .eq('user_key', 'ma_famille')
+        .maybeSingle();
 
-    if (response.data && response.data.data) {
-      const saved = response.data.data;
+      if (data && data.data) {
+        const saved = data.data;
         if (saved.recipes) setRecipes(saved.recipes);
         if (saved.equipments && Array.isArray(saved.equipments)) setEquipments(saved.equipments);
         if (saved.carbsList && Array.isArray(saved.carbsList)) setCarbsList(saved.carbsList);
@@ -89,12 +89,10 @@ export default function App() {
     loadData();
   }, []);
 
- useEffect(() => {
+  useEffect(() => {
     if (loading) return;
 
     async function saveData() {
-      console.log("Tentative de sauvegarde lancée...");
-      
       const payload = {
         user_key: 'ma_famille',
         data: { recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks }
@@ -107,27 +105,20 @@ export default function App() {
         .maybeSingle();
 
       if (existing) {
-        const { error } = await supabase
+        await supabase
           .from('stockage_donnees')
-          .update({ data: payload.data })
+          .update(payload)
           .eq('user_key', 'ma_famille');
-
-        if (error) console.error("Erreur UPDATE :", error);
-        else console.log("Sauvegarde réussie (UPDATE) !");
       } else {
-        const { error } = await supabase
+        await supabase
           .from('stockage_donnees')
           .insert([payload]);
-
-        if (error) console.error("Erreur INSERT :", error);
-        else console.log("Sauvegarde réussie (INSERT) !");
       }
     }
 
     const timer = setTimeout(saveData, 1000);
     return () => clearTimeout(timer);
-  }, [recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks, loading]);
-    const timer = setTimeout(saveData, 1000);
+  }, [recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks]);
 
   const addRecipe = (newRecipe) => {
     setRecipes(prev => {
@@ -1790,6 +1781,3 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
     </div>
   );
 }
-
-
-
