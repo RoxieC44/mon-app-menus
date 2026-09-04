@@ -104,16 +104,16 @@ export default function App() {
         .eq('user_key', 'ma_famille')
         .maybeSingle();
 
-      if (existing) {
-        await supabase
-          .from('stockage_donnees')
-          .update(payload)
-          .eq('user_key', 'ma_famille');
-      } else {
-        await supabase
-          .from('stockage_donnees')
-          .insert([payload]);
-      }
+     if (existing) {
+      await supabase
+        .from('stockage_donnees')
+        .update({ data: payload.data })
+        .eq('user_key', 'ma_famille');
+    } else {
+      await supabase
+        .from('stockage_donnees')
+        .insert([payload]);
+    }
     }
 
     const timer = setTimeout(saveData, 1000);
