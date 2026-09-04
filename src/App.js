@@ -62,14 +62,14 @@ export default function App() {
   useEffect(() => {
     async function loadData() {
       setLoading(true);
-      const { data } = await supabase
-        .from('stockage_donnees')
-        .select('data')
-        .eq('user_key', 'ma_famille')
-        .maybeSingle();
+    const response = await supabase
+      .from('stockage_donnees')
+      .select('data')
+      .eq('user_key', 'ma_famille')
+      .maybeSingle();
 
-      if (data && data.data) {
-        const saved = data.data;
+    if (response.data && response.data.data) {
+      const saved = response.data.data;
         if (saved.recipes) setRecipes(saved.recipes);
         if (saved.equipments && Array.isArray(saved.equipments)) setEquipments(saved.equipments);
         if (saved.carbsList && Array.isArray(saved.carbsList)) setCarbsList(saved.carbsList);
@@ -96,7 +96,7 @@ export default function App() {
       console.log("Tentative de sauvegarde lancée...");
       
       const payload = {
-        user_key: 'ma_famille',
+        _key: 'ma_famille',
         data: { recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks }
       };
 
