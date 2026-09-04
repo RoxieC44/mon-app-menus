@@ -361,7 +361,7 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
     }
   });
 
-  const generateSmartMenu = () => {
+const generateSmartMenu = () => {
     let newMenu = { ...menu };
     let tempEquipCounts = {};
     
@@ -377,12 +377,17 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
 
     eveningDays.forEach(day => {
       if (day.key === 'wednesdayDinner') return;
+      
+      // On récupère uniquement les recettes éligibles pour la saison ET le féculent requis du jour
       let possibleRecipes = getEligibleRecipes(day.reqCarb);
+      
+      // S'il n'y a pas assez de recettes strictes de saison pour ce féculent, on élargit aux recettes de ce féculent (toutes saisons confondues)
       if (possibleRecipes.length === 0) {
         possibleRecipes = recipes.filter(r => r.carb === day.reqCarb);
       }
       if (possibleRecipes.length === 0) return;
 
+      // On trie les candidats pour éviter d'utiliser trop souvent le même appareil
       possibleRecipes.sort((a, b) => {
         const countA = (tempEquipCounts[a.equipment] || 0) + (tempEquipCounts[a.additionalEquipment] || 0);
         const countB = (tempEquipCounts[b.equipment] || 0) + (tempEquipCounts[b.additionalEquipment] || 0);
