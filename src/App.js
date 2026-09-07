@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, List, Calendar, Trash2, Utensils, Info, Tag, Sun, Settings, Link as LinkIcon, Pencil, Camera, RefreshCw, AlertTriangle, Eye, X, Image as ImageIcon, ShoppingBag, Package, Check, Copy, Sparkles, Filter, Cake, Clock, ChevronDown, ChevronRight } from 'lucide-react';
+import { Plus, List, Calendar, Trash2, Utensils, Info, Tag, Sun, Settings, Link as LinkIcon, Pencil, Camera, RefreshCw, AlertTriangle, Eye, X, Image as ImageIcon, ShoppingBag, Package, Check, Copy, Sparkles, Filter, Cake } from 'lucide-react';
 import { supabase } from './supabaseClient';
 
 const DEFAULT_RECIPES = [];
@@ -8,7 +8,6 @@ const INITIAL_EQUIPMENTS = ['Thermomix', 'Cookeo', 'Ninja Double Stack', 'Poêle
 const INITIAL_CARBS = ['Pâtes', 'Pommes de terre', 'Semoule', 'Riz', 'Blé', 'Plaisir'];
 const SEASONS_LIST = ['Printemps', 'Été', 'Automne', 'Hiver'];
 const STORAGE_ZONES = ['Placard', 'Frigo', 'Congélateur'];
-const INVENTORY_CATEGORIES = ['Légumes & Fruits', 'Féculents & Céréales', 'Epicerie & Condiments', 'Produits laitiers & Frais', 'Viandes & Poissons', 'Surgelés', 'Autres'];
 
 const getCurrentSeason = () => {
   const now = new Date();
@@ -48,14 +47,14 @@ export default function App() {
     mondayLunch: 'restes', tuesdayLunch: 'restes', wednesdayLunch: '', thursdayLunch: 'restes', fridayLunch: 'restes', saturdayLunch: '', sundayLunch: ''
   });
   const [inventory, setInventory] = useState([
-    { name: 'Sel', status: 'Plein', zone: 'Placard', category: 'Epicerie & Condiments', expiryDate: '' },
-    { name: 'Poivre', status: 'Plein', zone: 'Placard', category: 'Epicerie & Condiments', expiryDate: '' },
-    { name: "Huile d'olive", status: 'Plein', zone: 'Placard', category: 'Epicerie & Condiments', expiryDate: '' },
-    { name: 'Beurre', status: 'Entamé', zone: 'Frigo', category: 'Produits laitiers & Frais', expiryDate: '' },
-    { name: 'Pâtes', status: 'Entamé', zone: 'Placard', category: 'Féculents & Céréales', expiryDate: '' },
-    { name: 'Riz', status: 'Presque vide', zone: 'Placard', category: 'Féculents & Céréales', expiryDate: '' },
-    { name: 'Oignons', status: 'Plein', zone: 'Placard', category: 'Légumes & Fruits', expiryDate: '' },
-    { name: 'Ail', status: 'Plein', zone: 'Placard', category: 'Légumes & Fruits', expiryDate: '' }
+    { name: 'Sel', status: 'Plein', zone: 'Placard' },
+    { name: 'Poivre', status: 'Plein', zone: 'Placard' },
+    { name: "Huile d'olive", status: 'Plein', zone: 'Placard' },
+    { name: 'Beurre', status: 'Entamé', zone: 'Frigo' },
+    { name: 'Pâtes', status: 'Entamé', zone: 'Placard' },
+    { name: 'Riz', status: 'Presque vide', zone: 'Placard' },
+    { name: 'Oignons', status: 'Plein', zone: 'Placard' },
+    { name: 'Ail', status: 'Plein', zone: 'Placard' }
   ]);
   const [bakingItems, setBakingItems] = useState(['', '']);
   const [shoppingChecks, setShoppingChecks] = useState({});
@@ -78,9 +77,7 @@ export default function App() {
         if (saved.inventory) {
           const migrated = saved.inventory.map(item => ({
             ...item,
-            zone: item.zone || 'Placard',
-            category: item.category || 'Autres',
-            expiryDate: item.expiryDate || ''
+            zone: item.zone || 'Placard'
           }));
           setInventory(migrated);
         }
@@ -195,7 +192,6 @@ export default function App() {
             carbsList={carbsList}
             subTab={menuSubTab}
             setSubTab={setMenuSubTab}
-            inventory={inventory}
           />
         )}
         {activeTab === 'baking' && (
@@ -280,7 +276,7 @@ function NavButton({ active, onClick, icon, label }) {
   );
 }
 
-function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, deleteRecipe, setEditingRecipe, setActiveTab, setViewingRecipe, currentSeason, equipments, setEquipments, carbsList, subTab, setSubTab, inventory }) {
+function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, deleteRecipe, setEditingRecipe, setActiveTab, setViewingRecipe, currentSeason, equipments, setEquipments, carbsList, subTab, setSubTab }) {
   return (
     <div className="space-y-6">
       <div className="flex bg-slate-200/70 p-1 rounded-xl max-w-md mx-auto">
@@ -313,7 +309,6 @@ function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, delete
           setViewingRecipe={setViewingRecipe} 
           currentSeason={currentSeason} 
           equipments={equipments}
-          inventory={inventory}
         />
       ) : (
         <RecipeList 
@@ -333,7 +328,7 @@ function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, delete
   );
 }
 
-function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, equipments, inventory }) {
+function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, equipments }) {
   const daysConfig = [
     { key: 'monday', label: 'Lundi', reqCarb: 'Blé' },
     { key: 'tuesday', label: 'Mardi', reqCarb: 'Semoule' },
@@ -389,23 +384,6 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
       if (possibleRecipes.length === 0) return;
 
       possibleRecipes.sort((a, b) => {
-        const getStockScore = (rec) => {
-          if (!rec.ingredients) return 0;
-          let score = 0;
-          rec.ingredients.forEach(ing => {
-            const found = inventory.find(i => ing.toLowerCase().includes(i.name.toLowerCase()));
-            if (found) {
-              if (found.status === 'Plein' || found.status === 'Entamé') score += 2;
-              if (found.status === 'Presque vide') score += 1;
-            }
-          });
-          return score;
-        };
-
-        const scoreA = getStockScore(a);
-        const scoreB = getStockScore(b);
-        if (scoreB !== scoreA) return scoreB - scoreA;
-
         const countA = (tempEquipCounts[a.equipment] || 0) + (tempEquipCounts[a.additionalEquipment] || 0);
         const countB = (tempEquipCounts[b.equipment] || 0) + (tempEquipCounts[b.additionalEquipment] || 0);
         return countA - countB;
@@ -437,10 +415,10 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
           <div>
             <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-indigo-600" />
-              Générateur Intelligent (Connecté au Stock)
+              Générateur Intelligent
             </h2>
             <p className="text-xs text-slate-500">
-              Suggestions basées sur la saison ({currentSeason}) et les ingrédients déjà présents dans vos placards/frigo.
+              Suggestions automatiques basées sur la saison actuelle ({currentSeason}).
             </p>
           </div>
           <button 
@@ -1299,25 +1277,15 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
   const [newItemName, setNewItemName] = useState('');
   const [newItemStatus, setNewItemStatus] = useState('Plein');
   const [newItemZone, setNewItemZone] = useState('Placard');
-  const [newItemCategory, setNewItemCategory] = useState(INVENTORY_CATEGORIES[0]);
-  const [newItemExpiry, setNewItemExpiry] = useState('');
   const [filterZone, setFilterZone] = useState('Tous');
-  const [openDropdowns, setOpenDropdowns] = useState({});
   const [newEquipName, setNewEquipName] = useState('');
   const [newCarbName, setNewCarbName] = useState('');
 
   const addItem = (e) => {
     e.preventDefault();
     if (!newItemName.trim()) return;
-    setInventory([...inventory, { 
-      name: newItemName.trim(), 
-      status: newItemStatus, 
-      zone: newItemZone, 
-      category: newItemCategory,
-      expiryDate: newItemExpiry 
-    }]);
+    setInventory([...inventory, { name: newItemName.trim(), status: newItemStatus, zone: newItemZone }]);
     setNewItemName('');
-    setNewItemExpiry('');
   };
 
   const updateStatus = (index, status) => {
@@ -1329,18 +1297,6 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
   const updateZone = (index, zone) => {
     const updated = [...inventory];
     updated[index].zone = zone;
-    setInventory(updated);
-  };
-
-  const updateCategory = (index, category) => {
-    const updated = [...inventory];
-    updated[index].category = category;
-    setInventory(updated);
-  };
-
-  const updateExpiry = (index, expiryDate) => {
-    const updated = [...inventory];
-    updated[index].expiryDate = expiryDate;
     setInventory(updated);
   };
 
@@ -1392,34 +1348,13 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
     }
   };
 
-  const toggleDropdown = (categoryName) => {
-    setOpenDropdowns(prev => ({
-      ...prev,
-      [categoryName]: !prev[categoryName]
-    }));
-  };
-
   const filteredInventory = inventory.filter(item => {
-    if (filterZone !== 'Tous' && item.zone !== filterZone) return false;
-    return true;
+    if (filterZone === 'Tous') return true;
+    return item.zone === filterZone;
   });
 
-  const checkExpiryStatus = (dateStr) => {
-    if (!dateStr) return null;
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    const expiry = new Date(dateStr);
-    expiry.setHours(0,0,0,0);
-    
-    const diffDays = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
-    
-    if (diffDays < 0) return { label: 'Périmé !', color: 'bg-red-100 text-red-800 border-red-300' };
-    if (diffDays <= 3) return { label: `Expire dans ${diffDays}j`, color: 'bg-amber-100 text-amber-800 border-amber-300' };
-    return { label: `Expire le ${new Date(dateStr).toLocaleDateString()}`, color: 'bg-slate-100 text-slate-600 border-slate-200' };
-  };
-
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 max-w-3xl mx-auto space-y-6">
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 max-w-2xl mx-auto space-y-6">
       <div className="flex bg-slate-200/70 p-1 rounded-xl">
         <button 
           onClick={() => setSubTab('inventory')}
@@ -1451,30 +1386,23 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
         <div className="space-y-6">
           <div>
             <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2 mb-1">
-              <Package className="w-5 h-5 text-indigo-600" /> Gestion des Provisions & Péremptions
+              <Package className="w-5 h-5 text-indigo-600" /> Gestion des Provisions
             </h2>
             <p className="text-xs text-slate-500">
-              Classez vos aliments par zone et par menu déroulant, et suivez leurs dates de péremption.
+              Rangez vos provisions par zone (Placard, Frigo, Congélateur) pour suivre vos stocks.
             </p>
           </div>
 
           <form onSubmit={addItem} className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
             <h3 className="text-xs font-bold text-slate-700 uppercase">Ajouter un article</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input 
                 type="text" 
-                placeholder="Nom (ex: Lait, Tomates, Steaks...)" 
+                placeholder="Nom (ex: Lait, Farine, Steaks...)" 
                 value={newItemName}
                 onChange={(e) => setNewItemName(e.target.value)}
-                className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm"
+                className="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm"
               />
-              <select 
-                value={newItemCategory}
-                onChange={(e) => setNewItemCategory(e.target.value)}
-                className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700"
-              >
-                {INVENTORY_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-              </select>
               <select 
                 value={newItemZone}
                 onChange={(e) => setNewItemZone(e.target.value)}
@@ -1491,151 +1419,82 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
                 <option value="Entamé">Entamé</option>
                 <option value="Presque vide">Presque vide</option>
               </select>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3 items-center pt-2">
-              <div className="flex items-center gap-2 flex-1 w-full">
-                <span className="text-xs font-semibold text-slate-600 flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5" /> Péremption :
-                </span>
-                <input 
-                  type="date"
-                  value={newItemExpiry}
-                  onChange={(e) => setNewItemExpiry(e.target.value)}
-                  className="bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-700 flex-1"
-                />
-              </div>
-              <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg text-sm font-medium w-full sm:w-auto">
-                Ajouter au stock
+              <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                Ajouter
               </button>
             </div>
           </form>
 
-          {/* Filtres par zone uniquement */}
-          <div className="space-y-2">
-            <div className="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-xl">
+          <div className="flex bg-slate-100 p-1 rounded-xl">
+            <button 
+              onClick={() => setFilterZone('Tous')}
+              className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all
+                ${filterZone === 'Tous' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600'}
+              `}
+            >
+              Tout ({inventory.length})
+            </button>
+            {STORAGE_ZONES.map(z => (
               <button 
-                onClick={() => setFilterZone('Tous')}
+                key={z}
+                onClick={() => setFilterZone(z)}
                 className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all
-                  ${filterZone === 'Tous' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600'}
+                  ${filterZone === z ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600'}
                 `}
               >
-                Toutes zones ({inventory.length})
+                {z} ({inventory.filter(i => i.zone === z).length})
               </button>
-              {STORAGE_ZONES.map(z => (
-                <button 
-                  key={z}
-                  onClick={() => setFilterZone(z)}
-                  className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all
-                    ${filterZone === z ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600'}
-                  `}
-                >
-                  {z} ({inventory.filter(i => i.zone === z).length})
-                </button>
-              ))}
-            </div>
+            ))}
           </div>
 
-          <div className="space-y-3">
-            {INVENTORY_CATEGORIES.map(categoryName => {
-              const categoryItems = filteredInventory.filter(item => (item.category || 'Autres') === categoryName);
-              if (categoryItems.length === 0 && filterZone !== 'Tous') return null;
-
-              const isOpen = !!openDropdowns[categoryName];
+          <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
+            {filteredInventory.map((item, index) => {
+              const originalIndex = inventory.findIndex(i => i === item);
 
               return (
-                <div key={categoryName} className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
-                  <button
-                    onClick={() => toggleDropdown(categoryName)}
-                    className="w-full flex items-center justify-between p-3.5 bg-slate-50 hover:bg-slate-100 transition-colors text-left"
-                  >
-                    <span className="font-bold text-slate-800 text-sm flex items-center gap-2">
-                      {isOpen ? <ChevronDown className="w-4 h-4 text-indigo-600" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
-                      {categoryName}
-                      <span className="text-xs font-normal text-slate-500">({categoryItems.length})</span>
-                    </span>
-                  </button>
+                <div key={originalIndex} className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-white hover:bg-slate-50 transition-colors gap-2">
+                  <span className="font-medium text-slate-800 text-sm">{item.name}</span>
+                  <div className="flex items-center gap-2 flex-wrap justify-end">
+                    <select 
+                      value={item.zone || 'Placard'} 
+                      onChange={(e) => updateZone(originalIndex, e.target.value)}
+                      className="text-xs font-semibold rounded-md px-2 py-1 border bg-slate-50 text-slate-700 border-slate-200"
+                    >
+                      {STORAGE_ZONES.map(z => <option key={z} value={z}>{z}</option>)}
+                    </select>
 
-                  {isOpen && (
-                    <div className="divide-y divide-slate-100 border-t border-slate-200">
-                      {categoryItems.map((item, index) => {
-                        const originalIndex = inventory.findIndex(i => i === item);
-                        const expiryBadge = checkExpiryStatus(item.expiryDate);
+                    <select 
+                      value={item.status} 
+                      onChange={(e) => updateStatus(originalIndex, e.target.value)}
+                      className={`text-xs font-semibold rounded-md px-2 py-1 border
+                        ${item.status === 'Plein' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : ''}
+                        ${item.status === 'Entamé' ? 'bg-amber-50 text-amber-700 border-amber-200' : ''}
+                        ${item.status === 'Presque vide' ? 'bg-red-50 text-red-700 border-red-200' : ''}
+                      `}
+                    >
+                      <option value="Plein">Plein</option>
+                      <option value="Entamé">Entamé</option>
+                      <option value="Presque vide">Presque vide</option>
+                    </select>
 
-                        return (
-                          <div key={originalIndex} className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-white hover:bg-slate-50 transition-colors gap-3">
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-2">
-                                <span className="font-semibold text-slate-800 text-sm">{item.name}</span>
-                              </div>
-                              {expiryBadge && (
-                                <span className={`text-[10px] px-2 py-0.5 rounded font-bold border inline-block ${expiryBadge.color}`}>
-                                  {expiryBadge.label}
-                                </span>
-                              )}
-                            </div>
-
-                            <div className="flex items-center gap-2 flex-wrap justify-end">
-                              <input 
-                                type="date"
-                                value={item.expiryDate || ''}
-                                onChange={(e) => updateExpiry(originalIndex, e.target.value)}
-                                className="text-[11px] rounded-md px-2 py-1 border bg-slate-50 text-slate-600 border-slate-200"
-                                title="Date de péremption"
-                              />
-
-                              <select 
-                                value={item.zone || 'Placard'} 
-                                onChange={(e) => updateZone(originalIndex, e.target.value)}
-                                className="text-xs font-semibold rounded-md px-2 py-1 border bg-slate-50 text-slate-700 border-slate-200"
-                              >
-                                {STORAGE_ZONES.map(z => <option key={z} value={z}>{z}</option>)}
-                              </select>
-
-                              <select 
-                                value={item.category || INVENTORY_CATEGORIES[0]} 
-                                onChange={(e) => updateCategory(originalIndex, e.target.value)}
-                                className="text-xs font-semibold rounded-md px-2 py-1 border bg-slate-50 text-slate-700 border-slate-200"
-                              >
-                                {INVENTORY_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                              </select>
-
-                              <select 
-                                value={item.status} 
-                                onChange={(e) => updateStatus(originalIndex, e.target.value)}
-                                className={`text-xs font-semibold rounded-md px-2 py-1 border
-                                  ${item.status === 'Plein' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : ''}
-                                  ${item.status === 'Entamé' ? 'bg-amber-50 text-amber-700 border-amber-200' : ''}
-                                  ${item.status === 'Presque vide' ? 'bg-red-50 text-red-700 border-red-200' : ''}
-                                `}
-                              >
-                                <option value="Plein">Plein</option>
-                                <option value="Entamé">Entamé</option>
-                                <option value="Presque vide">Presque vide</option>
-                              </select>
-
-                              <button 
-                                onClick={() => {
-                                  if (window.confirm("Supprimer cet élément ?")) {
-                                    removeItem(originalIndex);
-                                  }
-                                }}
-                                className="text-slate-400 hover:text-red-600 p-1"
-                                title="Supprimer"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                      {categoryItems.length === 0 && (
-                        <div className="p-4 text-center text-slate-400 text-xs">Aucun élément dans cette catégorie.</div>
-                      )}
-                    </div>
-                  )}
+                    <button 
+                      onClick={() => {
+                        if (window.confirm("Supprimer cet élément ?")) {
+                          removeItem(originalIndex);
+                        }
+                      }}
+                      className="text-slate-400 hover:text-red-600 p-1"
+                      title="Supprimer"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               );
             })}
+            {filteredInventory.length === 0 && (
+              <div className="p-8 text-center text-slate-400 text-sm">Aucun élément dans cette catégorie.</div>
+            )}
           </div>
         </div>
       ) : subTab === 'equipments' ? (
@@ -1731,7 +1590,6 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
 
 function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingChecks, setShoppingChecks, setActiveTab }) {
   const [copied, setCopied] = useState(false);
-  const [openShoppingDropdowns, setOpenShoppingDropdowns] = useState({});
 
   const activeRecipeIds = [
     ...Object.values(menu).filter(val => val && val !== 'restes'),
@@ -1754,17 +1612,10 @@ function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingCheck
 
   const getStockStatus = (ingName) => {
     const found = inventory.find(i => ingName.toLowerCase().includes(i.name.toLowerCase()));
-    if (!found) return { status: 'A acheter', color: 'text-indigo-600 bg-indigo-50 border-indigo-200', category: 'Autres' };
-    if (found.status === 'Plein') return { status: `En stock (${found.zone} - Plein)`, color: 'text-emerald-700 bg-emerald-50 border-emerald-200', category: found.category || 'Autres' };
-    if (found.status === 'Entamé') return { status: `En stock (${found.zone} - Entamé)`, color: 'text-amber-700 bg-amber-50 border-amber-200', category: found.category || 'Autres' };
-    return { status: `Presque vide (${found.zone})`, color: 'text-red-700 bg-red-50 border-red-200', category: found.category || 'Autres' };
-  };
-
-  const toggleShoppingDropdown = (categoryName) => {
-    setOpenShoppingDropdowns(prev => ({
-      ...prev,
-      [categoryName]: !prev[categoryName]
-    }));
+    if (!found) return { status: 'A acheter', color: 'text-indigo-600 bg-indigo-50 border-indigo-200' };
+    if (found.status === 'Plein') return { status: `En stock (${found.zone} - Plein)`, color: 'text-emerald-700 bg-emerald-50 border-emerald-200' };
+    if (found.status === 'Entamé') return { status: `En stock (${found.zone} - Entamé)`, color: 'text-amber-700 bg-amber-700 border-amber-200' };
+    return { status: `Presque vide (${found.zone})`, color: 'text-red-700 bg-red-50 border-red-200' };
   };
 
   const toggleCheck = (ing) => {
@@ -1783,9 +1634,9 @@ function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingCheck
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
           <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2">
-            <ShoppingBag className="w-5 h-5 text-indigo-600" /> Liste de Courses par Rayons Déroulants
+            <ShoppingBag className="w-5 h-5 text-indigo-600" /> Liste de Courses Intelligente
           </h2>
-          <p className="text-xs text-slate-500">Basée sur les menus, gâteaux et classée par rayons sous forme de menus déroulants.</p>
+          <p className="text-xs text-slate-500">Basée sur les menus, gâteaux et l'état de vos provisions.</p>
         </div>
         {rawList.length > 0 && (
           <button 
@@ -1809,63 +1660,31 @@ function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingCheck
           </button>
         </div>
       ) : (
-        <div className="space-y-3">
-          {INVENTORY_CATEGORIES.map(categoryName => {
-            const categoryIngredients = rawList.filter(ing => {
-              const stock = getStockStatus(ing);
-              return stock.category === categoryName;
-            });
-
-            if (categoryIngredients.length === 0) return null;
-
-            const isOpen = !!openShoppingDropdowns[categoryName];
+        <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
+          {rawList.map((ing, idx) => {
+            const stock = getStockStatus(ing);
+            const isChecked = !!shoppingChecks[ing];
 
             return (
-              <div key={categoryName} className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
-                <button
-                  onClick={() => toggleShoppingDropdown(categoryName)}
-                  className="w-full flex items-center justify-between p-3.5 bg-slate-50 hover:bg-slate-100 transition-colors text-left"
-                >
-                  <span className="font-bold text-slate-800 text-sm flex items-center gap-2">
-                    {isOpen ? <ChevronDown className="w-4 h-4 text-indigo-600" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
-                    {categoryName}
-                    <span className="text-xs font-normal text-slate-500">({categoryIngredients.length})</span>
-                  </span>
-                </button>
-
-                {isOpen && (
-                  <div className="divide-y divide-slate-100 border-t border-slate-200">
-                    {categoryIngredients.map((ing, idx) => {
-                      const stock = getStockStatus(ing);
-                      const isChecked = !!shoppingChecks[ing];
-
-                      return (
-                        <div 
-                          key={idx} 
-                          onClick={() => toggleCheck(ing)}
-                          className={`flex items-center justify-between p-3.5 cursor-pointer transition-colors
-                            ${isChecked ? 'bg-slate-50 opacity-60 line-through' : 'bg-white hover:bg-slate-50'}
-                          `}
-                        >
-                          <div className="flex items-center gap-3">
-                            <input 
-                              type="checkbox" 
-                              checked={isChecked} 
-                              onChange={() => {}} 
-                              className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500"
-                            />
-                            <div>
-                              <span className="font-medium text-slate-800 text-sm capitalize block">{ing}</span>
-                            </div>
-                          </div>
-                          <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-md border ${stock.color}`}>
-                            {stock.status}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+              <div 
+                key={idx} 
+                onClick={() => toggleCheck(ing)}
+                className={`flex items-center justify-between p-3.5 cursor-pointer transition-colors
+                  ${isChecked ? 'bg-slate-50 opacity-60 line-through' : 'bg-white hover:bg-slate-50'}
+                `}
+              >
+                <div className="flex items-center gap-3">
+                  <input 
+                    type="checkbox" 
+                    checked={isChecked} 
+                    onChange={() => {}} 
+                    className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500"
+                  />
+                  <span className="font-medium text-slate-800 text-sm capitalize">{ing}</span>
+                </div>
+                <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-md border ${stock.color}`}>
+                  {stock.status}
+                </span>
               </div>
             );
           })}
