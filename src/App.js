@@ -1962,4 +1962,3 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
     </div>
   );
 }
-```[cite: 4]
