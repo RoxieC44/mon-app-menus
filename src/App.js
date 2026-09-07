@@ -63,13 +63,12 @@ export default function App() {
     async function loadData() {
       setLoading(true);
       
-      // 1. Chargement des recettes depuis la nouvelle table "recipes"
+      // 1. Chargement des recettes depuis la table "recipes"[cite: 6]
       const { data: recipesData, error: recipesError } = await supabase
         .from('recipes')
         .select('*');
 
       if (!recipesError && recipesData) {
-        // On extrait l'objet JSON complet stocké dans la colonne "data", ou on reconstruit à partir des colonnes
         const loadedRecipes = recipesData.map(row => ({
           ...row.data,
           id: row.id.toString(),
@@ -78,7 +77,7 @@ export default function App() {
         setRecipes(loadedRecipes);
       }
 
-      // 2. Chargement des autres paramètres (menu, inventaire, etc.) depuis l'ancienne table de stockage
+      // 2. Chargement des autres paramètres[cite: 6]
       const { data } = await supabase
         .from('stockage_donnees')
         .select('data')
@@ -106,7 +105,6 @@ export default function App() {
     loadData();
   }, []);
 
-  // Sauvegarde automatique des paramètres généraux (hors recettes, gérées individuellement)
   useEffect(() => {
     if (loading) return;
 
@@ -139,30 +137,24 @@ export default function App() {
   }, [equipments, carbsList, menu, inventory, bakingItems, shoppingChecks, loading]);
 
   const addRecipe = async (newRecipe) => {
-    // Si la recette a un ID numérique généré par Date.now() ou similaire, on vérifie si elle existe déjà dans Supabase
     const payload = {
       title: newRecipe.name,
       data: newRecipe
     };
 
-    // On regarde si c'une modification ou un ajout
-    const isExisting = recipes.some(r => r.id === newRecipe.id);
+    // Si la recette possède déjà un ID, on l'ajoute au payload pour forcer l'upsert/mise à jour sur cet ID
+    if (newRecipe.id) {
+      payload.id = !isNaN(newRecipe.id) ? parseInt(newRecipe.id, 10) : newRecipe.id;
+    }
 
-    if (isExisting && !isNaN(newRecipe.id)) {
-      await supabase
-        .from('recipes')
-        .update(payload)
-        .eq('id', newRecipe.id);
-    } else {
-      // Insertion d'une nouvelle ligne dans la table recipes
-      const { data: inserted, error } = await supabase
-        .from('recipes')
-        .insert([payload])
-        .select();
+    // Utilisation de upsert pour mettre à jour si l'ID existe ou insérer sinon
+    const { data: upserted, error } = await supabase
+      .from('recipes')
+      .upsert([payload])
+      .select();
 
-      if (!error && inserted && inserted[0]) {
-        newRecipe.id = inserted[0].id.toString();
-      }
+    if (!error && upserted && upserted[0]) {
+      newRecipe.id = upserted[0].id.toString();
     }
 
     setRecipes(prev => {
@@ -1421,9 +1413,9 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
     const diffDays = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
 
     if (diffDays < 0) {
-      return 'bg-red-100 text-red-800 border-red-300 font-bold'; // Périmé
+      return 'bg-red-100 text-red-800 border-red-300 font-bold';
     } else if (diffDays <= 3) {
-      return 'bg-amber-100 text-amber-800 border-amber-300 font-bold'; // Bientôt périmé
+      return 'bg-amber-100 text-amber-800 border-amber-300 font-bold';
     }
     return 'bg-slate-50 text-slate-700 border-slate-200';
   };
