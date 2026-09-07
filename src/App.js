@@ -1596,19 +1596,61 @@ function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingCheck
     ...bakingItems.filter(Boolean)
   ];
   
-  const ingredientMap = {};
+  const ingredientMap = new Map();
 
   activeRecipeIds.forEach(id => {
     const r = recipes.find(x => x.id === id);
     if (r && r.ingredients) {
       r.ingredients.forEach(ing => {
-        const cleanIng = ing.toLowerCase();
-        ingredientMap[cleanIng] = (ingredientMap[cleanIng] || 0) + 1;
+        const cleanIng = ing.trim();
+        const match = cleanIng.match(/^([\d.,]+)\s*([a-zA-ZÀ-ÿ]*)\s+(d['’]|\bde\b\s+)?(.*)$/i);
+
+        if (match) {
+          const val = parseFloat(match[1].replace(',', '.')) || 0;
+          const unit = match[2] ? match[2].toLowerCase() : '';
+          const prep = match[3] || '';
+          const name = match[4].trim().toLowerCase();
+          const key = `${unit}_${name}`;
+
+          if (ingredientMap.has(key)) {
+            const existing = ingredientMap.get(key);
+            existing.qty += val;
+          } else {
+            ingredientMap.set(key, {
+              qty: val,
+              unit: match[2] || '',
+              prep: match[3] || '',
+              name: match[4].trim(),
+              raw: cleanIng
+            });
+          }
+        } else {
+          const key = cleanIng.toLowerCase();
+          if (ingredientMap.has(key)) {
+            const existing = ingredientMap.get(key);
+            existing.count = (existing.count || 1) + 1;
+          } else {
+            ingredientMap.set(key, {
+              qty: 0,
+              unit: '',
+              prep: '',
+              name: cleanIng,
+              raw: cleanIng,
+              count: 1
+            });
+          }
+        }
       });
     }
   });
 
-  const rawList = Object.keys(ingredientMap);
+  const rawList = Array.from(ingredientMap.values()).map(item => {
+    if (item.qty > 0) {
+      const formattedQty = item.qty % 1 !== 0 ? item.qty.toFixed(1).replace('.', ',') : item.qty;
+      return `${formattedQty}${item.unit ? ' ' + item.unit : ''}${item.prep ? ' ' + item.prep.trim() + ' ' : ' '}${item.name}`;
+    }
+    return item.raw;
+  });
 
   const getStockStatus = (ingName) => {
     const found = inventory.find(i => ingName.toLowerCase().includes(i.name.toLowerCase()));
@@ -1781,3 +1823,4 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
     </div>
   );
 }
+```[cite: 3]
