@@ -218,8 +218,8 @@ export default function App() {
 
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-40 px-4 py-2 shadow-[0_-10px_25px_-3px_rgb(0,0,0,0.1)]">
         <div className="max-w-md mx-auto flex justify-between items-center relative">
-          <NavButton name="menu" active={activeTab === 'menu'} onClick={() => setActiveTab('menu')} icon={<Calendar />} label="Menus" />
-          <NavButton name="baking" active={activeTab === 'baking'} onClick={() => setActiveTab('baking')} icon={<Cake />} label="Gâteaux" />
+          <NavButton active={activeTab === 'menu'} onClick={() => setActiveTab('menu')} icon={<Calendar />} label="Menus" />
+          <NavButton active={activeTab === 'baking'} onClick={() => setActiveTab('baking')} icon={<Cake />} label="Gâteaux" />
           
           <button
             onClick={() => { setEditingRecipe(null); setActiveTab('add'); }}
@@ -228,8 +228,8 @@ export default function App() {
             <Plus size="{26}"/>
           </button>
 
-          <NavButton 'inventory'} active="{activeTab" onClick="{()"> setActiveTab('inventory')} icon={<Package/>} label="Placard" />
-          <NavButton 'shopping'} active="{activeTab" onClick="{()"> setActiveTab('shopping')} icon={<ShoppingBag/>} label="Courses" />
+          <NavButton active={activeTab === 'inventory'} onClick={() => setActiveTab('inventory')} icon={<Package />} label="Placard" />
+          <NavButton active={activeTab === 'shopping'} onClick={() => setActiveTab('shopping')} icon={<ShoppingBag />} label="Courses" />
         </div>
       </nav>
     </div>
