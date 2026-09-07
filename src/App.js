@@ -1,5 +1,4 @@
-name=App_5.js
-```[source: 5]import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, List, Calendar, Trash2, Utensils, Info, Tag, Sun, Settings, Link as LinkIcon, Pencil, Camera, RefreshCw, AlertTriangle, Eye, X, Image as ImageIcon, ShoppingBag, Package, Check, Copy, Sparkles, Filter, Cake, Clock } from 'lucide-react';
 import { supabase } from './supabaseClient';
 
