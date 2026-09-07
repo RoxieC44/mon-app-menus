@@ -63,7 +63,6 @@ export default function App() {
     async function loadData() {
       setLoading(true);
       
-      // 1. Chargement des recettes depuis la table "recipes"[cite: 6]
       const { data: recipesData, error: recipesError } = await supabase
         .from('recipes')
         .select('*');
@@ -77,7 +76,6 @@ export default function App() {
         setRecipes(loadedRecipes);
       }
 
-      // 2. Chargement des autres paramètres[cite: 6]
       const { data } = await supabase
         .from('stockage_donnees')
         .select('data')
@@ -142,12 +140,10 @@ export default function App() {
       data: newRecipe
     };
 
-    // Si la recette possède déjà un ID, on l'ajoute au payload pour forcer l'upsert/mise à jour sur cet ID
     if (newRecipe.id) {
       payload.id = !isNaN(newRecipe.id) ? parseInt(newRecipe.id, 10) : newRecipe.id;
     }
 
-    // Utilisation de upsert pour mettre à jour si l'ID existe ou insérer sinon
     const { data: upserted, error } = await supabase
       .from('recipes')
       .upsert([payload])
@@ -232,8 +228,6 @@ export default function App() {
             equipments={equipments}
             setEquipments={setEquipments}
             carbsList={carbsList}
-            subTab={menuSubTab}
-            setSubTab={setMenuSubTab}
           />
         )}
         {activeTab === 'baking' && (
@@ -318,7 +312,9 @@ function NavButton({ active, onClick, icon, label }) {
   );
 }
 
-function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, deleteRecipe, setEditingRecipe, setActiveTab, setViewingRecipe, currentSeason, equipments, setEquipments, carbsList, subTab, setSubTab }) {
+function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, deleteRecipe, setEditingRecipe, setActiveTab, setViewingRecipe, currentSeason, equipments, setEquipments, carbsList }) {
+  const [subTab, setSubTab] = useState('planning');
+
   return (
     <div className="space-y-6">
       <div className="flex bg-slate-200/70 p-1 rounded-xl max-w-md mx-auto">
@@ -559,7 +555,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
               <option value="restes">🔁 Restes de la veille</option>
               {anyRecipes.map(r => (
                 <option key={r.id} value={r.id}>
-                  {r.name}
+                  {r.name} {r.optionalCategory ? `(${r.optionalCategory})` : ''}
                 </option>
               ))}
             </select>
@@ -601,7 +597,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
                 <option value="">-- Choisir le soir --</option>
                 {dinnerRecipes.map(r => (
                   <option key={r.id} value={r.id}>
-                    {r.name}
+                    {r.name} {r.optionalCategory ? `(${r.optionalCategory})` : ''}
                   </option>
                 ))}
               </select>
@@ -694,7 +690,14 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
           <div key={recipe.id} className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col justify-between hover:shadow-md transition-shadow">
             <div>
               <div className="flex justify-between items-start gap-2 mb-2">
-                <h3 className="font-bold text-slate-800 text-sm leading-tight">{recipe.name}</h3>
+                <div>
+                  <h3 className="font-bold text-slate-800 text-sm leading-tight">{recipe.name}</h3>
+                  {recipe.optionalCategory && (
+                    <span className="text-[10px] text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded font-semibold inline-block mt-1">
+                      🏷️ {recipe.optionalCategory}
+                    </span>
+                  )}
+                </div>
                 <span className="text-xs bg-indigo-50 text-indigo-700 font-semibold px-2 py-0.5 rounded flex-shrink-0 border border-indigo-100">
                   {recipe.carb}
                 </span>
@@ -838,7 +841,7 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
                   >
                     <option value="">-- Choisir une recette de gâteau --</option>
                     {bakingRecipes.map(r => (
-                      <option key={r.id} value={r.id}>{r.name}</option>
+                      <option key={r.id} value={r.id}>{r.name} {r.optionalCategory ? `(${r.optionalCategory})` : ''}</option>
                     ))}
                   </select>
 
@@ -876,6 +879,7 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
 
 function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTab, setSelectedImage, equipments, setEquipments, carbsList, setCarbsList }) {
   const [name, setName] = useState('');
+  const [optionalCategory, setOptionalCategory] = useState('');
   const [carb, setCarb] = useState(carbsList[0] || 'Plaisir');
   const [showNewCarbInput, setShowNewCarbInput] = useState(false);
   const [newCarbName, setNewCarbName] = useState('');
@@ -894,6 +898,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
   useEffect(() => {
     if (editingRecipe) {
       setName(editingRecipe.name || '');
+      setOptionalCategory(editingRecipe.optionalCategory || '');
       if (carbsList.includes(editingRecipe.carb)) {
         setCarb(editingRecipe.carb);
       } else if (editingRecipe.carb) {
@@ -1006,6 +1011,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
 
     const recipeData = {
       name,
+      optionalCategory: optionalCategory.trim(),
       carb,
       equipment: equipment || 'Autre',
       additionalEquipment: finalAdditionalEquipment,
@@ -1061,16 +1067,29 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
           </div>
         </div>
 
-        <div>
-          <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Nom de la recette</label>
-          <input 
-            type="text" 
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder={category === 'gateau' ? "Ex: Gâteau au chocolat moelleux..." : "Ex: Gratin de courgettes au chèvre..."}
-            className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Nom de la recette</label>
+            <input 
+              type="text" 
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder={category === 'gateau' ? "Ex: Gâteau au chocolat moelleux..." : "Ex: Gratin de courgettes..."}
+              className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Sous-catégorie / Tag (facultatif)</label>
+            <input 
+              type="text" 
+              value={optionalCategory}
+              onChange={(e) => setOptionalCategory(e.target.value)}
+              placeholder="Ex: Rapide, Végétarien, Froid..."
+              className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1798,10 +1817,15 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
         </button>
 
         <div>
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
             <span className="text-xs font-semibold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md border border-indigo-100">
               {recipe.category === 'gateau' ? '🍰 Gâteau' : recipe.carb}
             </span>
+            {recipe.optionalCategory && (
+              <span className="text-xs font-semibold bg-purple-50 text-purple-700 px-2.5 py-1 rounded-md border border-purple-100">
+                🏷️ {recipe.optionalCategory}
+              </span>
+            )}
             <span className="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md font-medium">
               {recipe.equipment}{recipe.additionalEquipment ? ` + ${recipe.additionalEquipment}` : ''}
             </span>
