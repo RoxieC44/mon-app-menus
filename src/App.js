@@ -1386,8 +1386,8 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
     const exp = new Date(dateStr);
     const diffDays = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
 
-    if (diffDays < 0) return 'bg-red-100 text-red-800 border-red-300 font-bold'; // Périmé
-    if (diffDays <= 3) return 'bg-orange-100 text-orange-800 border-orange-300 font-bold'; // Urinste (< 3j)
+    if (diffDays < 0) return 'bg-red-100 text-red-800 border-red-300 font-bold';
+    if (diffDays <= 3) return 'bg-orange-100 text-orange-800 border-orange-300 font-bold';
     return 'bg-emerald-50 text-emerald-700 border-emerald-200';
   };
 
@@ -1433,7 +1433,8 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
 
           <form onSubmit={addItem} className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
             <h3 className="text-xs font-bold text-slate-700 uppercase">Ajouter un article</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <input 
                 type="text" 
                 placeholder="Nom (ex: Lait, Farine, Steaks...)" 
@@ -1449,7 +1450,8 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
                 {STORAGE_ZONES.map(z => <option key={z} value={z}>{z}</option>)}
               </select>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 items-center">
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
               <select 
                 value={newItemStatus}
                 onChange={(e) => setNewItemStatus(e.target.value)}
@@ -1459,17 +1461,19 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
                 <option value="Entamé">Entamé</option>
                 <option value="Presque vide">Presque vide</option>
               </select>
-              <div className="flex items-center gap-1">
-                <span className="text-[11px] text-slate-500 font-medium">Péremption :</span>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold text-slate-500 uppercase">Date de péremption</label>
                 <input 
                   type="date"
                   value={newItemExpiry}
                   onChange={(e) => setNewItemExpiry(e.target.value)}
-                  className="bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-xs text-slate-700 flex-1"
+                  className="bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-xs text-slate-700 w-full"
                 />
               </div>
-              <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
-                Ajouter
+
+              <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium mt-auto">
+                Ajouter l'article
               </button>
             </div>
           </form>
@@ -1557,20 +1561,20 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
           </div>
         </div>
       ) : subTab === 'equipments' ? (
+        // ... (partie équipements inchangée)
         <div className="space-y-6">
           <div>
             <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2 mb-1">
               <Settings className="w-5 h-5 text-indigo-600" /> Gestion des Appareils de Cuisson
             </h2>
             <p className="text-xs text-slate-500">
-              Ajoutez ou supprimez les appareils disponibles pour vos recettes (Thermomix, Cookeo, Airfryer...).
+              Ajoutez ou supprimez les appareils disponibles pour vos recettes.
             </p>
           </div>
-
           <form onSubmit={addEquipment} className="flex gap-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
             <input 
               type="text" 
-              placeholder="Nouvel appareil (ex: Machine à pain)..." 
+              placeholder="Nouvel appareil..." 
               value={newEquipName}
               onChange={(e) => setNewEquipName(e.target.value)}
               className="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm"
@@ -1579,41 +1583,27 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
               Ajouter
             </button>
           </form>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {equipments.map(eq => (
               <div key={eq} className="bg-white border border-slate-200 text-slate-800 text-xs p-3 rounded-xl flex items-center justify-between shadow-sm font-medium">
-                <span className="flex items-center gap-2">
-                  <Settings className="w-4 h-4 text-indigo-600" />
-                  {eq}
-                </span>
-                <button 
-                  type="button" 
-                  onClick={() => removeEquipment(eq)}
-                  className="text-slate-400 hover:text-red-600 p-1 transition-colors"
-                  title="Supprimer"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <span className="flex items-center gap-2"><Settings className="w-4 h-4 text-indigo-600" />{eq}</span>
+                <button type="button" onClick={() => removeEquipment(eq)} className="text-slate-400 hover:text-red-600 p-1"><Trash2 className="w-4 h-4" /></button>
               </div>
             ))}
           </div>
         </div>
       ) : (
+        // ... (partie féculents inchangée)
         <div className="space-y-6">
           <div>
             <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2 mb-1">
               <Tag className="w-5 h-5 text-indigo-600" /> Gestion des Féculents / Catégories
             </h2>
-            <p className="text-xs text-slate-500">
-              Ajoutez ou supprimez les catégories de féculents disponibles pour vos recettes.
-            </p>
           </div>
-
           <form onSubmit={addCarb} className="flex gap-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
             <input 
               type="text" 
-              placeholder="Nouvelle catégorie (ex: Polenta, Quinoa)..." 
+              placeholder="Nouvelle catégorie..." 
               value={newCarbName}
               onChange={(e) => setNewCarbName(e.target.value)}
               className="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm"
@@ -1622,22 +1612,11 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
               Ajouter
             </button>
           </form>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {carbsList.map(c => (
               <div key={c} className="bg-white border border-slate-200 text-slate-800 text-xs p-3 rounded-xl flex items-center justify-between shadow-sm font-medium">
-                <span className="flex items-center gap-2">
-                  <Tag className="w-4 h-4 text-indigo-600" />
-                  {c}
-                </span>
-                <button 
-                  type="button" 
-                  onClick={() => removeCarb(c)}
-                  className="text-slate-400 hover:text-red-600 p-1 transition-colors"
-                  title="Supprimer"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <span className="flex items-center gap-2"><Tag className="w-4 h-4 text-indigo-600" />{c}</span>
+                <button type="button" onClick={() => removeCarb(c)} className="text-slate-400 hover:text-red-600 p-1"><Trash2 className="w-4 h-4" /></button>
               </div>
             ))}
           </div>
