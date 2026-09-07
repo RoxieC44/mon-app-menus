@@ -5,7 +5,6 @@ import { supabase } from './supabaseClient';
 const DEFAULT_RECIPES = [];
 
 const INITIAL_EQUIPMENTS = ['Thermomix', 'Cookeo', 'Ninja Double Stack', 'Poêle', 'Four', 'Casserole', 'Airfryer', 'Gaufrier - Croque-Monsieur - Panini', 'Crêpière - Mini woks - Grill', 'Raclette - Pierrade - Fondue', 'Plancha', 'Barbecue', 'Sans Cuisson'];
-const INITIAL_CARBS = ['Pâtes', 'Pommes de terre', 'Semoule', 'Riz', 'Blé', 'Plaisir'];
 const SEASONS_LIST = ['Printemps', 'Été', 'Automne', 'Hiver'];
 const STORAGE_ZONES = ['Placard', 'Frigo', 'Congélateur'];
 const INVENTORY_CATEGORIES = ['Légumes & Fruits', 'Féculents & Céréales', 'Epicerie & Condiments', 'Produits laitiers & Frais', 'Viandes & Poissons', 'Surgelés', 'Autres'];
@@ -42,7 +41,6 @@ export default function App() {
 
   const [recipes, setRecipes] = useState(DEFAULT_RECIPES);
   const [equipments, setEquipments] = useState(INITIAL_EQUIPMENTS);
-  const [carbsList, setCarbsList] = useState(INITIAL_CARBS);
   const [menu, setMenu] = useState({
     mondayDinner: '', tuesdayDinner: '', wednesdayDinner: '', thursdayDinner: '', fridayDinner: '', saturdayDinner: '', sundayDinner: '',
     mondayLunch: 'restes', tuesdayLunch: 'restes', wednesdayLunch: '', thursdayLunch: 'restes', fridayLunch: 'restes', saturdayLunch: '', sundayLunch: ''
@@ -73,7 +71,6 @@ export default function App() {
         const saved = data.data;
         if (saved.recipes) setRecipes(saved.recipes);
         if (saved.equipments && Array.isArray(saved.equipments)) setEquipments(saved.equipments);
-        if (saved.carbsList && Array.isArray(saved.carbsList)) setCarbsList(saved.carbsList);
         if (saved.menu) setMenu(saved.menu);
         if (saved.inventory) {
           const migrated = saved.inventory.map(item => ({
@@ -98,7 +95,7 @@ export default function App() {
     async function saveData() {
       const payload = {
         user_key: 'ma_famille',
-        data: { recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks }
+        data: { recipes, equipments, menu, inventory, bakingItems, shoppingChecks }
       };
 
       const { data: existing } = await supabase
@@ -121,7 +118,7 @@ export default function App() {
 
     const timer = setTimeout(saveData, 1000);
     return () => clearTimeout(timer);
-  }, [recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks]);
+  }, [recipes, equipments, menu, inventory, bakingItems, shoppingChecks]);
 
   const addRecipe = (newRecipe) => {
     setRecipes(prev => {
@@ -192,7 +189,6 @@ export default function App() {
             currentSeason={currentSeason} 
             equipments={equipments}
             setEquipments={setEquipments}
-            carbsList={carbsList}
             subTab={menuSubTab}
             setSubTab={setMenuSubTab}
             inventory={inventory}
@@ -212,13 +208,12 @@ export default function App() {
             currentSeason={currentSeason}
             equipments={equipments}
             setEquipments={setEquipments}
-            carbsList={carbsList}
             subTab={bakingSubTab}
             setSubTab={setBakingSubTab}
           />
         )}
-        {activeTab === 'add' && <AddRecipeForm addRecipe={addRecipe} editingRecipe={editingRecipe} setEditingRecipe={setEditingRecipe} setActiveTab={setActiveTab} setSelectedImage={setSelectedImage} equipments={equipments} setEquipments={setEquipments} carbsList={carbsList} setCarbsList={setCarbsList} />}
-        {activeTab === 'inventory' && <InventoryManager inventory={inventory} setInventory={setInventory} equipments={equipments} setEquipments={setEquipments} carbsList={carbsList} setCarbsList={setCarbsList} />}
+        {activeTab === 'add' && <AddRecipeForm addRecipe={addRecipe} editingRecipe={editingRecipe} setEditingRecipe={setEditingRecipe} setActiveTab={setActiveTab} setSelectedImage={setSelectedImage} equipments={equipments} setEquipments={setEquipments} />}
+        {activeTab === 'inventory' && <InventoryManager inventory={inventory} setInventory={setInventory} equipments={equipments} setEquipments={setEquipments} />}
         {activeTab === 'shopping' && <ShoppingListView menu={menu} recipes={recipes} inventory={inventory} bakingItems={bakingItems} shoppingChecks={shoppingChecks} setShoppingChecks={setShoppingChecks} setActiveTab={setActiveTab} />}
       </main>
 
@@ -280,7 +275,7 @@ function NavButton({ active, onClick, icon, label }) {
   );
 }
 
-function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, deleteRecipe, setEditingRecipe, setActiveTab, setViewingRecipe, currentSeason, equipments, setEquipments, carbsList, subTab, setSubTab, inventory }) {
+function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, deleteRecipe, setEditingRecipe, setActiveTab, setViewingRecipe, currentSeason, equipments, setEquipments, subTab, setSubTab, inventory }) {
   return (
     <div className="space-y-6">
       <div className="flex bg-slate-200/70 p-1 rounded-xl max-w-md mx-auto">
@@ -326,7 +321,6 @@ function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, delete
           currentSeason={currentSeason}
           title="Toutes les recettes de repas"
           equipments={equipments}
-          carbsList={carbsList}
         />
       )}
     </div>
@@ -335,21 +329,17 @@ function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, delete
 
 function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, equipments, inventory }) {
   const daysConfig = [
-    { key: 'monday', label: 'Lundi', reqCarb: 'Blé' },
-    { key: 'tuesday', label: 'Mardi', reqCarb: 'Semoule' },
-    { key: 'wednesday', label: 'Mercredi', reqCarb: '' },
-    { key: 'thursday', label: 'Jeudi', reqCarb: 'Riz' },
-    { key: 'friday', label: 'Vendredi', reqCarb: 'Pommes de terre' },
-    { key: 'saturday', label: 'Samedi', reqCarb: 'Plaisir' },
-    { key: 'sunday', label: 'Dimanche', reqCarb: 'Pâtes' },
+    { key: 'monday', label: 'Lundi' },
+    { key: 'tuesday', label: 'Mardi' },
+    { key: 'wednesday', label: 'Mercredi' },
+    { key: 'thursday', label: 'Jeudi' },
+    { key: 'friday', label: 'Vendredi' },
+    { key: 'saturday', label: 'Samedi' },
+    { key: 'sunday', label: 'Dimanche' },
   ];
 
-  const getEligibleRecipes = (reqCarb) => {
-    return recipes.filter(r => {
-      const matchCarb = reqCarb ? r.carb === reqCarb : true;
-      if (!matchCarb) return false;
-      return recipeMatchesSeason(r.season, currentSeason);
-    });
+  const getEligibleRecipes = () => {
+    return recipes.filter(r => recipeMatchesSeason(r.season, currentSeason));
   };
 
   const equipmentCounts = {};
@@ -371,24 +361,23 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
     let tempEquipCounts = {};
     
     const eveningDays = [
-      { key: 'mondayDinner', reqCarb: 'Blé' },
-      { key: 'tuesdayDinner', reqCarb: 'Semoule' },
-      { key: 'wednesdayDinner', reqCarb: '' },
-      { key: 'thursdayDinner', reqCarb: 'Riz' },
-      { key: 'fridayDinner', reqCarb: 'Pommes de terre' },
-      { key: 'saturdayDinner', reqCarb: 'Plaisir' },
-      { key: 'sundayDinner', reqCarb: 'Pâtes' },
+      { key: 'mondayDinner' },
+      { key: 'tuesdayDinner' },
+      { key: 'wednesdayDinner' },
+      { key: 'thursdayDinner' },
+      { key: 'fridayDinner' },
+      { key: 'saturdayDinner' },
+      { key: 'sundayDinner' },
     ];
 
     eveningDays.forEach(day => {
       if (day.key === 'wednesdayDinner') return;
-      let possibleRecipes = getEligibleRecipes(day.reqCarb);
+      let possibleRecipes = getEligibleRecipes();
       if (possibleRecipes.length === 0) {
-        possibleRecipes = recipes.filter(r => r.carb === day.reqCarb);
+        possibleRecipes = recipes;
       }
       if (possibleRecipes.length === 0) return;
 
-      // Connexion intelligente avec le stock : prioriser les recettes dont les ingrédients sont en stock ou entamés/plein
       possibleRecipes.sort((a, b) => {
         const getStockScore = (rec) => {
           if (!rec.ingredients) return 0;
@@ -405,7 +394,7 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
 
         const scoreA = getStockScore(a);
         const scoreB = getStockScore(b);
-        if (scoreB !== scoreA) return scoreB - scoreA; // Priorité au stock disponible
+        if (scoreB !== scoreA) return scoreB - scoreA;
 
         const countA = (tempEquipCounts[a.equipment] || 0) + (tempEquipCounts[a.additionalEquipment] || 0);
         const countB = (tempEquipCounts[b.equipment] || 0) + (tempEquipCounts[b.additionalEquipment] || 0);
@@ -494,15 +483,11 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
   const lunchKey = `${day.key}Lunch`;
   const dinnerKey = `${day.key}Dinner`;
 
-  const getAvailableRecipes = (reqCarb) => {
-    return recipes.filter(r => {
-      const matchCarb = reqCarb ? r.carb === reqCarb : true;
-      if (!matchCarb) return false;
-      return recipeMatchesSeason(r.season, currentSeason);
-    });
+  const getAvailableRecipes = () => {
+    return recipes.filter(r => recipeMatchesSeason(r.season, currentSeason));
   };
 
-  const dinnerRecipes = getAvailableRecipes(day.reqCarb);
+  const dinnerRecipes = getAvailableRecipes();
   const anyRecipes = recipes.filter(r => recipeMatchesSeason(r.season, currentSeason));
 
   const lunchVal = menu[lunchKey] || '';
@@ -519,11 +504,6 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
             <Calendar className="w-4 h-4 text-indigo-600" />
             {day.label}
           </h3>
-          {day.reqCarb && (
-            <span className="bg-slate-100 text-slate-600 text-xs px-2.5 py-1 rounded-md font-semibold border border-slate-200">
-               {day.reqCarb}
-            </span>
-          )}
         </div>
         
         <div className="space-y-3">
@@ -571,7 +551,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
               </div>
             ) : dinnerRecipes.length === 0 ? (
               <div className="text-xs text-amber-700 bg-amber-50 p-2.5 rounded-lg border border-amber-200">
-                Aucune recette de {currentSeason} pour ce féculent.
+                Aucune recette de {currentSeason} disponible.
               </div>
             ) : (
               <select
@@ -608,15 +588,13 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
   );
 }
 
-function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, title, equipments, carbsList }) {
+function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, title, equipments }) {
   const [filterSeason, setFilterSeason] = useState('Tous');
   const [filterEquip, setFilterEquip] = useState('Tous');
-  const [filterCarb, setFilterCarb] = useState('Tous');
 
   const filteredRecipes = recipes.filter(r => {
     if (filterSeason !== 'Tous' && !recipeMatchesSeason(r.season, filterSeason)) return false;
     if (filterEquip !== 'Tous' && r.equipment !== filterEquip && r.additionalEquipment !== filterEquip) return false;
-    if (filterCarb !== 'Tous' && r.carb !== filterCarb) return false;
     return true;
   });
 
@@ -647,15 +625,6 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
           </select>
 
           <select 
-            value={filterCarb} 
-            onChange={(e) => setFilterCarb(e.target.value)}
-            className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800"
-          >
-            <option value="Tous">Toutes les catégories</option>
-            {carbsList.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
-
-          <select 
             value={filterEquip} 
             onChange={(e) => setFilterEquip(e.target.value)}
             className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800"
@@ -676,9 +645,6 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
             <div>
               <div className="flex justify-between items-start gap-2 mb-2">
                 <h3 className="font-bold text-slate-800 text-sm leading-tight">{recipe.name}</h3>
-                <span className="text-xs bg-indigo-50 text-indigo-700 font-semibold px-2 py-0.5 rounded flex-shrink-0 border border-indigo-100">
-                  {recipe.carb}
-                </span>
               </div>
               
               {recipe.image && (
@@ -747,7 +713,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
   );
 }
 
-function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, setActiveTab, bakingRecipes, recipes, deleteRecipe, setViewingRecipe, currentSeason, equipments, carbsList, subTab, setSubTab }) {
+function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, setActiveTab, bakingRecipes, recipes, deleteRecipe, setViewingRecipe, currentSeason, equipments, subTab, setSubTab }) {
   const updateBakingItem = (index, recipeId) => {
     const updated = [...bakingItems];
     updated[index] = recipeId;
@@ -848,18 +814,14 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
           setActiveTab={setActiveTab}
           currentSeason={currentSeason}
           equipments={equipments}
-          carbsList={carbsList}
         />
       )}
     </div>
   );
 }
 
-function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTab, setSelectedImage, equipments, setEquipments, carbsList, setCarbsList }) {
+function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTab, setSelectedImage, equipments, setEquipments }) {
   const [name, setName] = useState('');
-  const [carb, setCarb] = useState(carbsList[0] || 'Plaisir');
-  const [showNewCarbInput, setShowNewCarbInput] = useState(false);
-  const [newCarbName, setNewCarbName] = useState('');
   const [equipment, setEquipment] = useState(equipments[0] || 'Four');
   const [showNewEquipInput, setShowNewEquipInput] = useState(false);
   const [newEquipName, setNewEquipName] = useState('');
@@ -875,11 +837,6 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
   useEffect(() => {
     if (editingRecipe) {
       setName(editingRecipe.name || '');
-      if (carbsList.includes(editingRecipe.carb)) {
-        setCarb(editingRecipe.carb);
-      } else if (editingRecipe.carb) {
-        setCarb(carbsList[0] || 'Plaisir');
-      }
       if (equipments.includes(editingRecipe.equipment)) {
         setEquipment(editingRecipe.equipment);
       } else if (editingRecipe.equipment) {
@@ -912,19 +869,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
         setSelectedSeasons(['Toutes']);
       }
     }
-  }, [editingRecipe, equipments, carbsList]);
-
-  const handleAddNewCarbQuick = (e) => {
-    e.preventDefault();
-    const trimmed = newCarbName.trim();
-    if (!trimmed) return;
-    if (!carbsList.some(c => c.toLowerCase() === trimmed.toLowerCase())) {
-      setCarbsList([...carbsList, trimmed]);
-    }
-    setCarb(trimmed);
-    setNewCarbName('');
-    setShowNewCarbInput(false);
-  };
+  }, [editingRecipe, equipments]);
 
   const handleAddNewEquipmentQuick = (e) => {
     e.preventDefault();
@@ -987,7 +932,6 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
 
     const recipeData = {
       name,
-      carb,
       equipment: equipment || 'Autre',
       additionalEquipment: finalAdditionalEquipment,
       season: finalSeason,
@@ -1030,13 +974,13 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
             <label className={`flex-1 p-3 rounded-xl border flex items-center justify-center gap-2 cursor-pointer transition-all
               ${category === 'repas' ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'bg-slate-50 border-slate-300 text-slate-700'}`}
             >
-              <input type="radio" name="recipeCat" checked={category === 'repas'} onChange={() => { setCategory('repas'); setCarb('Pâtes'); }} className="hidden" />
+              <input type="radio" name="recipeCat" checked={category === 'repas'} onChange={() => setCategory('repas')} className="hidden" />
               🍽️ Plat / Repas
             </label>
             <label className={`flex-1 p-3 rounded-xl border flex items-center justify-center gap-2 cursor-pointer transition-all
               ${category === 'gateau' ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'bg-slate-50 border-slate-300 text-slate-700'}`}
             >
-              <input type="radio" name="recipeCat" checked={category === 'gateau'} onChange={() => { setCategory('gateau'); setCarb('Plaisir'); }} className="hidden" />
+              <input type="radio" name="recipeCat" checked={category === 'gateau'} onChange={() => setCategory('gateau')} className="hidden" />
               🍰 Gâteau / Goûter
             </label>
           </div>
@@ -1054,150 +998,97 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
           />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {category === 'repas' && (
-            <div className="space-y-2">
-              <div className="flex justify-between items-center mb-1">
-                <label className="block text-xs font-semibold text-slate-700 uppercase">Féculent / Catégorie</label>
-                {!showNewCarbInput && (
-                  <button
-                    type="button"
-                    onClick={() => setShowNewCarbInput(true)}
-                    className="text-xs font-semibold text-indigo-600 hover:text-indigo-800"
-                  >
-                    + Nouvelle catégorie
-                  </button>
-                )}
-              </div>
-
-              {showNewCarbInput ? (
-                <div className="flex gap-2">
-                  <input 
-                    type="text"
-                    placeholder="Nom de la catégorie..."
-                    value={newCarbName}
-                    onChange={(e) => setNewCarbName(e.target.value)}
-                    className="flex-1 bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs text-slate-900"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleAddNewCarbQuick}
-                    className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium"
-                  >
-                    Ajouter
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowNewCarbInput(false)}
-                    className="text-slate-400 hover:text-slate-600 text-xs px-1"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ) : (
-                <select 
-                  value={carb}
-                  onChange={(e) => setCarb(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
-                >
-                  {carbsList.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              )}
-            </div>
-          )}
-
-          <div className={category === 'gateau' ? 'col-span-full space-y-2' : 'space-y-2'}>
-            <div className="flex justify-between items-center mb-1">
-              <label className="block text-xs font-semibold text-slate-700 uppercase">Appareil utilisé</label>
-              {!showNewEquipInput && (
-                <button
-                  type="button"
-                  onClick={() => setShowNewEquipInput(true)}
-                  className="text-xs font-semibold text-indigo-600 hover:text-indigo-800"
-                >
-                  + Nouvel appareil
-                </button>
-              )}
-            </div>
-
-            {showNewEquipInput ? (
-              <div className="flex gap-2">
-                <input 
-                  type="text"
-                  placeholder="Nom du nouvel appareil..."
-                  value={newEquipName}
-                  onChange={(e) => setNewEquipName(e.target.value)}
-                  className="flex-1 bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs text-slate-900"
-                />
-                <button
-                  type="button"
-                  onClick={handleAddNewEquipmentQuick}
-                  className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium"
-                >
-                  Ajouter
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowNewEquipInput(false)}
-                  className="text-slate-400 hover:text-slate-600 text-xs px-1"
-                >
-                  ✕
-                </button>
-              </div>
-            ) : (
-              <select 
-                value={equipment}
-                onChange={(e) => {
-                  setEquipment(e.target.value);
-                  if (additionalEquipment === e.target.value) {
-                    setAdditionalEquipment('');
-                  }
-                }}
-                className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
-              >
-                {equipments.map(eq => <option key={eq} value={eq}>{eq}</option>)}
-              </select>
-            )}
-
-            {!showNewEquipSelect ? (
+        <div>
+          <div className="flex justify-between items-center mb-1">
+            <label className="block text-xs font-semibold text-slate-700 uppercase">Appareil utilisé</label>
+            {!showNewEquipInput && (
               <button
                 type="button"
-                onClick={() => setShowNewEquipSelect(true)}
-                className="flex items-center gap-2 text-xs font-semibold text-indigo-600 hover:text-indigo-800 mt-1 transition-colors"
+                onClick={() => setShowNewEquipInput(true)}
+                className="text-xs font-semibold text-indigo-600 hover:text-indigo-800"
               >
-                <div className="w-5 h-5 rounded-full border border-indigo-600 flex items-center justify-center">
-                  <Plus className="w-3.5 h-3.5" />
-                </div>
-                Ajouter un autre appareil utilisé (facultatif)
+                + Nouvel appareil
               </button>
-            ) : (
-              <div className="space-y-2 mt-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs font-semibold text-slate-700">Second appareil :</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowNewEquipSelect(false);
-                      setAdditionalEquipment('');
-                    }}
-                    className="text-slate-400 hover:text-slate-700 text-xs"
-                  >
-                    ✕ Retirer
-                  </button>
-                </div>
-                <select 
-                  value={additionalEquipment}
-                  onChange={(e) => setAdditionalEquipment(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs text-slate-900 focus:ring-indigo-500"
-                >
-                  <option value="">-- Choisir un autre appareil --</option>
-                  {equipments
-                    .filter(eq => eq !== equipment)
-                    .map(eq => <option key={eq} value={eq}>{eq}</option>)}
-                </select>
-              </div>
             )}
           </div>
+
+          {showNewEquipInput ? (
+            <div className="flex gap-2">
+              <input 
+                type="text"
+                placeholder="Nom du nouvel appareil..."
+                value={newEquipName}
+                onChange={(e) => setNewEquipName(e.target.value)}
+                className="flex-1 bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs text-slate-900"
+              />
+              <button
+                type="button"
+                onClick={handleAddNewEquipmentQuick}
+                className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium"
+              >
+                Ajouter
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowNewEquipInput(false)}
+                className="text-slate-400 hover:text-slate-600 text-xs px-1"
+              >
+                ✕
+              </button>
+            </div>
+          ) : (
+            <select 
+              value={equipment}
+              onChange={(e) => {
+                setEquipment(e.target.value);
+                if (additionalEquipment === e.target.value) {
+                  setAdditionalEquipment('');
+                }
+              }}
+              className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
+            >
+              {equipments.map(eq => <option key={eq} value={eq}>{eq}</option>)}
+            </select>
+          )}
+
+          {!showNewEquipSelect ? (
+            <button
+              type="button"
+              onClick={() => setShowNewEquipSelect(true)}
+              className="flex items-center gap-2 text-xs font-semibold text-indigo-600 hover:text-indigo-800 mt-1 transition-colors"
+            >
+              <div className="w-5 h-5 rounded-full border border-indigo-600 flex items-center justify-center">
+                <Plus className="w-3.5 h-3.5" />
+              </div>
+              Ajouter un autre appareil utilisé (facultatif)
+            </button>
+          ) : (
+            <div className="space-y-2 mt-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-semibold text-slate-700">Second appareil :</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowNewEquipSelect(false);
+                    setAdditionalEquipment('');
+                  }}
+                  className="text-slate-400 hover:text-slate-700 text-xs"
+                >
+                  ✕ Retirer
+                </button>
+              </div>
+              <select 
+                value={additionalEquipment}
+                onChange={(e) => setAdditionalEquipment(e.target.value)}
+                className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs text-slate-900 focus:ring-indigo-500"
+              >
+                <option value="">-- Choisir un autre appareil --</option>
+                {equipments
+                  .filter(eq => eq !== equipment)
+                  .map(eq => <option key={eq} value={eq}>{eq}</option>)}
+              </select>
+            </div>
+          )}
         </div>
 
         <div>
@@ -1284,7 +1175,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
           />
         </div>
 
-          <button 
+        <button 
           type="submit"
           className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-xl transition-colors shadow-sm text-sm"
         >
@@ -1295,7 +1186,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
   );
 }
 
-function InventoryManager({ inventory, setInventory, equipments, setEquipments, carbsList, setCarbsList }) {
+function InventoryManager({ inventory, setInventory, equipments, setEquipments }) {
   const [subTab, setSubTab] = useState('inventory');
   const [newItemName, setNewItemName] = useState('');
   const [newItemStatus, setNewItemStatus] = useState('Plein');
@@ -1305,7 +1196,6 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
   const [filterZone, setFilterZone] = useState('Tous');
   const [filterCategory, setFilterCategory] = useState('Tous');
   const [newEquipName, setNewEquipName] = useState('');
-  const [newCarbName, setNewCarbName] = useState('');
 
   const addItem = (e) => {
     e.preventDefault();
@@ -1371,28 +1261,6 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
     }
   };
 
-  const addCarb = (e) => {
-    e.preventDefault();
-    const trimmed = newCarbName.trim();
-    if (!trimmed) return;
-    if (carbsList.some(c => c.toLowerCase() === trimmed.toLowerCase())) {
-      alert("Cette catégorie existe déjà !");
-      return;
-    }
-    setCarbsList([...carbsList, trimmed]);
-    setNewCarbName('');
-  };
-
-  const removeCarb = (carbToDelete) => {
-    if (carbsList.length <= 1) {
-      alert("Vous devez garder au moins une catégorie.");
-      return;
-    }
-    if (window.confirm(`Supprimer la catégorie "${carbToDelete}" ?`)) {
-      setCarbsList(carbsList.filter(c => c !== carbToDelete));
-    }
-  };
-
   const filteredInventory = inventory.filter(item => {
     if (filterZone !== 'Tous' && item.zone !== filterZone) return false;
     if (filterCategory !== 'Tous' && item.category !== filterCategory) return false;
@@ -1431,14 +1299,6 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
           `}
         >
           <Settings className="w-4 h-4" /> Appareils ({equipments.length})
-        </button>
-        <button 
-          onClick={() => setSubTab('carbs')}
-          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2
-            ${subTab === 'carbs' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
-          `}
-        >
-          <Tag className="w-4 h-4" /> Féculents ({carbsList.length})
         </button>
       </div>
 
@@ -1505,7 +1365,6 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
             </div>
           </form>
 
-          {/* Filtres par zone et par catégorie */}
           <div className="space-y-2">
             <div className="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-xl">
               <button 
@@ -1633,7 +1492,7 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
             )}
           </div>
         </div>
-      ) : subTab === 'equipments' ? (
+      ) : (
         <div className="space-y-6">
           <div>
             <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2 mb-1">
@@ -1667,49 +1526,6 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
                 <button 
                   type="button" 
                   onClick={() => removeEquipment(eq)}
-                  className="text-slate-400 hover:text-red-600 p-1 transition-colors"
-                  title="Supprimer"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          <div>
-            <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2 mb-1">
-              <Tag className="w-5 h-5 text-indigo-600" /> Gestion des Féculents / Catégories
-            </h2>
-            <p className="text-xs text-slate-500">
-              Ajoutez ou supprimez les catégories de féculents disponibles pour vos recettes.
-            </p>
-          </div>
-
-          <form onSubmit={addCarb} className="flex gap-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
-            <input 
-              type="text" 
-              placeholder="Nouvelle catégorie (ex: Polenta, Quinoa)..." 
-              value={newCarbName}
-              onChange={(e) => setNewCarbName(e.target.value)}
-              className="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm"
-            />
-            <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
-              Ajouter
-            </button>
-          </form>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {carbsList.map(c => (
-              <div key={c} className="bg-white border border-slate-200 text-slate-800 text-xs p-3 rounded-xl flex items-center justify-between shadow-sm font-medium">
-                <span className="flex items-center gap-2">
-                  <Tag className="w-4 h-4 text-indigo-600" />
-                  {c}
-                </span>
-                <button 
-                  type="button" 
-                  onClick={() => removeCarb(c)}
                   className="text-slate-400 hover:text-red-600 p-1 transition-colors"
                   title="Supprimer"
                 >
@@ -1882,7 +1698,7 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="text-xs font-semibold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md border border-indigo-100">
-              {recipe.category === 'gateau' ? '🍰 Gâteau' : recipe.carb}
+              {recipe.category === 'gateau' ? '🍰 Gâteau' : '🍽️ Plat'}
             </span>
             <span className="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md font-medium">
               {recipe.equipment}{recipe.additionalEquipment ? ` + ${recipe.additionalEquipment}` : ''}
@@ -1955,4 +1771,4 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
     </div>
   );
 }
-
+```[cite: 4]
