@@ -47,14 +47,14 @@ export default function App() {
     mondayLunch: 'restes', tuesdayLunch: 'restes', wednesdayLunch: '', thursdayLunch: 'restes', fridayLunch: 'restes', saturdayLunch: '', sundayLunch: ''
   });
   const [inventory, setInventory] = useState([
-    { name: 'Sel', status: 'Plein', zone: 'Placard' },
-    { name: 'Poivre', status: 'Plein', zone: 'Placard' },
-    { name: "Huile d'olive", status: 'Plein', zone: 'Placard' },
-    { name: 'Beurre', status: 'Entamé', zone: 'Frigo' },
-    { name: 'Pâtes', status: 'Entamé', zone: 'Placard' },
-    { name: 'Riz', status: 'Presque vide', zone: 'Placard' },
-    { name: 'Oignons', status: 'Plein', zone: 'Placard' },
-    { name: 'Ail', status: 'Plein', zone: 'Placard' }
+    { name: 'Sel', status: 'Plein', zone: 'Placard', expiryDate: '' },
+    { name: 'Poivre', status: 'Plein', zone: 'Placard', expiryDate: '' },
+    { name: "Huile d'olive", status: 'Plein', zone: 'Placard', expiryDate: '' },
+    { name: 'Beurre', status: 'Entamé', zone: 'Frigo', expiryDate: '' },
+    { name: 'Pâtes', status: 'Entamé', zone: 'Placard', expiryDate: '' },
+    { name: 'Riz', status: 'Presque vide', zone: 'Placard', expiryDate: '' },
+    { name: 'Oignons', status: 'Plein', zone: 'Placard', expiryDate: '' },
+    { name: 'Ail', status: 'Plein', zone: 'Placard', expiryDate: '' }
   ]);
   const [bakingItems, setBakingItems] = useState(['', '']);
   const [shoppingChecks, setShoppingChecks] = useState({});
@@ -77,7 +77,8 @@ export default function App() {
         if (saved.inventory) {
           const migrated = saved.inventory.map(item => ({
             ...item,
-            zone: item.zone || 'Placard'
+            zone: item.zone || 'Placard',
+            expiryDate: item.expiryDate || ''
           }));
           setInventory(migrated);
         }
@@ -1277,6 +1278,7 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
   const [newItemName, setNewItemName] = useState('');
   const [newItemStatus, setNewItemStatus] = useState('Plein');
   const [newItemZone, setNewItemZone] = useState('Placard');
+  const [newItemExpiry, setNewItemExpiry] = useState('');
   const [filterZone, setFilterZone] = useState('Tous');
   const [newEquipName, setNewEquipName] = useState('');
   const [newCarbName, setNewCarbName] = useState('');
@@ -1284,8 +1286,9 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
   const addItem = (e) => {
     e.preventDefault();
     if (!newItemName.trim()) return;
-    setInventory([...inventory, { name: newItemName.trim(), status: newItemStatus, zone: newItemZone }]);
+    setInventory([...inventory, { name: newItemName.trim(), status: newItemStatus, zone: newItemZone, expiryDate: newItemExpiry }]);
     setNewItemName('');
+    setNewItemExpiry('');
   };
 
   const updateStatus = (index, status) => {
@@ -1297,6 +1300,12 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
   const updateZone = (index, zone) => {
     const updated = [...inventory];
     updated[index].zone = zone;
+    setInventory(updated);
+  };
+
+  const updateExpiry = (index, expiryDate) => {
+    const updated = [...inventory];
+    updated[index].expiryDate = expiryDate;
     setInventory(updated);
   };
 
@@ -1353,6 +1362,23 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
     return item.zone === filterZone;
   });
 
+  const getExpiryBadgeStyle = (dateStr) => {
+    if (!dateStr) return 'bg-slate-50 text-slate-500 border-slate-200';
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const expiry = new Date(dateStr);
+    expiry.setHours(0, 0, 0, 0);
+
+    const diffDays = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      return 'bg-red-100 text-red-800 border-red-300 font-bold'; // Périmé
+    } else if (diffDays <= 3) {
+      return 'bg-amber-100 text-amber-800 border-amber-300 font-bold'; // Bientôt périmé
+    }
+    return 'bg-slate-50 text-slate-700 border-slate-200';
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 max-w-2xl mx-auto space-y-6">
       <div className="flex bg-slate-200/70 p-1 rounded-xl">
@@ -1389,37 +1415,50 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
               <Package className="w-5 h-5 text-indigo-600" /> Gestion des Provisions
             </h2>
             <p className="text-xs text-slate-500">
-              Rangez vos provisions par zone (Placard, Frigo, Congélateur) pour suivre vos stocks.
+              Rangez vos provisions par zone (Placard, Frigo, Congélateur) et suivez vos dates de péremption.
             </p>
           </div>
 
           <form onSubmit={addItem} className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
             <h3 className="text-xs font-bold text-slate-700 uppercase">Ajouter un article</h3>
-            <div className="flex flex-col sm:flex-row gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <input 
                 type="text" 
                 placeholder="Nom (ex: Lait, Farine, Steaks...)" 
                 value={newItemName}
                 onChange={(e) => setNewItemName(e.target.value)}
-                className="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm"
+                className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm"
               />
-              <select 
-                value={newItemZone}
-                onChange={(e) => setNewItemZone(e.target.value)}
-                className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700"
-              >
-                {STORAGE_ZONES.map(z => <option key={z} value={z}>{z}</option>)}
-              </select>
-              <select 
-                value={newItemStatus}
-                onChange={(e) => setNewItemStatus(e.target.value)}
-                className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700"
-              >
-                <option value="Plein">Plein</option>
-                <option value="Entamé">Entamé</option>
-                <option value="Presque vide">Presque vide</option>
-              </select>
-              <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+              <div className="flex gap-2">
+                <select 
+                  value={newItemZone}
+                  onChange={(e) => setNewItemZone(e.target.value)}
+                  className="flex-1 bg-white border border-slate-300 rounded-lg px-2 py-2 text-xs font-semibold text-slate-700"
+                >
+                  {STORAGE_ZONES.map(z => <option key={z} value={z}>{z}</option>)}
+                </select>
+                <select 
+                  value={newItemStatus}
+                  onChange={(e) => setNewItemStatus(e.target.value)}
+                  className="flex-1 bg-white border border-slate-300 rounded-lg px-2 py-2 text-xs font-semibold text-slate-700"
+                >
+                  <option value="Plein">Plein</option>
+                  <option value="Entamé">Entamé</option>
+                  <option value="Presque vide">Presque vide</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
+              <div className="flex items-center gap-2 w-full sm:w-auto flex-1">
+                <span className="text-xs font-semibold text-slate-600 whitespace-nowrap">Péremption :</span>
+                <input 
+                  type="date"
+                  value={newItemExpiry}
+                  onChange={(e) => setNewItemExpiry(e.target.value)}
+                  className="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-700"
+                />
+              </div>
+              <button type="submit" className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg text-sm font-medium">
                 Ajouter
               </button>
             </div>
@@ -1452,8 +1491,20 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
               const originalIndex = inventory.findIndex(i => i === item);
 
               return (
-                <div key={originalIndex} className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-white hover:bg-slate-50 transition-colors gap-2">
-                  <span className="font-medium text-slate-800 text-sm">{item.name}</span>
+                <div key={originalIndex} className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-white hover:bg-slate-50 transition-colors gap-3">
+                  <div className="flex flex-col">
+                    <span className="font-medium text-slate-800 text-sm">{item.name}</span>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-[10px] text-slate-400">Péremption :</span>
+                      <input 
+                        type="date" 
+                        value={item.expiryDate || ''}
+                        onChange={(e) => updateExpiry(originalIndex, e.target.value)}
+                        className={`text-[11px] rounded px-1.5 py-0.5 border ${getExpiryBadgeStyle(item.expiryDate)}`}
+                      />
+                    </div>
+                  </div>
+
                   <div className="flex items-center gap-2 flex-wrap justify-end">
                     <select 
                       value={item.zone || 'Placard'} 
