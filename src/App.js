@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, List, Calendar, Trash2, Utensils, Info, Tag, Sun, Settings, Link as LinkIcon, Pencil, Camera, RefreshCw, AlertTriangle, Eye, X, Image as ImageIcon, ShoppingBag, Package, Check, Copy, Sparkles, Filter, Cake, Clock } from 'lucide-react';
+import { Plus, List, Calendar, Trash2, Utensils, Info, Tag, Sun, Settings, Link as LinkIcon, Pencil, Camera, RefreshCw, AlertTriangle, Eye, X, Image as ImageIcon, ShoppingBag, Package, Check, Copy, Sparkles, Filter, Cake, Clock, ChevronDown, ChevronRight } from 'lucide-react';
 import { supabase } from './supabaseClient';
 
 const DEFAULT_RECIPES = [];
 
 const INITIAL_EQUIPMENTS = ['Thermomix', 'Cookeo', 'Ninja Double Stack', 'Poêle', 'Four', 'Casserole', 'Airfryer', 'Gaufrier - Croque-Monsieur - Panini', 'Crêpière - Mini woks - Grill', 'Raclette - Pierrade - Fondue', 'Plancha', 'Barbecue', 'Sans Cuisson'];
+const INITIAL_CARBS = ['Pâtes', 'Pommes de terre', 'Semoule', 'Riz', 'Blé', 'Plaisir'];
 const SEASONS_LIST = ['Printemps', 'Été', 'Automne', 'Hiver'];
 const STORAGE_ZONES = ['Placard', 'Frigo', 'Congélateur'];
 const INVENTORY_CATEGORIES = ['Légumes & Fruits', 'Féculents & Céréales', 'Epicerie & Condiments', 'Produits laitiers & Frais', 'Viandes & Poissons', 'Surgelés', 'Autres'];
@@ -41,6 +42,7 @@ export default function App() {
 
   const [recipes, setRecipes] = useState(DEFAULT_RECIPES);
   const [equipments, setEquipments] = useState(INITIAL_EQUIPMENTS);
+  const [carbsList, setCarbsList] = useState(INITIAL_CARBS);
   const [menu, setMenu] = useState({
     mondayDinner: '', tuesdayDinner: '', wednesdayDinner: '', thursdayDinner: '', fridayDinner: '', saturdayDinner: '', sundayDinner: '',
     mondayLunch: 'restes', tuesdayLunch: 'restes', wednesdayLunch: '', thursdayLunch: 'restes', fridayLunch: 'restes', saturdayLunch: '', sundayLunch: ''
@@ -71,6 +73,7 @@ export default function App() {
         const saved = data.data;
         if (saved.recipes) setRecipes(saved.recipes);
         if (saved.equipments && Array.isArray(saved.equipments)) setEquipments(saved.equipments);
+        if (saved.carbsList && Array.isArray(saved.carbsList)) setCarbsList(saved.carbsList);
         if (saved.menu) setMenu(saved.menu);
         if (saved.inventory) {
           const migrated = saved.inventory.map(item => ({
@@ -95,7 +98,7 @@ export default function App() {
     async function saveData() {
       const payload = {
         user_key: 'ma_famille',
-        data: { recipes, equipments, menu, inventory, bakingItems, shoppingChecks }
+        data: { recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks }
       };
 
       const { data: existing } = await supabase
@@ -118,7 +121,7 @@ export default function App() {
 
     const timer = setTimeout(saveData, 1000);
     return () => clearTimeout(timer);
-  }, [recipes, equipments, menu, inventory, bakingItems, shoppingChecks]);
+  }, [recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks]);
 
   const addRecipe = (newRecipe) => {
     setRecipes(prev => {
@@ -189,6 +192,7 @@ export default function App() {
             currentSeason={currentSeason} 
             equipments={equipments}
             setEquipments={setEquipments}
+            carbsList={carbsList}
             subTab={menuSubTab}
             setSubTab={setMenuSubTab}
             inventory={inventory}
@@ -208,12 +212,13 @@ export default function App() {
             currentSeason={currentSeason}
             equipments={equipments}
             setEquipments={setEquipments}
+            carbsList={carbsList}
             subTab={bakingSubTab}
             setSubTab={setBakingSubTab}
           />
         )}
-        {activeTab === 'add' && <AddRecipeForm addRecipe={addRecipe} editingRecipe={editingRecipe} setEditingRecipe={setEditingRecipe} setActiveTab={setActiveTab} setSelectedImage={setSelectedImage} equipments={equipments} setEquipments={setEquipments} />}
-        {activeTab === 'inventory' && <InventoryManager inventory={inventory} setInventory={setInventory} equipments={equipments} setEquipments={setEquipments} />}
+        {activeTab === 'add' && <AddRecipeForm addRecipe={addRecipe} editingRecipe={editingRecipe} setEditingRecipe={setEditingRecipe} setActiveTab={setActiveTab} setSelectedImage={setSelectedImage} equipments={equipments} setEquipments={setEquipments} carbsList={carbsList} setCarbsList={setCarbsList} />}
+        {activeTab === 'inventory' && <InventoryManager inventory={inventory} setInventory={setInventory} equipments={equipments} setEquipments={setEquipments} carbsList={carbsList} setCarbsList={setCarbsList} />}
         {activeTab === 'shopping' && <ShoppingListView menu={menu} recipes={recipes} inventory={inventory} bakingItems={bakingItems} shoppingChecks={shoppingChecks} setShoppingChecks={setShoppingChecks} setActiveTab={setActiveTab} />}
       </main>
 
@@ -275,7 +280,7 @@ function NavButton({ active, onClick, icon, label }) {
   );
 }
 
-function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, deleteRecipe, setEditingRecipe, setActiveTab, setViewingRecipe, currentSeason, equipments, setEquipments, subTab, setSubTab, inventory }) {
+function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, deleteRecipe, setEditingRecipe, setActiveTab, setViewingRecipe, currentSeason, equipments, setEquipments, carbsList, subTab, setSubTab, inventory }) {
   return (
     <div className="space-y-6">
       <div className="flex bg-slate-200/70 p-1 rounded-xl max-w-md mx-auto">
@@ -321,6 +326,7 @@ function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, delete
           currentSeason={currentSeason}
           title="Toutes les recettes de repas"
           equipments={equipments}
+          carbsList={carbsList}
         />
       )}
     </div>
@@ -329,17 +335,21 @@ function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, delete
 
 function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, equipments, inventory }) {
   const daysConfig = [
-    { key: 'monday', label: 'Lundi' },
-    { key: 'tuesday', label: 'Mardi' },
-    { key: 'wednesday', label: 'Mercredi' },
-    { key: 'thursday', label: 'Jeudi' },
-    { key: 'friday', label: 'Vendredi' },
-    { key: 'saturday', label: 'Samedi' },
-    { key: 'sunday', label: 'Dimanche' },
+    { key: 'monday', label: 'Lundi', reqCarb: 'Blé' },
+    { key: 'tuesday', label: 'Mardi', reqCarb: 'Semoule' },
+    { key: 'wednesday', label: 'Mercredi', reqCarb: '' },
+    { key: 'thursday', label: 'Jeudi', reqCarb: 'Riz' },
+    { key: 'friday', label: 'Vendredi', reqCarb: 'Pommes de terre' },
+    { key: 'saturday', label: 'Samedi', reqCarb: 'Plaisir' },
+    { key: 'sunday', label: 'Dimanche', reqCarb: 'Pâtes' },
   ];
 
-  const getEligibleRecipes = () => {
-    return recipes.filter(r => recipeMatchesSeason(r.season, currentSeason));
+  const getEligibleRecipes = (reqCarb) => {
+    return recipes.filter(r => {
+      const matchCarb = reqCarb ? r.carb === reqCarb : true;
+      if (!matchCarb) return false;
+      return recipeMatchesSeason(r.season, currentSeason);
+    });
   };
 
   const equipmentCounts = {};
@@ -361,20 +371,20 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
     let tempEquipCounts = {};
     
     const eveningDays = [
-      { key: 'mondayDinner' },
-      { key: 'tuesdayDinner' },
-      { key: 'wednesdayDinner' },
-      { key: 'thursdayDinner' },
-      { key: 'fridayDinner' },
-      { key: 'saturdayDinner' },
-      { key: 'sundayDinner' },
+      { key: 'mondayDinner', reqCarb: 'Blé' },
+      { key: 'tuesdayDinner', reqCarb: 'Semoule' },
+      { key: 'wednesdayDinner', reqCarb: '' },
+      { key: 'thursdayDinner', reqCarb: 'Riz' },
+      { key: 'fridayDinner', reqCarb: 'Pommes de terre' },
+      { key: 'saturdayDinner', reqCarb: 'Plaisir' },
+      { key: 'sundayDinner', reqCarb: 'Pâtes' },
     ];
 
     eveningDays.forEach(day => {
       if (day.key === 'wednesdayDinner') return;
-      let possibleRecipes = getEligibleRecipes();
+      let possibleRecipes = getEligibleRecipes(day.reqCarb);
       if (possibleRecipes.length === 0) {
-        possibleRecipes = recipes;
+        possibleRecipes = recipes.filter(r => r.carb === day.reqCarb);
       }
       if (possibleRecipes.length === 0) return;
 
@@ -483,11 +493,15 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
   const lunchKey = `${day.key}Lunch`;
   const dinnerKey = `${day.key}Dinner`;
 
-  const getAvailableRecipes = () => {
-    return recipes.filter(r => recipeMatchesSeason(r.season, currentSeason));
+  const getAvailableRecipes = (reqCarb) => {
+    return recipes.filter(r => {
+      const matchCarb = reqCarb ? r.carb === reqCarb : true;
+      if (!matchCarb) return false;
+      return recipeMatchesSeason(r.season, currentSeason);
+    });
   };
 
-  const dinnerRecipes = getAvailableRecipes();
+  const dinnerRecipes = getAvailableRecipes(day.reqCarb);
   const anyRecipes = recipes.filter(r => recipeMatchesSeason(r.season, currentSeason));
 
   const lunchVal = menu[lunchKey] || '';
@@ -504,6 +518,11 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
             <Calendar className="w-4 h-4 text-indigo-600" />
             {day.label}
           </h3>
+          {day.reqCarb && (
+            <span className="bg-slate-100 text-slate-600 text-xs px-2.5 py-1 rounded-md font-semibold border border-slate-200">
+               {day.reqCarb}
+            </span>
+          )}
         </div>
         
         <div className="space-y-3">
@@ -551,7 +570,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
               </div>
             ) : dinnerRecipes.length === 0 ? (
               <div className="text-xs text-amber-700 bg-amber-50 p-2.5 rounded-lg border border-amber-200">
-                Aucune recette de {currentSeason} disponible.
+                Aucune recette de {currentSeason} pour ce féculent.
               </div>
             ) : (
               <select
@@ -588,13 +607,15 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
   );
 }
 
-function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, title, equipments }) {
+function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, title, equipments, carbsList }) {
   const [filterSeason, setFilterSeason] = useState('Tous');
   const [filterEquip, setFilterEquip] = useState('Tous');
+  const [filterCarb, setFilterCarb] = useState('Tous');
 
   const filteredRecipes = recipes.filter(r => {
     if (filterSeason !== 'Tous' && !recipeMatchesSeason(r.season, filterSeason)) return false;
     if (filterEquip !== 'Tous' && r.equipment !== filterEquip && r.additionalEquipment !== filterEquip) return false;
+    if (filterCarb !== 'Tous' && r.carb !== filterCarb) return false;
     return true;
   });
 
@@ -625,6 +646,15 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
           </select>
 
           <select 
+            value={filterCarb} 
+            onChange={(e) => setFilterCarb(e.target.value)}
+            className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800"
+          >
+            <option value="Tous">Toutes les catégories</option>
+            {carbsList.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+
+          <select 
             value={filterEquip} 
             onChange={(e) => setFilterEquip(e.target.value)}
             className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800"
@@ -645,6 +675,9 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
             <div>
               <div className="flex justify-between items-start gap-2 mb-2">
                 <h3 className="font-bold text-slate-800 text-sm leading-tight">{recipe.name}</h3>
+                <span className="text-xs bg-indigo-50 text-indigo-700 font-semibold px-2 py-0.5 rounded flex-shrink-0 border border-indigo-100">
+                  {recipe.carb}
+                </span>
               </div>
               
               {recipe.image && (
@@ -713,7 +746,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
   );
 }
 
-function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, setActiveTab, bakingRecipes, recipes, deleteRecipe, setViewingRecipe, currentSeason, equipments, subTab, setSubTab }) {
+function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, setActiveTab, bakingRecipes, recipes, deleteRecipe, setViewingRecipe, currentSeason, equipments, carbsList, subTab, setSubTab }) {
   const updateBakingItem = (index, recipeId) => {
     const updated = [...bakingItems];
     updated[index] = recipeId;
@@ -814,14 +847,18 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
           setActiveTab={setActiveTab}
           currentSeason={currentSeason}
           equipments={equipments}
+          carbsList={carbsList}
         />
       )}
     </div>
   );
 }
 
-function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTab, setSelectedImage, equipments, setEquipments }) {
+function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTab, setSelectedImage, equipments, setEquipments, carbsList, setCarbsList }) {
   const [name, setName] = useState('');
+  const [carb, setCarb] = useState(carbsList[0] || 'Plaisir');
+  const [showNewCarbInput, setShowNewCarbInput] = useState(false);
+  const [newCarbName, setNewCarbName] = useState('');
   const [equipment, setEquipment] = useState(equipments[0] || 'Four');
   const [showNewEquipInput, setShowNewEquipInput] = useState(false);
   const [newEquipName, setNewEquipName] = useState('');
@@ -837,6 +874,11 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
   useEffect(() => {
     if (editingRecipe) {
       setName(editingRecipe.name || '');
+      if (carbsList.includes(editingRecipe.carb)) {
+        setCarb(editingRecipe.carb);
+      } else if (editingRecipe.carb) {
+        setCarb(carbsList[0] || 'Plaisir');
+      }
       if (equipments.includes(editingRecipe.equipment)) {
         setEquipment(editingRecipe.equipment);
       } else if (editingRecipe.equipment) {
@@ -869,7 +911,19 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
         setSelectedSeasons(['Toutes']);
       }
     }
-  }, [editingRecipe, equipments]);
+  }, [editingRecipe, equipments, carbsList]);
+
+  const handleAddNewCarbQuick = (e) => {
+    e.preventDefault();
+    const trimmed = newCarbName.trim();
+    if (!trimmed) return;
+    if (!carbsList.some(c => c.toLowerCase() === trimmed.toLowerCase())) {
+      setCarbsList([...carbsList, trimmed]);
+    }
+    setCarb(trimmed);
+    setNewCarbName('');
+    setShowNewCarbInput(false);
+  };
 
   const handleAddNewEquipmentQuick = (e) => {
     e.preventDefault();
@@ -932,6 +986,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
 
     const recipeData = {
       name,
+      carb,
       equipment: equipment || 'Autre',
       additionalEquipment: finalAdditionalEquipment,
       season: finalSeason,
@@ -974,13 +1029,13 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
             <label className={`flex-1 p-3 rounded-xl border flex items-center justify-center gap-2 cursor-pointer transition-all
               ${category === 'repas' ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'bg-slate-50 border-slate-300 text-slate-700'}`}
             >
-              <input type="radio" name="recipeCat" checked={category === 'repas'} onChange={() => setCategory('repas')} className="hidden" />
+              <input type="radio" name="recipeCat" checked={category === 'repas'} onChange={() => { setCategory('repas'); setCarb('Pâtes'); }} className="hidden" />
               🍽️ Plat / Repas
             </label>
             <label className={`flex-1 p-3 rounded-xl border flex items-center justify-center gap-2 cursor-pointer transition-all
               ${category === 'gateau' ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'bg-slate-50 border-slate-300 text-slate-700'}`}
             >
-              <input type="radio" name="recipeCat" checked={category === 'gateau'} onChange={() => setCategory('gateau')} className="hidden" />
+              <input type="radio" name="recipeCat" checked={category === 'gateau'} onChange={() => { setCategory('gateau'); setCarb('Plaisir'); }} className="hidden" />
               🍰 Gâteau / Goûter
             </label>
           </div>
@@ -998,97 +1053,150 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
           />
         </div>
 
-        <div>
-          <div className="flex justify-between items-center mb-1">
-            <label className="block text-xs font-semibold text-slate-700 uppercase">Appareil utilisé</label>
-            {!showNewEquipInput && (
-              <button
-                type="button"
-                onClick={() => setShowNewEquipInput(true)}
-                className="text-xs font-semibold text-indigo-600 hover:text-indigo-800"
-              >
-                + Nouvel appareil
-              </button>
-            )}
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {category === 'repas' && (
+            <div className="space-y-2">
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-xs font-semibold text-slate-700 uppercase">Féculent / Catégorie</label>
+                {!showNewCarbInput && (
+                  <button
+                    type="button"
+                    onClick={() => setShowNewCarbInput(true)}
+                    className="text-xs font-semibold text-indigo-600 hover:text-indigo-800"
+                  >
+                    + Nouvelle catégorie
+                  </button>
+                )}
+              </div>
 
-          {showNewEquipInput ? (
-            <div className="flex gap-2">
-              <input 
-                type="text"
-                placeholder="Nom du nouvel appareil..."
-                value={newEquipName}
-                onChange={(e) => setNewEquipName(e.target.value)}
-                className="flex-1 bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs text-slate-900"
-              />
-              <button
-                type="button"
-                onClick={handleAddNewEquipmentQuick}
-                className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium"
-              >
-                Ajouter
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowNewEquipInput(false)}
-                className="text-slate-400 hover:text-slate-600 text-xs px-1"
-              >
-                ✕
-              </button>
+              {showNewCarbInput ? (
+                <div className="flex gap-2">
+                  <input 
+                    type="text"
+                    placeholder="Nom de la catégorie..."
+                    value={newCarbName}
+                    onChange={(e) => setNewCarbName(e.target.value)}
+                    className="flex-1 bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs text-slate-900"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddNewCarbQuick}
+                    className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium"
+                  >
+                    Ajouter
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowNewCarbInput(false)}
+                    className="text-slate-400 hover:text-slate-600 text-xs px-1"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <select 
+                  value={carb}
+                  onChange={(e) => setCarb(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
+                >
+                  {carbsList.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              )}
             </div>
-          ) : (
-            <select 
-              value={equipment}
-              onChange={(e) => {
-                setEquipment(e.target.value);
-                if (additionalEquipment === e.target.value) {
-                  setAdditionalEquipment('');
-                }
-              }}
-              className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
-            >
-              {equipments.map(eq => <option key={eq} value={eq}>{eq}</option>)}
-            </select>
           )}
 
-          {!showNewEquipSelect ? (
-            <button
-              type="button"
-              onClick={() => setShowNewEquipSelect(true)}
-              className="flex items-center gap-2 text-xs font-semibold text-indigo-600 hover:text-indigo-800 mt-1 transition-colors"
-            >
-              <div className="w-5 h-5 rounded-full border border-indigo-600 flex items-center justify-center">
-                <Plus className="w-3.5 h-3.5" />
-              </div>
-              Ajouter un autre appareil utilisé (facultatif)
-            </button>
-          ) : (
-            <div className="space-y-2 mt-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-semibold text-slate-700">Second appareil :</span>
+          <div className={category === 'gateau' ? 'col-span-full space-y-2' : 'space-y-2'}>
+            <div className="flex justify-between items-center mb-1">
+              <label className="block text-xs font-semibold text-slate-700 uppercase">Appareil utilisé</label>
+              {!showNewEquipInput && (
                 <button
                   type="button"
-                  onClick={() => {
-                    setShowNewEquipSelect(false);
-                    setAdditionalEquipment('');
-                  }}
-                  className="text-slate-400 hover:text-slate-700 text-xs"
+                  onClick={() => setShowNewEquipInput(true)}
+                  className="text-xs font-semibold text-indigo-600 hover:text-indigo-800"
                 >
-                  ✕ Retirer
+                  + Nouvel appareil
+                </button>
+              )}
+            </div>
+
+            {showNewEquipInput ? (
+              <div className="flex gap-2">
+                <input 
+                  type="text"
+                  placeholder="Nom du nouvel appareil..."
+                  value={newEquipName}
+                  onChange={(e) => setNewEquipName(e.target.value)}
+                  className="flex-1 bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs text-slate-900"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddNewEquipmentQuick}
+                  className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium"
+                >
+                  Ajouter
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowNewEquipInput(false)}
+                  className="text-slate-400 hover:text-slate-600 text-xs px-1"
+                >
+                  ✕
                 </button>
               </div>
+            ) : (
               <select 
-                value={additionalEquipment}
-                onChange={(e) => setAdditionalEquipment(e.target.value)}
-                className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs text-slate-900 focus:ring-indigo-500"
+                value={equipment}
+                onChange={(e) => {
+                  setEquipment(e.target.value);
+                  if (additionalEquipment === e.target.value) {
+                    setAdditionalEquipment('');
+                  }
+                }}
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:ring-indigo-500"
               >
-                <option value="">-- Choisir un autre appareil --</option>
-                {equipments
-                  .filter(eq => eq !== equipment)
-                  .map(eq => <option key={eq} value={eq}>{eq}</option>)}
+                {equipments.map(eq => <option key={eq} value={eq}>{eq}</option>)}
               </select>
-            </div>
-          )}
+            )}
+
+            {!showNewEquipSelect ? (
+              <button
+                type="button"
+                onClick={() => setShowNewEquipSelect(true)}
+                className="flex items-center gap-2 text-xs font-semibold text-indigo-600 hover:text-indigo-800 mt-1 transition-colors"
+              >
+                <div className="w-5 h-5 rounded-full border border-indigo-600 flex items-center justify-center">
+                  <Plus className="w-3.5 h-3.5" />
+                </div>
+                Ajouter un autre appareil utilisé (facultatif)
+              </button>
+            ) : (
+              <div className="space-y-2 mt-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-semibold text-slate-700">Second appareil :</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowNewEquipSelect(false);
+                      setAdditionalEquipment('');
+                    }}
+                    className="text-slate-400 hover:text-slate-700 text-xs"
+                  >
+                    ✕ Retirer
+                  </button>
+                </div>
+                <select 
+                  value={additionalEquipment}
+                  onChange={(e) => setAdditionalEquipment(e.target.value)}
+                  className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs text-slate-900 focus:ring-indigo-500"
+                >
+                  <option value="">-- Choisir un autre appareil --</option>
+                  {equipments
+                    .filter(eq => eq !== equipment)
+                    .map(eq => <option key={eq} value={eq}>{eq}</option>)}
+                </select>
+              </div>
+            )}
+          </div>
         </div>
 
         <div>
@@ -1175,7 +1283,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
           />
         </div>
 
-        <button 
+          <button 
           type="submit"
           className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-xl transition-colors shadow-sm text-sm"
         >
@@ -1186,7 +1294,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
   );
 }
 
-function InventoryManager({ inventory, setInventory, equipments, setEquipments }) {
+function InventoryManager({ inventory, setInventory, equipments, setEquipments, carbsList, setCarbsList }) {
   const [subTab, setSubTab] = useState('inventory');
   const [newItemName, setNewItemName] = useState('');
   const [newItemStatus, setNewItemStatus] = useState('Plein');
@@ -1194,8 +1302,9 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments }
   const [newItemCategory, setNewItemCategory] = useState(INVENTORY_CATEGORIES[0]);
   const [newItemExpiry, setNewItemExpiry] = useState('');
   const [filterZone, setFilterZone] = useState('Tous');
-  const [filterCategory, setFilterCategory] = useState('Tous');
+  const [openDropdowns, setOpenDropdowns] = useState({});
   const [newEquipName, setNewEquipName] = useState('');
+  const [newCarbName, setNewCarbName] = useState('');
 
   const addItem = (e) => {
     e.preventDefault();
@@ -1261,9 +1370,37 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments }
     }
   };
 
+  const addCarb = (e) => {
+    e.preventDefault();
+    const trimmed = newCarbName.trim();
+    if (!trimmed) return;
+    if (carbsList.some(c => c.toLowerCase() === trimmed.toLowerCase())) {
+      alert("Cette catégorie existe déjà !");
+      return;
+    }
+    setCarbsList([...carbsList, trimmed]);
+    setNewCarbName('');
+  };
+
+  const removeCarb = (carbToDelete) => {
+    if (carbsList.length <= 1) {
+      alert("Vous devez garder au moins une catégorie.");
+      return;
+    }
+    if (window.confirm(`Supprimer la catégorie "${carbToDelete}" ?`)) {
+      setCarbsList(carbsList.filter(c => c !== carbToDelete));
+    }
+  };
+
+  const toggleDropdown = (categoryName) => {
+    setOpenDropdowns(prev => ({
+      ...prev,
+      [categoryName]: !prev[categoryName]
+    }));
+  };
+
   const filteredInventory = inventory.filter(item => {
     if (filterZone !== 'Tous' && item.zone !== filterZone) return false;
-    if (filterCategory !== 'Tous' && item.category !== filterCategory) return false;
     return true;
   });
 
@@ -1300,6 +1437,14 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments }
         >
           <Settings className="w-4 h-4" /> Appareils ({equipments.length})
         </button>
+        <button 
+          onClick={() => setSubTab('carbs')}
+          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2
+            ${subTab === 'carbs' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
+          `}
+        >
+          <Tag className="w-4 h-4" /> Féculents ({carbsList.length})
+        </button>
       </div>
 
       {subTab === 'inventory' ? (
@@ -1309,7 +1454,7 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments }
               <Package className="w-5 h-5 text-indigo-600" /> Gestion des Provisions & Péremptions
             </h2>
             <p className="text-xs text-slate-500">
-              Classez vos aliments par zone et catégorie d'aliments, et suivez leurs dates de péremption.
+              Classez vos aliments par zone et par menu déroulant, et suivez leurs dates de péremption.
             </p>
           </div>
 
@@ -1365,6 +1510,7 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments }
             </div>
           </form>
 
+          {/* Filtres par zone uniquement */}
           <div className="space-y-2">
             <div className="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-xl">
               <button 
@@ -1387,112 +1533,112 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments }
                 </button>
               ))}
             </div>
-
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-              <span className="font-semibold text-slate-500 whitespace-nowrap">Catégories :</span>
-              <button 
-                onClick={() => setFilterCategory('Tous')}
-                className={`px-3 py-1 rounded-lg font-medium whitespace-nowrap transition-colors
-                  ${filterCategory === 'Tous' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}
-                `}
-              >
-                Toutes
-              </button>
-              {INVENTORY_CATEGORIES.map(cat => (
-                <button 
-                  key={cat}
-                  onClick={() => setFilterCategory(cat)}
-                  className={`px-3 py-1 rounded-lg font-medium whitespace-nowrap transition-colors
-                    ${filterCategory === cat ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}
-                  `}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
           </div>
 
-          <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
-            {filteredInventory.map((item, index) => {
-              const originalIndex = inventory.findIndex(i => i === item);
-              const expiryBadge = checkExpiryStatus(item.expiryDate);
+          <div className="space-y-3">
+            {INVENTORY_CATEGORIES.map(categoryName => {
+              const categoryItems = filteredInventory.filter(item => (item.category || 'Autres') === categoryName);
+              if (categoryItems.length === 0 && filterZone !== 'Tous') return null;
+
+              const isOpen = !!openDropdowns[categoryName];
 
               return (
-                <div key={originalIndex} className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-white hover:bg-slate-50 transition-colors gap-3">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-slate-800 text-sm">{item.name}</span>
-                      <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium border border-slate-200">
-                        {item.category || 'Autres'}
-                      </span>
+                <div key={categoryName} className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                  <button
+                    onClick={() => toggleDropdown(categoryName)}
+                    className="w-full flex items-center justify-between p-3.5 bg-slate-50 hover:bg-slate-100 transition-colors text-left"
+                  >
+                    <span className="font-bold text-slate-800 text-sm flex items-center gap-2">
+                      {isOpen ? <ChevronDown className="w-4 h-4 text-indigo-600" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
+                      {categoryName}
+                      <span className="text-xs font-normal text-slate-500">({categoryItems.length})</span>
+                    </span>
+                  </button>
+
+                  {isOpen && (
+                    <div className="divide-y divide-slate-100 border-t border-slate-200">
+                      {categoryItems.map((item, index) => {
+                        const originalIndex = inventory.findIndex(i => i === item);
+                        const expiryBadge = checkExpiryStatus(item.expiryDate);
+
+                        return (
+                          <div key={originalIndex} className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-white hover:bg-slate-50 transition-colors gap-3">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-slate-800 text-sm">{item.name}</span>
+                              </div>
+                              {expiryBadge && (
+                                <span className={`text-[10px] px-2 py-0.5 rounded font-bold border inline-block ${expiryBadge.color}`}>
+                                  {expiryBadge.label}
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-2 flex-wrap justify-end">
+                              <input 
+                                type="date"
+                                value={item.expiryDate || ''}
+                                onChange={(e) => updateExpiry(originalIndex, e.target.value)}
+                                className="text-[11px] rounded-md px-2 py-1 border bg-slate-50 text-slate-600 border-slate-200"
+                                title="Date de péremption"
+                              />
+
+                              <select 
+                                value={item.zone || 'Placard'} 
+                                onChange={(e) => updateZone(originalIndex, e.target.value)}
+                                className="text-xs font-semibold rounded-md px-2 py-1 border bg-slate-50 text-slate-700 border-slate-200"
+                              >
+                                {STORAGE_ZONES.map(z => <option key={z} value={z}>{z}</option>)}
+                              </select>
+
+                              <select 
+                                value={item.category || INVENTORY_CATEGORIES[0]} 
+                                onChange={(e) => updateCategory(originalIndex, e.target.value)}
+                                className="text-xs font-semibold rounded-md px-2 py-1 border bg-slate-50 text-slate-700 border-slate-200"
+                              >
+                                {INVENTORY_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                              </select>
+
+                              <select 
+                                value={item.status} 
+                                onChange={(e) => updateStatus(originalIndex, e.target.value)}
+                                className={`text-xs font-semibold rounded-md px-2 py-1 border
+                                  ${item.status === 'Plein' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : ''}
+                                  ${item.status === 'Entamé' ? 'bg-amber-50 text-amber-700 border-amber-200' : ''}
+                                  ${item.status === 'Presque vide' ? 'bg-red-50 text-red-700 border-red-200' : ''}
+                                `}
+                              >
+                                <option value="Plein">Plein</option>
+                                <option value="Entamé">Entamé</option>
+                                <option value="Presque vide">Presque vide</option>
+                              </select>
+
+                              <button 
+                                onClick={() => {
+                                  if (window.confirm("Supprimer cet élément ?")) {
+                                    removeItem(originalIndex);
+                                  }
+                                }}
+                                className="text-slate-400 hover:text-red-600 p-1"
+                                title="Supprimer"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {categoryItems.length === 0 && (
+                        <div className="p-4 text-center text-slate-400 text-xs">Aucun élément dans cette catégorie.</div>
+                      )}
                     </div>
-                    {expiryBadge && (
-                      <span className={`text-[10px] px-2 py-0.5 rounded font-bold border inline-block ${expiryBadge.color}`}>
-                        {expiryBadge.label}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-2 flex-wrap justify-end">
-                    <input 
-                      type="date"
-                      value={item.expiryDate || ''}
-                      onChange={(e) => updateExpiry(originalIndex, e.target.value)}
-                      className="text-[11px] rounded-md px-2 py-1 border bg-slate-50 text-slate-600 border-slate-200"
-                      title="Date de péremption"
-                    />
-
-                    <select 
-                      value={item.zone || 'Placard'} 
-                      onChange={(e) => updateZone(originalIndex, e.target.value)}
-                      className="text-xs font-semibold rounded-md px-2 py-1 border bg-slate-50 text-slate-700 border-slate-200"
-                    >
-                      {STORAGE_ZONES.map(z => <option key={z} value={z}>{z}</option>)}
-                    </select>
-
-                    <select 
-                      value={item.category || INVENTORY_CATEGORIES[0]} 
-                      onChange={(e) => updateCategory(originalIndex, e.target.value)}
-                      className="text-xs font-semibold rounded-md px-2 py-1 border bg-slate-50 text-slate-700 border-slate-200"
-                    >
-                      {INVENTORY_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                    </select>
-
-                    <select 
-                      value={item.status} 
-                      onChange={(e) => updateStatus(originalIndex, e.target.value)}
-                      className={`text-xs font-semibold rounded-md px-2 py-1 border
-                        ${item.status === 'Plein' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : ''}
-                        ${item.status === 'Entamé' ? 'bg-amber-50 text-amber-700 border-amber-200' : ''}
-                        ${item.status === 'Presque vide' ? 'bg-red-50 text-red-700 border-red-200' : ''}
-                      `}
-                    >
-                      <option value="Plein">Plein</option>
-                      <option value="Entamé">Entamé</option>
-                      <option value="Presque vide">Presque vide</option>
-                    </select>
-
-                    <button 
-                      onClick={() => {
-                        if (window.confirm("Supprimer cet élément ?")) {
-                          removeItem(originalIndex);
-                        }
-                      }}
-                      className="text-slate-400 hover:text-red-600 p-1"
-                      title="Supprimer"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+                  )}
                 </div>
               );
             })}
-            {filteredInventory.length === 0 && (
-              <div className="p-8 text-center text-slate-400 text-sm">Aucun élément dans cette sélection.</div>
-            )}
           </div>
         </div>
-      ) : (
+      ) : subTab === 'equipments' ? (
         <div className="space-y-6">
           <div>
             <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2 mb-1">
@@ -1535,6 +1681,49 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments }
             ))}
           </div>
         </div>
+      ) : (
+        <div className="space-y-6">
+          <div>
+            <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2 mb-1">
+              <Tag className="w-5 h-5 text-indigo-600" /> Gestion des Féculents / Catégories
+            </h2>
+            <p className="text-xs text-slate-500">
+              Ajoutez ou supprimez les catégories de féculents disponibles pour vos recettes.
+            </p>
+          </div>
+
+          <form onSubmit={addCarb} className="flex gap-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <input 
+              type="text" 
+              placeholder="Nouvelle catégorie (ex: Polenta, Quinoa)..." 
+              value={newCarbName}
+              onChange={(e) => setNewCarbName(e.target.value)}
+              className="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm"
+            />
+            <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+              Ajouter
+            </button>
+          </form>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {carbsList.map(c => (
+              <div key={c} className="bg-white border border-slate-200 text-slate-800 text-xs p-3 rounded-xl flex items-center justify-between shadow-sm font-medium">
+                <span className="flex items-center gap-2">
+                  <Tag className="w-4 h-4 text-indigo-600" />
+                  {c}
+                </span>
+                <button 
+                  type="button" 
+                  onClick={() => removeCarb(c)}
+                  className="text-slate-400 hover:text-red-600 p-1 transition-colors"
+                  title="Supprimer"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );
@@ -1542,7 +1731,7 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments }
 
 function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingChecks, setShoppingChecks, setActiveTab }) {
   const [copied, setCopied] = useState(false);
-  const [shoppingCategoryFilter, setShoppingCategoryFilter] = useState('Tous');
+  const [openShoppingDropdowns, setOpenShoppingDropdowns] = useState({});
 
   const activeRecipeIds = [
     ...Object.values(menu).filter(val => val && val !== 'restes'),
@@ -1571,11 +1760,12 @@ function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingCheck
     return { status: `Presque vide (${found.zone})`, color: 'text-red-700 bg-red-50 border-red-200', category: found.category || 'Autres' };
   };
 
-  const filteredShoppingList = rawList.filter(ing => {
-    if (shoppingCategoryFilter === 'Tous') return true;
-    const stockInfo = getStockStatus(ing);
-    return stockInfo.category === shoppingCategoryFilter;
-  });
+  const toggleShoppingDropdown = (categoryName) => {
+    setOpenShoppingDropdowns(prev => ({
+      ...prev,
+      [categoryName]: !prev[categoryName]
+    }));
+  };
 
   const toggleCheck = (ing) => {
     setShoppingChecks({ ...shoppingChecks, [ing]: !shoppingChecks[ing] });
@@ -1593,9 +1783,9 @@ function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingCheck
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
           <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2">
-            <ShoppingBag className="w-5 h-5 text-indigo-600" /> Liste de Courses par Catégories
+            <ShoppingBag className="w-5 h-5 text-indigo-600" /> Liste de Courses par Rayons Déroulants
           </h2>
-          <p className="text-xs text-slate-500">Basée sur les menus, gâteaux et classée par rayons selon vos provisions.</p>
+          <p className="text-xs text-slate-500">Basée sur les menus, gâteaux et classée par rayons sous forme de menus déroulants.</p>
         </div>
         {rawList.length > 0 && (
           <button 
@@ -1608,31 +1798,6 @@ function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingCheck
         )}
       </div>
 
-      {rawList.length > 0 && (
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
-          <span className="font-semibold text-slate-500 whitespace-nowrap">Rayon :</span>
-          <button 
-            onClick={() => setShoppingCategoryFilter('Tous')}
-            className={`px-3 py-1 rounded-lg font-medium whitespace-nowrap transition-colors
-              ${shoppingCategoryFilter === 'Tous' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}
-            `}
-          >
-            Tous ({rawList.length})
-          </button>
-          {INVENTORY_CATEGORIES.map(cat => (
-            <button 
-              key={cat}
-              onClick={() => setShoppingCategoryFilter(cat)}
-              className={`px-3 py-1 rounded-lg font-medium whitespace-nowrap transition-colors
-                ${shoppingCategoryFilter === cat ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}
-              `}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-      )}
-
       {rawList.length === 0 ? (
         <div className="text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-300">
           <p className="text-slate-500 text-sm mb-2">Aucun menu ou gâteau planifié pour l'instant.</p>
@@ -1644,40 +1809,66 @@ function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingCheck
           </button>
         </div>
       ) : (
-        <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
-          {filteredShoppingList.map((ing, idx) => {
-            const stock = getStockStatus(ing);
-            const isChecked = !!shoppingChecks[ing];
+        <div className="space-y-3">
+          {INVENTORY_CATEGORIES.map(categoryName => {
+            const categoryIngredients = rawList.filter(ing => {
+              const stock = getStockStatus(ing);
+              return stock.category === categoryName;
+            });
+
+            if (categoryIngredients.length === 0) return null;
+
+            const isOpen = !!openShoppingDropdowns[categoryName];
 
             return (
-              <div 
-                key={idx} 
-                onClick={() => toggleCheck(ing)}
-                className={`flex items-center justify-between p-3.5 cursor-pointer transition-colors
-                  ${isChecked ? 'bg-slate-50 opacity-60 line-through' : 'bg-white hover:bg-slate-50'}
-                `}
-              >
-                <div className="flex items-center gap-3">
-                  <input 
-                    type="checkbox" 
-                    checked={isChecked} 
-                    onChange={() => {}} 
-                    className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500"
-                  />
-                  <div>
-                    <span className="font-medium text-slate-800 text-sm capitalize block">{ing}</span>
-                    <span className="text-[10px] text-slate-400 font-medium">{stock.category}</span>
+              <div key={categoryName} className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                <button
+                  onClick={() => toggleShoppingDropdown(categoryName)}
+                  className="w-full flex items-center justify-between p-3.5 bg-slate-50 hover:bg-slate-100 transition-colors text-left"
+                >
+                  <span className="font-bold text-slate-800 text-sm flex items-center gap-2">
+                    {isOpen ? <ChevronDown className="w-4 h-4 text-indigo-600" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
+                    {categoryName}
+                    <span className="text-xs font-normal text-slate-500">({categoryIngredients.length})</span>
+                  </span>
+                </button>
+
+                {isOpen && (
+                  <div className="divide-y divide-slate-100 border-t border-slate-200">
+                    {categoryIngredients.map((ing, idx) => {
+                      const stock = getStockStatus(ing);
+                      const isChecked = !!shoppingChecks[ing];
+
+                      return (
+                        <div 
+                          key={idx} 
+                          onClick={() => toggleCheck(ing)}
+                          className={`flex items-center justify-between p-3.5 cursor-pointer transition-colors
+                            ${isChecked ? 'bg-slate-50 opacity-60 line-through' : 'bg-white hover:bg-slate-50'}
+                          `}
+                        >
+                          <div className="flex items-center gap-3">
+                            <input 
+                              type="checkbox" 
+                              checked={isChecked} 
+                              onChange={() => {}} 
+                              className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500"
+                            />
+                            <div>
+                              <span className="font-medium text-slate-800 text-sm capitalize block">{ing}</span>
+                            </div>
+                          </div>
+                          <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-md border ${stock.color}`}>
+                            {stock.status}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
-                </div>
-                <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-md border ${stock.color}`}>
-                  {stock.status}
-                </span>
+                )}
               </div>
             );
           })}
-          {filteredShoppingList.length === 0 && (
-            <div className="p-8 text-center text-slate-400 text-sm">Aucun ingrédient pour cette catégorie dans la liste de courses.</div>
-          )}
         </div>
       )}
     </div>
@@ -1698,7 +1889,7 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="text-xs font-semibold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md border border-indigo-100">
-              {recipe.category === 'gateau' ? '🍰 Gâteau' : '🍽️ Plat'}
+              {recipe.category === 'gateau' ? '🍰 Gâteau' : recipe.carb}
             </span>
             <span className="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md font-medium">
               {recipe.equipment}{recipe.additionalEquipment ? ` + ${recipe.additionalEquipment}` : ''}
@@ -1771,3 +1962,4 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
     </div>
   );
 }
+```[cite: 4]
