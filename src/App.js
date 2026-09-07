@@ -101,14 +101,27 @@ export default function App() {
         data: { recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks }
       };
 
-      await supabase
+      const { data: existing } = await supabase
         .from('stockage_donnees')
-        .upsert(payload, { onConflict: 'user_key' });
+        .select('id')
+        .eq('user_key', 'ma_famille')
+        .maybeSingle();
+
+      if (existing) {
+        await supabase
+          .from('stockage_donnees')
+          .update(payload)
+          .eq('user_key', 'ma_famille');
+      } else {
+        await supabase
+          .from('stockage_donnees')
+          .insert([payload]);
+      }
     }
 
     const timer = setTimeout(saveData, 1000);
     return () => clearTimeout(timer);
-  }, [recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks, loading]);
+  }, [recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks]);
 
   const addRecipe = (newRecipe) => {
     setRecipes(prev => {
