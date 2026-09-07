@@ -47,14 +47,14 @@ export default function App() {
     mondayLunch: 'restes', tuesdayLunch: 'restes', wednesdayLunch: '', thursdayLunch: 'restes', fridayLunch: 'restes', saturdayLunch: '', sundayLunch: ''
   });
   const [inventory, setInventory] = useState([
-    { name: 'Sel', status: 'Plein', zone: 'Placard' },
-    { name: 'Poivre', status: 'Plein', zone: 'Placard' },
-    { name: "Huile d'olive", status: 'Plein', zone: 'Placard' },
-    { name: 'Beurre', status: 'Entamé', zone: 'Frigo' },
-    { name: 'Pâtes', status: 'Entamé', zone: 'Placard' },
-    { name: 'Riz', status: 'Presque vide', zone: 'Placard' },
-    { name: 'Oignons', status: 'Plein', zone: 'Placard' },
-    { name: 'Ail', status: 'Plein', zone: 'Placard' }
+    { name: 'Sel', status: 'Plein', zone: 'Placard', expiryDate: '' },
+    { name: 'Poivre', status: 'Plein', zone: 'Placard', expiryDate: '' },
+    { name: "Huile d'olive", status: 'Plein', zone: 'Placard', expiryDate: '' },
+    { name: 'Beurre', status: 'Entamé', zone: 'Frigo', expiryDate: '' },
+    { name: 'Pâtes', status: 'Entamé', zone: 'Placard', expiryDate: '' },
+    { name: 'Riz', status: 'Presque vide', zone: 'Placard', expiryDate: '' },
+    { name: 'Oignons', status: 'Plein', zone: 'Placard', expiryDate: '' },
+    { name: 'Ail', status: 'Plein', zone: 'Placard', expiryDate: '' }
   ]);
   const [bakingItems, setBakingItems] = useState(['', '']);
   const [shoppingChecks, setShoppingChecks] = useState({});
@@ -77,7 +77,8 @@ export default function App() {
         if (saved.inventory) {
           const migrated = saved.inventory.map(item => ({
             ...item,
-            zone: item.zone || 'Placard'
+            zone: item.zone || 'Placard',
+            expiryDate: item.expiryDate || ''
           }));
           setInventory(migrated);
         }
@@ -190,6 +191,7 @@ export default function App() {
             equipments={equipments}
             setEquipments={setEquipments}
             carbsList={carbsList}
+            inventory={inventory}
             subTab={menuSubTab}
             setSubTab={setMenuSubTab}
           />
@@ -276,7 +278,7 @@ function NavButton({ active, onClick, icon, label }) {
   );
 }
 
-function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, deleteRecipe, setEditingRecipe, setActiveTab, setViewingRecipe, currentSeason, equipments, setEquipments, carbsList, subTab, setSubTab }) {
+function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, deleteRecipe, setEditingRecipe, setActiveTab, setViewingRecipe, currentSeason, equipments, setEquipments, carbsList, inventory, subTab, setSubTab }) {
   return (
     <div className="space-y-6">
       <div className="flex bg-slate-200/70 p-1 rounded-xl max-w-md mx-auto">
@@ -309,6 +311,7 @@ function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, delete
           setViewingRecipe={setViewingRecipe} 
           currentSeason={currentSeason} 
           equipments={equipments}
+          inventory={inventory}
         />
       ) : (
         <RecipeList 
@@ -328,7 +331,7 @@ function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, delete
   );
 }
 
-function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, equipments }) {
+function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, setEditingRecipe, setActiveTab, currentSeason, equipments, inventory }) {
   const daysConfig = [
     { key: 'monday', label: 'Lundi', reqCarb: 'Blé' },
     { key: 'tuesday', label: 'Mardi', reqCarb: 'Semoule' },
@@ -365,6 +368,13 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
     let newMenu = { ...menu };
     let tempEquipCounts = {};
     
+    // Trier l'inventaire par date de péremption la plus proche pour influencer la sélection intelligente
+    const sortedPantry = [...inventory]
+      .filter(item => item.expiryDate)
+      .sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
+
+    const urgentIngredients = sortedPantry.map(i => i.name.toLowerCase());
+
     const eveningDays = [
       { key: 'mondayDinner', reqCarb: 'Blé' },
       { key: 'tuesdayDinner', reqCarb: 'Semoule' },
@@ -383,15 +393,23 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
       }
       if (possibleRecipes.length === 0) return;
 
+      // Trier les recettes en donnant la priorité à celles qui utilisent des ingrédients urgents du placard
       possibleRecipes.sort((a, b) => {
+        const scoreA = a.ingredients?.some(ing => urgentIngredients.some(urg => ing.toLowerCase().includes(urg))) ? 0 : 1;
+        const scoreB = b.ingredients?.some(ing => urgentIngredients.some(urg => ing.toLowerCase().includes(urg))) ? 0 : 1;
+        if (scoreA !== scoreB) return scoreA - scoreB;
+
         const countA = (tempEquipCounts[a.equipment] || 0) + (tempEquipCounts[a.additionalEquipment] || 0);
         const countB = (tempEquipCounts[b.equipment] || 0) + (tempEquipCounts[b.additionalEquipment] || 0);
         return countA - countB;
       });
 
-      const getRecipeCount = (r) => (tempEquipCounts[r.equipment] || 0) + (r.additionalEquipment ? (tempEquipCounts[r.additionalEquipment] || 0) : 0);
-      const minUsage = getRecipeCount(possibleRecipes[0]);
-      const bestCandidates = possibleRecipes.filter(r => getRecipeCount(r) === minUsage);
+      const bestCandidates = possibleRecipes.filter(r => {
+        const countR = (tempEquipCounts[r.equipment] || 0) + (r.additionalEquipment ? (tempEquipCounts[r.additionalEquipment] || 0) : 0);
+        const countFirst = (tempEquipCounts[possibleRecipes[0].equipment] || 0) + (possibleRecipes[0].additionalEquipment ? (tempEquipCounts[possibleRecipes[0].additionalEquipment] || 0) : 0);
+        return countR === countFirst;
+      });
+
       const picked = bestCandidates[Math.floor(Math.random() * bestCandidates.length)];
       
       newMenu[day.key] = picked.id;
@@ -415,10 +433,10 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
           <div>
             <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-indigo-600" />
-              Générateur Intelligent
+              Générateur Intelligent (avec anti-gaspillage)
             </h2>
             <p className="text-xs text-slate-500">
-              Suggestions automatiques basées sur la saison actuelle ({currentSeason}).
+              Suggestions basées sur la saison ({currentSeason}) et les dates de péremption du placard.
             </p>
           </div>
           <button 
@@ -1277,6 +1295,7 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
   const [newItemName, setNewItemName] = useState('');
   const [newItemStatus, setNewItemStatus] = useState('Plein');
   const [newItemZone, setNewItemZone] = useState('Placard');
+  const [newItemExpiry, setNewItemExpiry] = useState('');
   const [filterZone, setFilterZone] = useState('Tous');
   const [newEquipName, setNewEquipName] = useState('');
   const [newCarbName, setNewCarbName] = useState('');
@@ -1284,8 +1303,9 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
   const addItem = (e) => {
     e.preventDefault();
     if (!newItemName.trim()) return;
-    setInventory([...inventory, { name: newItemName.trim(), status: newItemStatus, zone: newItemZone }]);
+    setInventory([...inventory, { name: newItemName.trim(), status: newItemStatus, zone: newItemZone, expiryDate: newItemExpiry }]);
     setNewItemName('');
+    setNewItemExpiry('');
   };
 
   const updateStatus = (index, status) => {
@@ -1297,6 +1317,12 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
   const updateZone = (index, zone) => {
     const updated = [...inventory];
     updated[index].zone = zone;
+    setInventory(updated);
+  };
+
+  const updateExpiry = (index, dateVal) => {
+    const updated = [...inventory];
+    updated[index].expiryDate = dateVal;
     setInventory(updated);
   };
 
@@ -1353,6 +1379,18 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
     return item.zone === filterZone;
   });
 
+  const getExpiryBadgeStyle = (dateStr) => {
+    if (!dateStr) return 'bg-slate-100 text-slate-500 border-slate-200';
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const exp = new Date(dateStr);
+    const diffDays = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) return 'bg-red-100 text-red-800 border-red-300 font-bold'; // Périmé
+    if (diffDays <= 3) return 'bg-orange-100 text-orange-800 border-orange-300 font-bold'; // Urinste (< 3j)
+    return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 max-w-2xl mx-auto space-y-6">
       <div className="flex bg-slate-200/70 p-1 rounded-xl">
@@ -1389,19 +1427,19 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
               <Package className="w-5 h-5 text-indigo-600" /> Gestion des Provisions
             </h2>
             <p className="text-xs text-slate-500">
-              Rangez vos provisions par zone (Placard, Frigo, Congélateur) pour suivre vos stocks.
+              Suivez vos stocks, zones et dates de péremption pour aider le générateur de menus.
             </p>
           </div>
 
           <form onSubmit={addItem} className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
             <h3 className="text-xs font-bold text-slate-700 uppercase">Ajouter un article</h3>
-            <div className="flex flex-col sm:flex-row gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <input 
                 type="text" 
                 placeholder="Nom (ex: Lait, Farine, Steaks...)" 
                 value={newItemName}
                 onChange={(e) => setNewItemName(e.target.value)}
-                className="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm"
+                className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm"
               />
               <select 
                 value={newItemZone}
@@ -1410,6 +1448,8 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
               >
                 {STORAGE_ZONES.map(z => <option key={z} value={z}>{z}</option>)}
               </select>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 items-center">
               <select 
                 value={newItemStatus}
                 onChange={(e) => setNewItemStatus(e.target.value)}
@@ -1419,6 +1459,15 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
                 <option value="Entamé">Entamé</option>
                 <option value="Presque vide">Presque vide</option>
               </select>
+              <div className="flex items-center gap-1">
+                <span className="text-[11px] text-slate-500 font-medium">Péremption :</span>
+                <input 
+                  type="date"
+                  value={newItemExpiry}
+                  onChange={(e) => setNewItemExpiry(e.target.value)}
+                  className="bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-xs text-slate-700 flex-1"
+                />
+              </div>
               <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
                 Ajouter
               </button>
@@ -1453,7 +1502,9 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
 
               return (
                 <div key={originalIndex} className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-white hover:bg-slate-50 transition-colors gap-2">
-                  <span className="font-medium text-slate-800 text-sm">{item.name}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-slate-800 text-sm">{item.name}</span>
+                  </div>
                   <div className="flex items-center gap-2 flex-wrap justify-end">
                     <select 
                       value={item.zone || 'Placard'} 
@@ -1462,6 +1513,14 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
                     >
                       {STORAGE_ZONES.map(z => <option key={z} value={z}>{z}</option>)}
                     </select>
+
+                    <input 
+                      type="date"
+                      value={item.expiryDate || ''}
+                      onChange={(e) => updateExpiry(originalIndex, e.target.value)}
+                      className={`text-xs rounded-md px-2 py-1 border ${getExpiryBadgeStyle(item.expiryDate)}`}
+                      title="Date de péremption"
+                    />
 
                     <select 
                       value={item.status} 
@@ -1614,7 +1673,7 @@ function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingCheck
     const found = inventory.find(i => ingName.toLowerCase().includes(i.name.toLowerCase()));
     if (!found) return { status: 'A acheter', color: 'text-indigo-600 bg-indigo-50 border-indigo-200' };
     if (found.status === 'Plein') return { status: `En stock (${found.zone} - Plein)`, color: 'text-emerald-700 bg-emerald-50 border-emerald-200' };
-    if (found.status === 'Entamé') return { status: `En stock (${found.zone} - Entamé)`, color: 'text-amber-700 bg-amber-700 border-amber-200' };
+    if (found.status === 'Entamé') return { status: `En stock (${found.zone} - Entamé)`, color: 'text-amber-700 bg-amber-50 border-amber-200' };
     return { status: `Presque vide (${found.zone})`, color: 'text-red-700 bg-red-50 border-red-200' };
   };
 
