@@ -56,7 +56,7 @@ export default function App() {
     { name: 'Oignons', status: 'Plein', zone: 'Placard' },
     { name: 'Ail', status: 'Plein', zone: 'Placard' }
   ]);
-  const [bakingItems, setBakingItems] = useState(['', '']);
+  const [bakingItems, setBakingItems] = useState(['', '', '']);
   const [shoppingChecks, setShoppingChecks] = useState({});
 
   useEffect(() => {
@@ -737,8 +737,9 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
     const shuffled = [...bakingRecipes].sort(() => 0.5 - Math.random());
     const first = shuffled[0] ? shuffled[0].id : '';
     const second = shuffled[1] ? shuffled[1].id : first;
+    const third = shuffled[2] ? shuffled[2].id : second;
     
-    setBakingItems([first, second]);
+    setBakingItems([first, second, third]);
   };
 
   return (
@@ -750,7 +751,7 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
             ${subTab === 'planning' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
           `}
         >
-          <Calendar className="w-4 h-4" /> Choix de la semaine ({bakingItems.filter(Boolean).length}/2)
+          <Calendar className="w-4 h-4" /> Choix de la semaine ({bakingItems.filter(Boolean).length}/3)
         </button>
         <button 
           onClick={() => setSubTab('list')}
