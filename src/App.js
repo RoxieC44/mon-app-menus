@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+name=App_5.js
+```[source: 5]import React, { useState, useEffect } from 'react';
 import { Plus, List, Calendar, Trash2, Utensils, Info, Tag, Sun, Settings, Link as LinkIcon, Pencil, Camera, RefreshCw, AlertTriangle, Eye, X, Image as ImageIcon, ShoppingBag, Package, Check, Copy, Sparkles, Filter, Cake, Clock } from 'lucide-react';
 import { supabase } from './supabaseClient';
 
@@ -8,7 +9,7 @@ const INITIAL_EQUIPMENTS = ['Thermomix', 'Cookeo', 'Ninja Double Stack', 'Poêle
 const INITIAL_CARBS = ['Pâtes', 'Pommes de terre', 'Semoule', 'Riz', 'Blé', 'Plaisir'];
 const SEASONS_LIST = ['Printemps', 'Été', 'Automne', 'Hiver'];
 const STORAGE_ZONES = ['Placard', 'Frigo', 'Congélateur'];
-const INVENTORY_CATEGORIES = ['Légumes & Fruits', 'Féculents & Céréales', 'Epicerie & Condiments', 'Produits laitiers & Frais', 'Viandes & Poissons', 'Surgelés', 'Autres'];
+const INITIAL_INVENTORY_CATEGORIES = ['Viandes & Poissons', 'Fromages & Produits laitiers', 'Féculents & Céréales', 'Légumes & Fruits', 'Épicerie & Condiments', 'Surgelés', 'Boissons', 'Autres'];
 
 const getCurrentSeason = () => {
   const now = new Date();
@@ -43,15 +44,16 @@ export default function App() {
   const [recipes, setRecipes] = useState(DEFAULT_RECIPES);
   const [equipments, setEquipments] = useState(INITIAL_EQUIPMENTS);
   const [carbsList, setCarbsList] = useState(INITIAL_CARBS);
+  const [inventoryCategories, setInventoryCategories] = useState(INITIAL_INVENTORY_CATEGORIES);
   const [menu, setMenu] = useState({
     mondayDinner: '', tuesdayDinner: '', wednesdayDinner: '', thursdayDinner: '', fridayDinner: '', saturdayDinner: '', sundayDinner: '',
     mondayLunch: 'restes', tuesdayLunch: 'restes', wednesdayLunch: '', thursdayLunch: 'restes', fridayLunch: 'restes', saturdayLunch: '', sundayLunch: ''
   });
   const [inventory, setInventory] = useState([
-    { name: 'Sel', status: 'Plein', zone: 'Placard', category: 'Epicerie & Condiments', expiryDate: '' },
-    { name: 'Poivre', status: 'Plein', zone: 'Placard', category: 'Epicerie & Condiments', expiryDate: '' },
-    { name: "Huile d'olive", status: 'Plein', zone: 'Placard', category: 'Epicerie & Condiments', expiryDate: '' },
-    { name: 'Beurre', status: 'Entamé', zone: 'Frigo', category: 'Produits laitiers & Frais', expiryDate: '' },
+    { name: 'Sel', status: 'Plein', zone: 'Placard', category: 'Épicerie & Condiments', expiryDate: '' },
+    { name: 'Poivre', status: 'Plein', zone: 'Placard', category: 'Épicerie & Condiments', expiryDate: '' },
+    { name: "Huile d'olive", status: 'Plein', zone: 'Placard', category: 'Épicerie & Condiments', expiryDate: '' },
+    { name: 'Beurre', status: 'Entamé', zone: 'Frigo', category: 'Fromages & Produits laitiers', expiryDate: '' },
     { name: 'Pâtes', status: 'Entamé', zone: 'Placard', category: 'Féculents & Céréales', expiryDate: '' },
     { name: 'Riz', status: 'Presque vide', zone: 'Placard', category: 'Féculents & Céréales', expiryDate: '' },
     { name: 'Oignons', status: 'Plein', zone: 'Placard', category: 'Légumes & Fruits', expiryDate: '' },
@@ -74,6 +76,7 @@ export default function App() {
         if (saved.recipes) setRecipes(saved.recipes);
         if (saved.equipments && Array.isArray(saved.equipments)) setEquipments(saved.equipments);
         if (saved.carbsList && Array.isArray(saved.carbsList)) setCarbsList(saved.carbsList);
+        if (saved.inventoryCategories && Array.isArray(saved.inventoryCategories)) setInventoryCategories(saved.inventoryCategories);
         if (saved.menu) setMenu(saved.menu);
         if (saved.inventory) {
           const migrated = saved.inventory.map(item => ({
@@ -98,7 +101,7 @@ export default function App() {
     async function saveData() {
       const payload = {
         user_key: 'ma_famille',
-        data: { recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks }
+        data: { recipes, equipments, carbsList, inventoryCategories, menu, inventory, bakingItems, shoppingChecks }
       };
 
       const { data: existing } = await supabase
@@ -121,7 +124,7 @@ export default function App() {
 
     const timer = setTimeout(saveData, 1000);
     return () => clearTimeout(timer);
-  }, [recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks]);
+  }, [recipes, equipments, carbsList, inventoryCategories, menu, inventory, bakingItems, shoppingChecks]);
 
   const addRecipe = (newRecipe) => {
     setRecipes(prev => {
@@ -161,17 +164,17 @@ export default function App() {
       <header className="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-10">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <h1 className="text-xl font-bold flex items-center gap-2">
-            <Utensils className="w-6 h-6" />
+            <Utensils className="w-6 h-6"/>
             Mon Menu Organisé
           </h1>
           
           <div className="flex items-center gap-2">
             <div className="text-xs bg-amber-400 text-slate-900 font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
-              <Sun className="w-3.5 h-3.5" />
+              <Sun className="w-3.5 h-3.5"/>
               Saison actuelle : {currentSeason}
             </div>
             <div className="text-xs bg-indigo-700 py-1.5 px-3 rounded-full opacity-90 hidden md:flex items-center gap-1">
-               <Info className="w-3.5 h-3.5" /> {recipes.length} recettes
+               <Info className="w-3.5 h-3.5"/> {recipes.length} recettes
             </div>
           </div>
         </div>
@@ -179,51 +182,18 @@ export default function App() {
 
       <main className="max-w-4xl mx-auto p-4 mt-2">
         {activeTab === 'menu' && (
-          <MenuContainer 
-            menu={menu} 
-            updateMenu={updateMenu} 
-            recipes={recipes}
-            mealRecipes={mealRecipes}
-            setMenu={setMenu} 
-            deleteRecipe={deleteRecipe}
-            setViewingRecipe={setViewingRecipe} 
-            setEditingRecipe={setEditingRecipe}
-            setActiveTab={setActiveTab}
-            currentSeason={currentSeason} 
-            equipments={equipments}
-            setEquipments={setEquipments}
-            carbsList={carbsList}
-            subTab={menuSubTab}
-            setSubTab={setMenuSubTab}
-            inventory={inventory}
-          />
+          <MenuContainer carbsList="{carbsList}" currentSeason="{currentSeason}" deleteRecipe="{deleteRecipe}" equipments="{equipments}" inventory="{inventory}" mealRecipes="{mealRecipes}" menu="{menu}" recipes="{recipes}" setActiveTab="{setActiveTab}" setEditingRecipe="{setEditingRecipe}" setEquipments="{setEquipments}" setMenu="{setMenu}" setSubTab="{setMenuSubTab}" setViewingRecipe="{setViewingRecipe}" subTab="{menuSubTab}" updateMenu="{updateMenu}"/>
         )}
         {activeTab === 'baking' && (
-          <BakingPlanner 
-            menu={menu} 
-            bakingItems={bakingItems} 
-            setBakingItems={setBakingItems} 
-            bakingRecipes={bakingRecipes} 
-            recipes={recipes}
-            deleteRecipe={deleteRecipe}
-            setViewingRecipe={setViewingRecipe} 
-            setEditingRecipe={setEditingRecipe}
-            setActiveTab={setActiveTab}
-            currentSeason={currentSeason}
-            equipments={equipments}
-            setEquipments={setEquipments}
-            carbsList={carbsList}
-            subTab={bakingSubTab}
-            setSubTab={setBakingSubTab}
-          />
+          <BakingPlanner bakingItems="{bakingItems}" bakingRecipes="{bakingRecipes}" carbsList="{carbsList}" currentSeason="{currentSeason}" deleteRecipe="{deleteRecipe}" equipments="{equipments}" menu="{menu}" recipes="{recipes}" setActiveTab="{setActiveTab}" setBakingItems="{setBakingItems}" setEditingRecipe="{setEditingRecipe}" setEquipments="{setEquipments}" setSubTab="{setBakingSubTab}" setViewingRecipe="{setViewingRecipe}" subTab="{bakingSubTab}"/>
         )}
-        {activeTab === 'add' && <AddRecipeForm addRecipe={addRecipe} editingRecipe={editingRecipe} setEditingRecipe={setEditingRecipe} setActiveTab={setActiveTab} setSelectedImage={setSelectedImage} equipments={equipments} setEquipments={setEquipments} carbsList={carbsList} setCarbsList={setCarbsList} />}
-        {activeTab === 'inventory' && <InventoryManager inventory={inventory} setInventory={setInventory} equipments={equipments} setEquipments={setEquipments} carbsList={carbsList} setCarbsList={setCarbsList} />}
-        {activeTab === 'shopping' && <ShoppingListView menu={menu} recipes={recipes} inventory={inventory} bakingItems={bakingItems} shoppingChecks={shoppingChecks} setShoppingChecks={setShoppingChecks} setActiveTab={setActiveTab} />}
+        {activeTab === 'add' && <AddRecipeForm addRecipe="{addRecipe}" carbsList="{carbsList}" editingRecipe="{editingRecipe}" equipments="{equipments}" setActiveTab="{setActiveTab}" setCarbsList="{setCarbsList}" setEditingRecipe="{setEditingRecipe}" setEquipments="{setEquipments}" setSelectedImage="{setSelectedImage}"/>}
+        {activeTab === 'inventory' && <InventoryManager carbsList="{carbsList}" equipments="{equipments}" inventory="{inventory}" inventoryCategories="{inventoryCategories}" setCarbsList="{setCarbsList}" setEquipments="{setEquipments}" setInventory="{setInventory}" setInventoryCategories="{setInventoryCategories}"/>}
+        {activeTab === 'shopping' && <ShoppingListView bakingItems="{bakingItems}" inventory="{inventory}" inventoryCategories="{inventoryCategories}" menu="{menu}" recipes="{recipes}" setActiveTab="{setActiveTab}" setShoppingChecks="{setShoppingChecks}" shoppingChecks="{shoppingChecks}"/>}
       </main>
 
       {viewingRecipe && (
-        <RecipeModal recipe={viewingRecipe} onClose={() => setViewingRecipe(null)} setSelectedImage={setSelectedImage} />
+        <RecipeModal onClose="{()" recipe="{viewingRecipe}"> setViewingRecipe(null)} setSelectedImage={setSelectedImage} />
       )}
 
       {selectedImage && (
@@ -249,18 +219,18 @@ export default function App() {
 
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-40 px-4 py-2 shadow-[0_-10px_25px_-3px_rgb(0,0,0,0.1)]">
         <div className="max-w-md mx-auto flex justify-between items-center relative">
-          <NavButton active={activeTab === 'menu'} onClick={() => setActiveTab('menu')} icon={<Calendar />} label="Menus" />
-          <NavButton active={activeTab === 'baking'} onClick={() => setActiveTab('baking')} icon={<Cake />} label="Gâteaux" />
+          <NavButton 'menu'} active="{activeTab" onClick="{()"> setActiveTab('menu')} icon={<Calendar/>} label="Menus" />
+          <NavButton 'baking'} active="{activeTab" onClick="{()"> setActiveTab('baking')} icon={<Cake/>} label="Gâteaux" />
           
           <button
             onClick={() => { setEditingRecipe(null); setActiveTab('add'); }}
             className={`bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-lg transform -translate-y-4 transition-transform hover:scale-105 border-4 border-white flex items-center justify-center flex-shrink-0 ${activeTab === 'add' ? 'ring-2 ring-indigo-400 scale-105' : ''}`}
           >
-            <Plus size={26} />
+            <Plus size="{26}"/>
           </button>
 
-          <NavButton active={activeTab === 'inventory'} onClick={() => setActiveTab('inventory')} icon={<Package />} label="Placard" />
-          <NavButton active={activeTab === 'shopping'} onClick={() => setActiveTab('shopping')} icon={<ShoppingBag />} label="Courses" />
+          <NavButton 'inventory'} active="{activeTab" onClick="{()"> setActiveTab('inventory')} icon={<Package/>} label="Placard" />
+          <NavButton 'shopping'} active="{activeTab" onClick="{()"> setActiveTab('shopping')} icon={<ShoppingBag/>} label="Courses" />
         </div>
       </nav>
     </div>
@@ -290,7 +260,7 @@ function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, delete
             ${subTab === 'planning' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
           `}
         >
-          <Calendar className="w-4 h-4" /> Choix de la semaine
+          <Calendar className="w-4 h-4"/> Choix de la semaine
         </button>
         <button 
           onClick={() => setSubTab('catalog')}
@@ -298,36 +268,14 @@ function MenuContainer({ menu, updateMenu, recipes, mealRecipes, setMenu, delete
             ${subTab === 'catalog' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
           `}
         >
-          <List className="w-4 h-4" /> Catalogue Repas ({mealRecipes.length})
+          <List className="w-4 h-4"/> Catalogue Repas ({mealRecipes.length})
         </button>
       </div>
 
       {subTab === 'planning' ? (
-        <MenuPlanner 
-          menu={menu} 
-          updateMenu={updateMenu} 
-          recipes={mealRecipes} 
-          setMenu={setMenu} 
-          setEditingRecipe={setEditingRecipe}
-          setActiveTab={setActiveTab}
-          setViewingRecipe={setViewingRecipe} 
-          currentSeason={currentSeason} 
-          equipments={equipments}
-          inventory={inventory}
-        />
+        <MenuPlanner currentSeason="{currentSeason}" equipments="{equipments}" inventory="{inventory}" menu="{menu}" recipes="{mealRecipes}" setActiveTab="{setActiveTab}" setEditingRecipe="{setEditingRecipe}" setMenu="{setMenu}" setViewingRecipe="{setViewingRecipe}" updateMenu="{updateMenu}"/>
       ) : (
-        <RecipeList 
-          recipes={mealRecipes} 
-          menu={menu} 
-          deleteRecipe={deleteRecipe} 
-          setViewingRecipe={setViewingRecipe} 
-          setEditingRecipe={setEditingRecipe}
-          setActiveTab={setActiveTab}
-          currentSeason={currentSeason}
-          title="Toutes les recettes de repas"
-          equipments={equipments}
-          carbsList={carbsList}
-        />
+        <RecipeList carbsList="{carbsList}" currentSeason="{currentSeason}" deleteRecipe="{deleteRecipe}" equipments="{equipments}" menu="{menu}" recipes="{mealRecipes}" setActiveTab="{setActiveTab}" setEditingRecipe="{setEditingRecipe}" setViewingRecipe="{setViewingRecipe}" title="Toutes les recettes de repas"/>
       )}
     </div>
   );
@@ -388,7 +336,6 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
       }
       if (possibleRecipes.length === 0) return;
 
-      // Connexion intelligente avec le stock : prioriser les recettes dont les ingrédients sont en stock ou entamés/plein
       possibleRecipes.sort((a, b) => {
         const getStockScore = (rec) => {
           if (!rec.ingredients) return 0;
@@ -405,7 +352,7 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
 
         const scoreA = getStockScore(a);
         const scoreB = getStockScore(b);
-        if (scoreB !== scoreA) return scoreB - scoreA; // Priorité au stock disponible
+        if (scoreB !== scoreA) return scoreB - scoreA;
 
         const countA = (tempEquipCounts[a.equipment] || 0) + (tempEquipCounts[a.additionalEquipment] || 0);
         const countB = (tempEquipCounts[b.equipment] || 0) + (tempEquipCounts[b.additionalEquipment] || 0);
@@ -437,7 +384,7 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
           <div>
             <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-indigo-600" />
+              <Sparkles className="w-5 h-5 text-indigo-600"/>
               Générateur Intelligent (Connecté au Stock)
             </h2>
             <p className="text-xs text-slate-500">
@@ -448,7 +395,7 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
             onClick={generateSmartMenu}
             className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl font-medium transition-colors text-sm shadow-sm"
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-4 h-4"/>
             Générer un menu équilibré
           </button>
         </div>
@@ -459,31 +406,21 @@ function MenuPlanner({ menu, updateMenu, recipes, setMenu, setViewingRecipe, set
             <span key={equip} className={`text-xs px-2.5 py-1 rounded-md font-medium border flex items-center gap-1.5
               ${count > 2 ? 'bg-orange-50 border-orange-200 text-orange-700' : 'bg-slate-100 border-slate-200 text-slate-700'}
             `}>
-              <Settings className="w-3.5 h-3.5" />
+              <Settings className="w-3.5 h-3.5"/>
               {equip} : {count}x
             </span>
           ))}
         </div>
         {hasImbalance && (
           <p className="text-xs text-orange-600 mt-2 flex items-center gap-1 font-medium">
-            <AlertTriangle className="w-4 h-4" /> Attention, vous utilisez le même appareil plus de 2 fois dans la semaine !
+            <AlertTriangle className="w-4 h-4"/> Attention, vous utilisez le même appareil plus de 2 fois dans la semaine !
           </p>
         )}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         {daysConfig.map(day => (
-          <FullDayCard 
-            key={day.key}
-            day={day}
-            menu={menu}
-            updateMenu={updateMenu}
-            recipes={recipes}
-            currentSeason={currentSeason}
-            setEditingRecipe={setEditingRecipe}
-            setActiveTab={setActiveTab}
-            setViewingRecipe={setViewingRecipe}
-          />
+          <FullDayCard currentSeason="{currentSeason}" day="{day}" key="{day.key}" menu="{menu}" recipes="{recipes}" setActiveTab="{setActiveTab}" setEditingRecipe="{setEditingRecipe}" setViewingRecipe="{setViewingRecipe}" updateMenu="{updateMenu}"/>
         ))}
       </div>
     </div>
@@ -516,7 +453,7 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
       <div>
         <div className="flex justify-between items-center mb-3 pb-2 border-b border-slate-100">
           <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-indigo-600" />
+            <Calendar className="w-4 h-4 text-indigo-600"/>
             {day.label}
           </h3>
           {day.reqCarb && (
@@ -548,13 +485,13 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
             {lunchRecipe && (
               <div className="flex justify-between items-center pt-1">
                 <span className="text-[11px] text-slate-500 flex items-center gap-1 font-medium">
-                  <Settings className="w-3 h-3 text-slate-400" /> {lunchRecipe.equipment}{lunchRecipe.additionalEquipment ? ` + ${lunchRecipe.additionalEquipment}` : ''}
+                  <Settings className="w-3 h-3 text-slate-400"/> {lunchRecipe.equipment}{lunchRecipe.additionalEquipment ? ` + ${lunchRecipe.additionalEquipment}` : ''}
                 </span>
                 <button 
                   onClick={() => setViewingRecipe(lunchRecipe)}
                   className="text-[11px] font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded transition-colors flex items-center gap-1"
                 >
-                  <Eye className="w-3 h-3" /> Voir
+                  <Eye className="w-3 h-3"/> Voir
                 </button>
               </div>
             )}
@@ -591,13 +528,13 @@ function FullDayCard({ day, menu, updateMenu, recipes, setEditingRecipe, setActi
             {dinnerRecipe && (
               <div className="flex justify-between items-center pt-1">
                 <span className="text-[11px] text-slate-500 flex items-center gap-1 font-medium">
-                  <Settings className="w-3 h-3 text-slate-400" /> {dinnerRecipe.equipment}{dinnerRecipe.additionalEquipment ? ` + ${dinnerRecipe.additionalEquipment}` : ''}
+                  <Settings className="w-3 h-3 text-slate-400"/> {dinnerRecipe.equipment}{dinnerRecipe.additionalEquipment ? ` + ${dinnerRecipe.additionalEquipment}` : ''}
                 </span>
                 <button 
                   onClick={() => setViewingRecipe(dinnerRecipe)}
                   className="text-[11px] font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded transition-colors flex items-center gap-1"
                 >
-                  <Eye className="w-3 h-3" /> Voir
+                  <Eye className="w-3 h-3"/> Voir
                 </button>
               </div>
             )}
@@ -625,7 +562,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
       {title && (
         <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex justify-between items-center">
           <h2 className="font-bold text-slate-800 text-base flex items-center gap-2">
-            <List className="w-5 h-5 text-indigo-600" /> {title}
+            <List className="w-5 h-5 text-indigo-600"/> {title}
           </h2>
           <span className="text-xs text-slate-500 font-medium">{filteredRecipes.length} recette(s)</span>
         </div>
@@ -634,7 +571,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
       <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap gap-3 items-center justify-between">
         <div className="flex flex-wrap gap-2 items-center text-xs">
           <span className="font-semibold text-slate-600 flex items-center gap-1">
-            <Filter className="w-3.5 h-3.5" /> Filtres :
+            <Filter className="w-3.5 h-3.5"/> Filtres :
           </span>
 
           <select 
@@ -689,12 +626,12 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
 
               <div className="flex flex-wrap gap-1.5 mb-3">
                 <span className="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded flex items-center gap-1 font-medium">
-                  <Settings className="w-3 h-3 text-slate-400" /> {recipe.equipment}{recipe.additionalEquipment ? ` + ${recipe.additionalEquipment}` : ''}
+                  <Settings className="w-3 h-3 text-slate-400"/> {recipe.equipment}{recipe.additionalEquipment ? ` + ${recipe.additionalEquipment}` : ''}
                 </span>
                 <span className={`text-[11px] px-2 py-0.5 rounded font-medium flex items-center gap-1
                   ${recipe.season === currentSeason ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-slate-100 text-slate-600'}
                 `}>
-                  <Sun className="w-3 h-3" /> {recipe.season}
+                  <Sun className="w-3 h-3"/> {recipe.season}
                 </span>
               </div>
 
@@ -711,7 +648,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
                 onClick={() => setViewingRecipe(recipe)}
                 className="text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-md transition-colors flex items-center gap-1"
               >
-                <Eye className="w-3.5 h-3.5" /> Voir la fiche
+                <Eye className="w-3.5 h-3.5"/> Voir la fiche
               </button>
 
               <div className="flex items-center gap-1">
@@ -723,7 +660,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
                   className="text-slate-400 hover:text-indigo-600 p-1.5 rounded transition-colors"
                   title="Modifier la recette"
                 >
-                  <Pencil className="w-4 h-4" />
+                  <Pencil className="w-4 h-4"/>
                 </button>
 
                 <button 
@@ -731,7 +668,7 @@ function RecipeList({ recipes, deleteRecipe, setViewingRecipe, setEditingRecipe,
                   className="text-slate-400 hover:text-red-600 p-1.5 rounded transition-colors"
                   title="Supprimer la recette"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-4 h-4"/>
                 </button>
               </div>
             </div>
@@ -773,7 +710,7 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
             ${subTab === 'planning' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
           `}
         >
-          <Calendar className="w-4 h-4" /> Choix de la semaine ({bakingItems.filter(Boolean).length}/2)
+          <Calendar className="w-4 h-4"/> Choix de la semaine ({bakingItems.filter(Boolean).length}/2)
         </button>
         <button 
           onClick={() => setSubTab('list')}
@@ -781,7 +718,7 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
             ${subTab === 'list' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
           `}
         >
-          <Cake className="w-4 h-4" /> Catalogue Gâteaux ({bakingRecipes.length})
+          <Cake className="w-4 h-4"/> Catalogue Gâteaux ({bakingRecipes.length})
         </button>
       </div>
 
@@ -790,7 +727,7 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="font-bold text-slate-800 text-base flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-indigo-600" /> Gâteaux & Goûters de la semaine
+                <Sparkles className="w-5 h-5 text-indigo-600"/> Gâteaux & Goûters de la semaine
               </h2>
               <p className="text-xs text-slate-500">Sélectionnez ou générez vos pâtisseries de la semaine.</p>
             </div>
@@ -798,7 +735,7 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
               onClick={generateSmartBaking}
               className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl font-medium transition-colors text-sm shadow-sm"
             >
-              <RefreshCw className="w-4 h-4" />
+              <RefreshCw className="w-4 h-4"/>
               Générer les gâteaux
             </button>
           </div>
@@ -830,7 +767,7 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
                         onClick={() => setViewingRecipe(selectedRecipe)}
                         className="text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded transition-colors flex items-center gap-1"
                       >
-                        <Eye className="w-3.5 h-3.5" /> Voir la recette
+                        <Eye className="w-3.5 h-3.5"/> Voir la recette
                       </button>
                     </div>
                   )}
@@ -840,16 +777,7 @@ function BakingPlanner({ menu, bakingItems, setBakingItems, setEditingRecipe, se
           </div>
         </div>
       ) : (
-        <RecipeList 
-          recipes={bakingRecipes} 
-          deleteRecipe={deleteRecipe} 
-          setViewingRecipe={setViewingRecipe} 
-          setEditingRecipe={setEditingRecipe}
-          setActiveTab={setActiveTab}
-          currentSeason={currentSeason}
-          equipments={equipments}
-          carbsList={carbsList}
-        />
+        <RecipeList carbsList="{carbsList}" currentSeason="{currentSeason}" deleteRecipe="{deleteRecipe}" equipments="{equipments}" recipes="{bakingRecipes}" setActiveTab="{setActiveTab}" setEditingRecipe="{setEditingRecipe}" setViewingRecipe="{setViewingRecipe}"/>
       )}
     </div>
   );
@@ -1010,7 +938,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 max-w-2xl mx-auto relative">
       <div className="flex justify-between items-center mb-4">
         <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2">
-          <Plus className="w-5 h-5 text-indigo-600" /> {editingRecipe ? 'Modifier la recette' : 'Ajouter une nouvelle recette'}
+          <Plus className="w-5 h-5 text-indigo-600"/> {editingRecipe ? 'Modifier la recette' : 'Ajouter une nouvelle recette'}
         </h2>
         {editingRecipe && (
           <button 
@@ -1166,7 +1094,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
                 className="flex items-center gap-2 text-xs font-semibold text-indigo-600 hover:text-indigo-800 mt-1 transition-colors"
               >
                 <div className="w-5 h-5 rounded-full border border-indigo-600 flex items-center justify-center">
-                  <Plus className="w-3.5 h-3.5" />
+                  <Plus className="w-3.5 h-3.5"/>
                 </div>
                 Ajouter un autre appareil utilisé (facultatif)
               </button>
@@ -1231,7 +1159,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
             <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Lien internet optionnel</label>
             <input 
               type="url" 
-              placeholder="https://www.marmiton.org/..."
+              placeholder="[https://www.marmiton.org/](https://www.marmiton.org/)..."
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900"
@@ -1256,7 +1184,7 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
               onClick={() => setImage('')}
               className="absolute top-1 right-1 bg-slate-900/70 text-white rounded-full p-1 text-xs"
             >
-              <X className="w-3 h-3" />
+              <X className="w-3 h-3"/>
             </button>
           </div>
         )}
@@ -1295,17 +1223,18 @@ function AddRecipeForm({ addRecipe, editingRecipe, setEditingRecipe, setActiveTa
   );
 }
 
-function InventoryManager({ inventory, setInventory, equipments, setEquipments, carbsList, setCarbsList }) {
+function InventoryManager({ inventory, setInventory, equipments, setEquipments, carbsList, setCarbsList, inventoryCategories, setInventoryCategories }) {
   const [subTab, setSubTab] = useState('inventory');
   const [newItemName, setNewItemName] = useState('');
   const [newItemStatus, setNewItemStatus] = useState('Plein');
   const [newItemZone, setNewItemZone] = useState('Placard');
-  const [newItemCategory, setNewItemCategory] = useState(INVENTORY_CATEGORIES[0]);
+  const [newItemCategory, setNewItemCategory] = useState(inventoryCategories[0] || 'Autres');
   const [newItemExpiry, setNewItemExpiry] = useState('');
   const [filterZone, setFilterZone] = useState('Tous');
   const [filterCategory, setFilterCategory] = useState('Tous');
   const [newEquipName, setNewEquipName] = useState('');
   const [newCarbName, setNewCarbName] = useState('');
+  const [newCategoryName, setNewCategoryName] = useState('');
 
   const addItem = (e) => {
     e.preventDefault();
@@ -1393,6 +1322,28 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
     }
   };
 
+  const addCategory = (e) => {
+    e.preventDefault();
+    const trimmed = newCategoryName.trim();
+    if (!trimmed) return;
+    if (inventoryCategories.some(c => c.toLowerCase() === trimmed.toLowerCase())) {
+      alert("Cette catégorie existe déjà !");
+      return;
+    }
+    setInventoryCategories([...inventoryCategories, trimmed]);
+    setNewCategoryName('');
+  };
+
+  const removeCategory = (catToDelete) => {
+    if (inventoryCategories.length <= 1) {
+      alert("Vous devez garder au moins une catégorie.");
+      return;
+    }
+    if (window.confirm(`Supprimer la catégorie "${catToDelete}" ?`)) {
+      setInventoryCategories(inventoryCategories.filter(c => c !== catToDelete));
+    }
+  };
+
   const filteredInventory = inventory.filter(item => {
     if (filterZone !== 'Tous' && item.zone !== filterZone) return false;
     if (filterCategory !== 'Tous' && item.category !== filterCategory) return false;
@@ -1415,30 +1366,38 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 max-w-3xl mx-auto space-y-6">
-      <div className="flex bg-slate-200/70 p-1 rounded-xl">
+      <div className="flex bg-slate-200/70 p-1 rounded-xl overflow-x-auto">
         <button 
           onClick={() => setSubTab('inventory')}
-          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2
+          className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 whitespace-nowrap
             ${subTab === 'inventory' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
           `}
         >
-          <Package className="w-4 h-4" /> Provisions ({inventory.length})
+          <Package className="w-4 h-4"/> Provisions ({inventory.length})
         </button>
         <button 
           onClick={() => setSubTab('equipments')}
-          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2
+          className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 whitespace-nowrap
             ${subTab === 'equipments' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
           `}
         >
-          <Settings className="w-4 h-4" /> Appareils ({equipments.length})
+          <Settings className="w-4 h-4"/> Appareils ({equipments.length})
         </button>
         <button 
           onClick={() => setSubTab('carbs')}
-          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2
+          className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 whitespace-nowrap
             ${subTab === 'carbs' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
           `}
         >
-          <Tag className="w-4 h-4" /> Féculents ({carbsList.length})
+          <Tag className="w-4 h-4"/> Féculents ({carbsList.length})
+        </button>
+        <button 
+          onClick={() => setSubTab('categories')}
+          className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 whitespace-nowrap
+            ${subTab === 'categories' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}
+          `}
+        >
+          <List className="w-4 h-4"/> Catégories ({inventoryCategories.length})
         </button>
       </div>
 
@@ -1446,10 +1405,10 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
         <div className="space-y-6">
           <div>
             <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2 mb-1">
-              <Package className="w-5 h-5 text-indigo-600" /> Gestion des Provisions & Péremptions
+              <Package className="w-5 h-5 text-indigo-600"/> Gestion des Provisions & Péremptions
             </h2>
             <p className="text-xs text-slate-500">
-              Classez vos aliments par zone et catégorie d'aliments, et suivez leurs dates de péremption.
+              Classez vos aliments par zone et catégorie (fromages, viandes, féculents...), et suivez leurs dates de péremption.
             </p>
           </div>
 
@@ -1458,7 +1417,7 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <input 
                 type="text" 
-                placeholder="Nom (ex: Lait, Tomates, Steaks...)" 
+                placeholder="Nom (ex: Comté, Steaks, Pâtes...)" 
                 value={newItemName}
                 onChange={(e) => setNewItemName(e.target.value)}
                 className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm"
@@ -1468,7 +1427,7 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
                 onChange={(e) => setNewItemCategory(e.target.value)}
                 className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700"
               >
-                {INVENTORY_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                {inventoryCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
               </select>
               <select 
                 value={newItemZone}
@@ -1490,7 +1449,7 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
             <div className="flex flex-col sm:flex-row gap-3 items-center pt-2">
               <div className="flex items-center gap-2 flex-1 w-full">
                 <span className="text-xs font-semibold text-slate-600 flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5" /> Péremption :
+                  <Clock className="w-3.5 h-3.5"/> Péremption :
                 </span>
                 <input 
                   type="date"
@@ -1539,7 +1498,7 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
               >
                 Toutes
               </button>
-              {INVENTORY_CATEGORIES.map(cat => (
+              {inventoryCategories.map(cat => (
                 <button 
                   key={cat}
                   onClick={() => setFilterCategory(cat)}
@@ -1592,11 +1551,11 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
                     </select>
 
                     <select 
-                      value={item.category || INVENTORY_CATEGORIES[0]} 
+                      value={item.category || inventoryCategories[0]} 
                       onChange={(e) => updateCategory(originalIndex, e.target.value)}
                       className="text-xs font-semibold rounded-md px-2 py-1 border bg-slate-50 text-slate-700 border-slate-200"
                     >
-                      {INVENTORY_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                      {inventoryCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                     </select>
 
                     <select 
@@ -1622,7 +1581,7 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
                       className="text-slate-400 hover:text-red-600 p-1"
                       title="Supprimer"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-4 h-4"/>
                     </button>
                   </div>
                 </div>
@@ -1637,7 +1596,7 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
         <div className="space-y-6">
           <div>
             <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2 mb-1">
-              <Settings className="w-5 h-5 text-indigo-600" /> Gestion des Appareils de Cuisson
+              <Settings className="w-5 h-5 text-indigo-600"/> Gestion des Appareils de Cuisson
             </h2>
             <p className="text-xs text-slate-500">
               Ajoutez ou supprimez les appareils disponibles pour vos recettes (Thermomix, Cookeo, Airfryer...).
@@ -1661,7 +1620,7 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
             {equipments.map(eq => (
               <div key={eq} className="bg-white border border-slate-200 text-slate-800 text-xs p-3 rounded-xl flex items-center justify-between shadow-sm font-medium">
                 <span className="flex items-center gap-2">
-                  <Settings className="w-4 h-4 text-indigo-600" />
+                  <Settings className="w-4 h-4 text-indigo-600"/>
                   {eq}
                 </span>
                 <button 
@@ -1670,20 +1629,20 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
                   className="text-slate-400 hover:text-red-600 p-1 transition-colors"
                   title="Supprimer"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-4 h-4"/>
                 </button>
               </div>
             ))}
           </div>
         </div>
-      ) : (
+      ) : subTab === 'carbs' ? (
         <div className="space-y-6">
           <div>
             <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2 mb-1">
-              <Tag className="w-5 h-5 text-indigo-600" /> Gestion des Féculents / Catégories
+              <Tag className="w-5 h-5 text-indigo-600"/> Gestion des Féculents / Catégories de Repas
             </h2>
             <p className="text-xs text-slate-500">
-              Ajoutez ou supprimez les catégories de féculents disponibles pour vos recettes.
+              Ajoutez ou supprimez les catégories de féculents disponibles pour vos recettes de repas.
             </p>
           </div>
 
@@ -1704,7 +1663,7 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
             {carbsList.map(c => (
               <div key={c} className="bg-white border border-slate-200 text-slate-800 text-xs p-3 rounded-xl flex items-center justify-between shadow-sm font-medium">
                 <span className="flex items-center gap-2">
-                  <Tag className="w-4 h-4 text-indigo-600" />
+                  <Tag className="w-4 h-4 text-indigo-600"/>
                   {c}
                 </span>
                 <button 
@@ -1713,7 +1672,50 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
                   className="text-slate-400 hover:text-red-600 p-1 transition-colors"
                   title="Supprimer"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-4 h-4"/>
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          <div>
+            <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2 mb-1">
+              <List className="w-5 h-5 text-indigo-600"/> Gestion des Catégories de Provisions
+            </h2>
+            <p className="text-xs text-slate-500">
+              Ajoutez ou supprimez les catégories pour classer vos provisions (ex: Fromages, Viandes, Féculents...).
+            </p>
+          </div>
+
+          <form onSubmit={addCategory} className="flex gap-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <input 
+              type="text" 
+              placeholder="Nouvelle catégorie (ex: Fromages, Charcuterie)..." 
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+              className="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm"
+            />
+            <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+              Ajouter
+            </button>
+          </form>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {inventoryCategories.map(cat => (
+              <div key={cat} className="bg-white border border-slate-200 text-slate-800 text-xs p-3 rounded-xl flex items-center justify-between shadow-sm font-medium">
+                <span className="flex items-center gap-2">
+                  <Tag className="w-4 h-4 text-indigo-600"/>
+                  {cat}
+                </span>
+                <button 
+                  type="button" 
+                  onClick={() => removeCategory(cat)}
+                  className="text-slate-400 hover:text-red-600 p-1 transition-colors"
+                  title="Supprimer"
+                >
+                  <Trash2 className="w-4 h-4"/>
                 </button>
               </div>
             ))}
@@ -1724,7 +1726,7 @@ function InventoryManager({ inventory, setInventory, equipments, setEquipments, 
   );
 }
 
-function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingChecks, setShoppingChecks, setActiveTab }) {
+function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingChecks, setShoppingChecks, setActiveTab, inventoryCategories }) {
   const [copied, setCopied] = useState(false);
   const [shoppingCategoryFilter, setShoppingCategoryFilter] = useState('Tous');
 
@@ -1777,7 +1779,7 @@ function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingCheck
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
           <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2">
-            <ShoppingBag className="w-5 h-5 text-indigo-600" /> Liste de Courses par Catégories
+            <ShoppingBag className="w-5 h-5 text-indigo-600"/> Liste de Courses par Catégories
           </h2>
           <p className="text-xs text-slate-500">Basée sur les menus, gâteaux et classée par rayons selon vos provisions.</p>
         </div>
@@ -1786,7 +1788,7 @@ function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingCheck
             onClick={copyListText}
             className="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg transition-colors"
           >
-            {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+            {copied ? <Check className="w-4 h-4 text-emerald-600"/> : <Copy className="w-4 h-4"/>}
             {copied ? 'Copié !' : 'Copier la liste'}
           </button>
         )}
@@ -1803,7 +1805,7 @@ function ShoppingListView({ menu, recipes, inventory, bakingItems, shoppingCheck
           >
             Tous ({rawList.length})
           </button>
-          {INVENTORY_CATEGORIES.map(cat => (
+          {inventoryCategories.map(cat => (
             <button 
               key={cat}
               onClick={() => setShoppingCategoryFilter(cat)}
@@ -1876,7 +1878,7 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
           onClick={onClose}
           className="absolute top-4 right-4 bg-slate-100 hover:bg-slate-200 p-2 rounded-full text-slate-600 transition-colors z-10"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5"/>
         </button>
 
         <div>
@@ -1917,7 +1919,7 @@ function RecipeModal({ recipe, onClose, setSelectedImage }) {
               rel="noopener noreferrer"
               className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5"
             >
-              <LinkIcon className="w-3.5 h-3.5" /> Ouvrir le lien
+              <LinkIcon className="w-3.5 h-3.5"/> Ouvrir le lien
             </a>
           </div>
         )}
