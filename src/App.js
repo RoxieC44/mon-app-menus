@@ -62,6 +62,23 @@ export default function App() {
   useEffect(() => {
     async function loadData() {
       setLoading(true);
+      
+      // 1. Chargement des recettes depuis la nouvelle table "recipes"
+      const { data: recipesData, error: recipesError } = await supabase
+        .from('recipes')
+        .select('*');
+
+      if (!recipesError && recipesData) {
+        // On extrait l'objet JSON complet stocké dans la colonne "data", ou on reconstruit à partir des colonnes
+        const loadedRecipes = recipesData.map(row => ({
+          ...row.data,
+          id: row.id.toString(),
+          name: row.title || row.data?.name
+        }));
+        setRecipes(loadedRecipes);
+      }
+
+      // 2. Chargement des autres paramètres (menu, inventaire, etc.) depuis l'ancienne table de stockage
       const { data } = await supabase
         .from('stockage_donnees')
         .select('data')
@@ -70,7 +87,6 @@ export default function App() {
 
       if (data && data.data) {
         const saved = data.data;
-        if (saved.recipes) setRecipes(saved.recipes);
         if (saved.equipments && Array.isArray(saved.equipments)) setEquipments(saved.equipments);
         if (saved.carbsList && Array.isArray(saved.carbsList)) setCarbsList(saved.carbsList);
         if (saved.menu) setMenu(saved.menu);
@@ -90,13 +106,14 @@ export default function App() {
     loadData();
   }, []);
 
+  // Sauvegarde automatique des paramètres généraux (hors recettes, gérées individuellement)
   useEffect(() => {
     if (loading) return;
 
     async function saveData() {
       const payload = {
         user_key: 'ma_famille',
-        data: { recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks }
+        data: { equipments, carbsList, menu, inventory, bakingItems, shoppingChecks }
       };
 
       const { data: existing } = await supabase
@@ -119,16 +136,43 @@ export default function App() {
 
     const timer = setTimeout(saveData, 1000);
     return () => clearTimeout(timer);
-  }, [recipes, equipments, carbsList, menu, inventory, bakingItems, shoppingChecks]);
+  }, [equipments, carbsList, menu, inventory, bakingItems, shoppingChecks, loading]);
 
-  const addRecipe = (newRecipe) => {
+  const addRecipe = async (newRecipe) => {
+    // Si la recette a un ID numérique généré par Date.now() ou similaire, on vérifie si elle existe déjà dans Supabase
+    const payload = {
+      title: newRecipe.name,
+      data: newRecipe
+    };
+
+    // On regarde si c'une modification ou un ajout
+    const isExisting = recipes.some(r => r.id === newRecipe.id);
+
+    if (isExisting && !isNaN(newRecipe.id)) {
+      await supabase
+        .from('recipes')
+        .update(payload)
+        .eq('id', newRecipe.id);
+    } else {
+      // Insertion d'une nouvelle ligne dans la table recipes
+      const { data: inserted, error } = await supabase
+        .from('recipes')
+        .insert([payload])
+        .select();
+
+      if (!error && inserted && inserted[0]) {
+        newRecipe.id = inserted[0].id.toString();
+      }
+    }
+
     setRecipes(prev => {
       const exists = prev.some(r => r.id === newRecipe.id);
       if (exists) {
         return prev.map(r => r.id === newRecipe.id ? newRecipe : r);
       }
-      return [...prev, { ...newRecipe, id: Date.now().toString() }];
+      return [...prev, newRecipe];
     });
+
     if (newRecipe.category === 'gateau') {
       setBakingSubTab('list');
       setActiveTab('baking');
@@ -138,7 +182,12 @@ export default function App() {
     }
   };
 
-  const deleteRecipe = (id) => {
+  const deleteRecipe = async (id) => {
+    await supabase
+      .from('recipes')
+      .delete()
+      .eq('id', id);
+
     setRecipes(recipes.filter(r => r.id !== id));
     const newMenu = { ...menu };
     Object.keys(newMenu).forEach(day => {
